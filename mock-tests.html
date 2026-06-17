@@ -18,6 +18,7 @@
       <a href="flashcards.html"><span class="ico">🃏</span> Flashcards</a>
       <a href="mock-tests.html" class="active"><span class="ico">📝</span> Mock Tests</a>
       <a href="games.html"><span class="ico">🎮</span> Memory Games</a>
+      <a href="progress.html"><span class="ico">📊</span> My Progress</a>
     </nav>
     <div class="sidebar-foot">Pass mark is 700/1000 (~70%). Aim for 85%+ consistently before booking the real exam.</div>
   </aside>
@@ -98,6 +99,7 @@
       </div>
       <div class="btn-row center mt" style="justify-content:center">
         <button class="btn primary" id="retryBtn">↻ New Test</button>
+        <a class="btn" href="progress.html">📊 View My Progress</a>
         <a class="btn" href="index.html">📖 Back to Study Guide</a>
       </div>
     </section>
@@ -105,6 +107,7 @@
 </div>
 
 <script src="js/data.js"></script>
+<script src="js/progress.js"></script>
 <script>
 (function () {
   const el = id => document.getElementById(id);
@@ -230,11 +233,17 @@
     clearInterval(timer);
     let correct = 0;
     const byCat = {};
+    const progressBatch = [];
     questions.forEach((q, i) => {
       byCat[q.cat] = byCat[q.cat] || { c: 0, t: 0 };
       byCat[q.cat].t++;
-      if (answers[i] === q.answer) { correct++; byCat[q.cat].c++; }
+      const isRight = answers[i] === q.answer;
+      if (isRight) { correct++; byCat[q.cat].c++; }
+      // only count answered questions toward saved topic progress
+      if (answers[i] !== null) progressBatch.push({ topic: q.topic, correct: isRight });
     });
+    // persist per-topic performance locally
+    if (window.AZProgress && progressBatch.length) AZProgress.recordResults(progressBatch);
     const pct = Math.round(correct / questions.length * 100);
     const pass = pct >= 70;
     el("quiz").classList.add("hidden");
