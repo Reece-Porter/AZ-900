@@ -217,5 +217,13 @@ const PAIRS = [
   { term: "TCO Calculator", def: "Compare on-prem vs Azure cost", cat: "govern" },
 ];
 
-/* expose globally */
-window.AZ = { CATEGORIES, TOPICS, FLASHCARDS, QUESTIONS, PAIRS };
+/* expose globally.
+   The comprehensive scenario bank lives in js/questions.js (loaded first as
+   window.AZ_QUESTIONS). If present, it supersedes the small inline set below. */
+window.AZ = {
+  CATEGORIES,
+  TOPICS,
+  FLASHCARDS,
+  QUESTIONS: (typeof window !== "undefined" && window.AZ_QUESTIONS && window.AZ_QUESTIONS.length) ? window.AZ_QUESTIONS : QUESTIONS,
+  PAIRS,
+};
