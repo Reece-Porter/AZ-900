@@ -75,6 +75,15 @@
         <p id="setupSummary" style="color:var(--muted)">Select a mode above to begin.</p>
         <button class="btn primary" id="startBtn" disabled>Start Test</button>
       </div>
+
+      <div class="card mt" id="drillCard" style="display:none">
+        <h4 style="margin-top:0">⚡ Quick drills</h4>
+        <p style="color:var(--muted);margin:0 0 12px;font-size:13.5px">Jump straight into the questions you most need to revisit.</p>
+        <div class="btn-row">
+          <button class="btn" id="reviewMistakesBtn" style="display:none"></button>
+          <button class="btn" id="flaggedBtn" style="display:none"></button>
+        </div>
+      </div>
     </section>
 
     <!-- QUIZ -->
@@ -83,7 +92,10 @@
         <div class="q-meta">
           <span id="qProgress">Question 1</span>
           <span id="qCat" class="pill blue">—</span>
-          <span id="qTimer">⏱ 00:00</span>
+          <span style="display:flex;align-items:center;gap:12px">
+            <button class="btn ghost" id="flagBtn" style="padding:4px 10px;font-size:13px">☆ Flag</button>
+            <span id="qTimer">⏱ 00:00</span>
+          </span>
         </div>
         <div class="progress mb"><span id="qBar"></span></div>
         <div class="q-card">
@@ -117,7 +129,8 @@
         <div id="review"></div>
       </div>
       <div class="btn-row center mt" style="justify-content:center">
-        <button class="btn primary" id="retryBtn">↻ New Test</button>
+        <button class="btn primary" id="retryWrongBtn" style="display:none">↻ Retry incorrect</button>
+        <button class="btn" id="retryBtn">↻ New Test</button>
         <a class="btn" href="progress.html">📊 View My Progress</a>
         <a class="btn" href="index.html">📖 Back to Study Guide</a>
       </div>
@@ -135,9 +148,43 @@
   const cats = AZ.CATEGORIES;
   const topics = AZ.TOPICS;
   let mode = null, questions = [], current = 0, answers = [], timer = null, seconds = 0;
-  let instantFeedback = true;
+  let instantFeedback = true, timed = true, lastWrong = [];
   const selectedTopics = new Set();
   if (el("feedbackToggle")) el("feedbackToggle").onchange = e => { instantFeedback = e.target.checked; };
+
+  // ---- flagged & missed questions (persisted locally) ----
+  const FLAG_KEY = "az900_flagged", MISS_KEY = "az900_missed";
+  const loadSet = k => { try { return new Set(JSON.parse(localStorage.getItem(k) || "[]")); } catch (e) { return new Set(); } };
+  const saveSet = (k, s) => localStorage.setItem(k, JSON.stringify([...s]));
+  const flagged = loadSet(FLAG_KEY), missed = loadSet(MISS_KEY);
+  function qid(q) {
+    const str = q.type === "sentence" ? q.segments.map(x => typeof x === "string" ? x : x.options.join("|")).join("~") : q.q;
+    let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+    return "q" + (h >>> 0);
+  }
+  function refreshDrills() {
+    const missCount = AZ.QUESTIONS.filter(q => missed.has(qid(q))).length;
+    const flagCount = AZ.QUESTIONS.filter(q => flagged.has(qid(q))).length;
+    const mb = el("reviewMistakesBtn"), fb = el("flaggedBtn");
+    mb.style.display = missCount ? "inline-flex" : "none";
+    mb.textContent = `🔁 Review my mistakes (${missCount})`;
+    fb.style.display = flagCount ? "inline-flex" : "none";
+    fb.textContent = `⭐ Flagged questions (${flagCount})`;
+    el("drillCard").style.display = (missCount || flagCount) ? "block" : "none";
+  }
+  el("reviewMistakesBtn").onclick = () => { mode = "review"; startPool(AZ.QUESTIONS.filter(q => missed.has(qid(q))), { timed: false }); };
+  el("flaggedBtn").onclick = () => { mode = "review"; startPool(AZ.QUESTIONS.filter(q => flagged.has(qid(q))), { timed: false }); };
+  el("flagBtn").onclick = () => {
+    const id = qid(questions[current]);
+    flagged.has(id) ? flagged.delete(id) : flagged.add(id);
+    saveSet(FLAG_KEY, flagged); renderFlag();
+  };
+  function renderFlag() {
+    const on = flagged.has(qid(questions[current]));
+    el("flagBtn").textContent = on ? "★ Flagged" : "☆ Flag";
+    el("flagBtn").style.color = on ? "var(--amber)" : "";
+    el("flagBtn").style.borderColor = on ? "var(--amber)" : "";
+  }
 
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const topicsIn = k => Object.keys(topics).filter(t => topics[t].cat === k);
@@ -232,16 +279,25 @@
   el("startBtn").onclick = start;
 
   function start() {
-    instantFeedback = el("feedbackToggle").checked;
     let pool = AZ.QUESTIONS;
     if (mode === "topic") pool = pool.filter(q => selectedTopics.has(q.topic));
+    startPool(pool, { timed: mode !== "practice" });
+  }
+
+  function startPool(pool, opts) {
+    opts = opts || {};
+    if (!pool.length) { alert("No questions available for that selection yet."); return; }
+    instantFeedback = el("feedbackToggle").checked;
     questions = shuffle(pool);
     current = 0; answers = new Array(questions.length).fill(null); seconds = 0;
     el("setup").classList.add("hidden");
     el("results").classList.add("hidden");
     el("quiz").classList.remove("hidden");
-    if (mode !== "practice") {
+    timed = opts.timed !== false;
+    clearInterval(timer);
+    if (timed) {
       el("qTimer").style.display = "";
+      el("qTimer").textContent = "⏱ 00:00";
       timer = setInterval(() => { seconds++; el("qTimer").textContent = "⏱ " + fmt(seconds); }, 1000);
     } else { el("qTimer").style.display = "none"; }
     renderQ();
@@ -314,6 +370,7 @@
 
     if (instantFeedback && isComplete(q, answers[current])) reveal();
     updateNav();
+    renderFlag();
   }
 
   function renderSingle(q, opts) {
@@ -425,6 +482,7 @@
     el("quiz").classList.add("hidden");
     el("results").classList.add("hidden");
     el("setup").classList.remove("hidden");
+    refreshDrills();
   }
 
   function finish() {
@@ -432,16 +490,28 @@
     let correct = 0;
     const byCat = {};
     const progressBatch = [];
+    lastWrong = [];
     questions.forEach((q, i) => {
       byCat[q.cat] = byCat[q.cat] || { c: 0, t: 0 };
       byCat[q.cat].t++;
+      const answered = isAnswered(q, answers[i]);
       const isRight = isCorrect(q, answers[i]);
       if (isRight) { correct++; byCat[q.cat].c++; }
       // only count answered questions toward saved topic progress
-      if (isAnswered(q, answers[i])) progressBatch.push({ topic: q.topic, correct: isRight });
+      if (answered) progressBatch.push({ topic: q.topic, correct: isRight });
+      // track mistakes for "review my mistakes" and "retry incorrect"
+      if (answered) {
+        const id = qid(q);
+        if (isRight) missed.delete(id); else { missed.add(id); lastWrong.push(q); }
+      } else { lastWrong.push(q); }
     });
+    saveSet(MISS_KEY, missed);
     // persist per-topic performance locally
     if (window.AZProgress && progressBatch.length) AZProgress.recordResults(progressBatch);
+    // show/hide retry-incorrect button
+    const rw = el("retryWrongBtn");
+    if (lastWrong.length) { rw.style.display = "inline-flex"; rw.textContent = `↻ Retry incorrect (${lastWrong.length})`; }
+    else rw.style.display = "none";
     const pct = Math.round(correct / questions.length * 100);
     const pass = pct >= 70;
     el("quiz").classList.add("hidden");
@@ -449,7 +519,7 @@
     el("scorePct").textContent = pct + "%";
     el("scorePct").className = "score " + (pass ? "pass" : "fail");
     el("scoreVerdict").textContent = pass ? "🎉 Pass — well done!" : "Keep studying — you'll get there.";
-    el("scoreDetail").textContent = `You answered ${correct} of ${questions.length} correctly` + (mode !== "practice" ? ` in ${fmt(seconds)}.` : ".") + ` (Pass mark ≈ 70%.)`;
+    el("scoreDetail").textContent = `You answered ${correct} of ${questions.length} correctly` + (timed ? ` in ${fmt(seconds)}.` : ".") + ` (Pass mark ≈ 70%.)`;
 
     // domain breakdown
     const bd = el("domainBreakdown"); bd.innerHTML = "";
@@ -476,6 +546,9 @@
   }
 
   el("retryBtn").onclick = reset;
+  el("retryWrongBtn").onclick = () => { if (lastWrong.length) { mode = "review"; startPool(lastWrong.slice(), { timed: false }); } };
+
+  refreshDrills();
 })();
 </script>
 </body>
