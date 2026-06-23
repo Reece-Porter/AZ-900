@@ -126,6 +126,7 @@
 </div>
 
 <script src="js/questions.js"></script>
+<script src="js/questions-formats.js"></script>
 <script src="js/data.js"></script>
 <script src="js/progress.js"></script>
 <script>
@@ -248,49 +249,166 @@
 
   const fmt = s => String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0");
 
+  // ---- question-type helpers ----
+  const LETTERS = ["A","B","C","D","E","F"];
+  const blanksOf = q => q.segments.filter(s => typeof s === "object");
+  const sortedEq = (a, b) => {
+    const x = [...a].sort((m,n)=>m-n), y = [...b].sort((m,n)=>m-n);
+    return x.length === y.length && x.every((v,i)=>v===y[i]);
+  };
+  function isComplete(q, a) {
+    if (a == null) return false;
+    if (q.type === "multi") return Array.isArray(a) && a.length === q.answers.length;
+    if (q.type === "sentence") { const b = blanksOf(q); return Array.isArray(a) && a.length === b.length && a.every(x => x != null); }
+    return true; // single / yesno
+  }
+  function isAnswered(q, a) {
+    if (a == null) return false;
+    if (q.type === "multi") return Array.isArray(a) && a.length > 0;
+    if (q.type === "sentence") return Array.isArray(a) && a.some(x => x != null);
+    return true;
+  }
+  function isCorrect(q, a) {
+    if (!isComplete(q, a)) return false;
+    if (q.type === "multi") return sortedEq(a, q.answers);
+    if (q.type === "sentence") { const b = blanksOf(q); return a.every((x,i)=>x===b[i].answer); }
+    return a === q.answer;
+  }
+  function qStem(q) { return q.type === "sentence" ? q.segments.map(s => typeof s === "string" ? s : "____").join("") : q.q; }
+  function ansText(q, a) {
+    if (!isAnswered(q, a)) return "—";
+    if (q.type === "multi") return a.map(i => LETTERS[i] + ". " + q.options[i]).join("; ");
+    if (q.type === "sentence") { const b = blanksOf(q); return a.map((x,i)=> x == null ? "—" : b[i].options[x]).join("  /  "); }
+    return LETTERS[a] + ". " + q.options[a];
+  }
+  function correctText(q) {
+    if (q.type === "multi") return q.answers.map(i => LETTERS[i] + ". " + q.options[i]).join("; ");
+    if (q.type === "sentence") return blanksOf(q).map(x => x.options[x.answer]).join("  /  ");
+    return LETTERS[q.answer] + ". " + q.options[q.answer];
+  }
+
+  function updateNav() {
+    el("nextQBtn").disabled = !isComplete(questions[current], answers[current]);
+    el("nextQBtn").textContent = current === questions.length - 1 ? "Finish ✓" : "Next →";
+    el("backQBtn").disabled = current === 0;
+  }
+
   function renderQ() {
     const q = questions[current];
     el("qProgress").textContent = `Question ${current + 1} of ${questions.length}`;
     el("qCat").textContent = cats[q.cat].name;
     el("qBar").style.width = ((current) / questions.length * 100) + "%";
-    el("qText").textContent = q.q;
     el("qExplain").classList.remove("show");
     const opts = el("qOptions"); opts.innerHTML = "";
-    const letters = ["A","B","C","D","E"];
+
+    if (q.type === "sentence") {
+      el("qText").textContent = "Select the option that best completes each sentence.";
+      renderSentence(q, opts);
+    } else if (q.type === "multi") {
+      el("qText").innerHTML = q.q + ` <span class="pill blue" style="margin-left:6px">Choose ${q.answers.length}</span>`;
+      renderMulti(q, opts);
+    } else {
+      el("qText").textContent = q.q;
+      renderSingle(q, opts);
+    }
+
+    if (instantFeedback && isComplete(q, answers[current])) reveal();
+    updateNav();
+  }
+
+  function renderSingle(q, opts) {
     q.options.forEach((opt, i) => {
       const d = document.createElement("div");
       d.className = "opt";
-      d.innerHTML = `<span class="mark">${letters[i]}</span><span>${opt}</span>`;
-      d.onclick = () => choose(i, d);
+      d.innerHTML = `<span class="mark">${LETTERS[i]}</span><span>${opt}</span>`;
       if (answers[current] === i) d.classList.add("selected");
+      d.onclick = () => {
+        if (instantFeedback && answers[current] !== null) return;
+        answers[current] = i;
+        [...opts.children].forEach(c => c.classList.remove("selected","correct","wrong"));
+        d.classList.add("selected");
+        if (instantFeedback) reveal();
+        updateNav();
+      };
       opts.appendChild(d);
     });
-    // if already answered and instant feedback is on, show the reveal
-    if (instantFeedback && answers[current] !== null) reveal();
-    el("nextQBtn").disabled = answers[current] === null;
-    el("nextQBtn").textContent = current === questions.length - 1 ? "Finish ✓" : "Next →";
-    el("backQBtn").disabled = current === 0;
   }
 
-  function choose(i, node) {
-    if (instantFeedback && answers[current] !== null) return; // lock after answering when feedback is on
-    answers[current] = i;
-    [...el("qOptions").children].forEach(c => c.classList.remove("selected", "correct", "wrong"));
-    node.classList.add("selected");
-    el("nextQBtn").disabled = false;
-    if (instantFeedback) reveal();
+  function renderMulti(q, opts) {
+    const sel = Array.isArray(answers[current]) ? answers[current] : [];
+    q.options.forEach((opt, i) => {
+      const d = document.createElement("div");
+      d.className = "opt";
+      d.innerHTML = `<span class="mark" style="border-radius:6px">${sel.includes(i) ? "✓" : ""}</span><span>${opt}</span>`;
+      if (sel.includes(i)) d.classList.add("selected");
+      d.onclick = () => {
+        if (instantFeedback && isComplete(q, answers[current])) return; // locked after reveal
+        let a = Array.isArray(answers[current]) ? answers[current].slice() : [];
+        const idx = a.indexOf(i);
+        if (idx >= 0) a.splice(idx, 1);
+        else { if (a.length >= q.answers.length) return; a.push(i); }
+        answers[current] = a.length ? a : null;
+        [...opts.children].forEach((c, j) => {
+          const on = a.includes(j);
+          c.classList.toggle("selected", on);
+          c.querySelector(".mark").textContent = on ? "✓" : "";
+        });
+        if (instantFeedback && isComplete(q, answers[current])) reveal();
+        updateNav();
+      };
+      opts.appendChild(d);
+    });
+  }
+
+  function renderSentence(q, opts) {
+    const wrap = document.createElement("div");
+    wrap.className = "sentence";
+    const stored = Array.isArray(answers[current]) ? answers[current] : null;
+    let bi = -1;
+    q.segments.forEach(seg => {
+      if (typeof seg === "string") { wrap.appendChild(document.createTextNode(seg)); return; }
+      const blankIndex = ++bi;
+      const s = document.createElement("select");
+      s.innerHTML = `<option value="">— choose —</option>` + seg.options.map((o,oi)=>`<option value="${oi}">${o}</option>`).join("");
+      if (stored && stored[blankIndex] != null) s.value = stored[blankIndex];
+      s.onchange = () => {
+        const b = blanksOf(q);
+        let a = Array.isArray(answers[current]) ? answers[current].slice() : new Array(b.length).fill(null);
+        a[blankIndex] = s.value === "" ? null : Number(s.value);
+        answers[current] = a;
+        if (instantFeedback && isComplete(q, answers[current])) reveal();
+        updateNav();
+      };
+      wrap.appendChild(s);
+    });
+    opts.appendChild(wrap);
   }
 
   function reveal() {
     const q = questions[current];
-    const nodes = [...el("qOptions").children];
-    nodes.forEach((n, i) => {
-      n.style.pointerEvents = "none";
-      if (i === q.answer) n.classList.add("correct");
-      else if (i === answers[current]) n.classList.add("wrong");
-    });
+    const opts = el("qOptions");
+    if (q.type === "sentence") {
+      const b = blanksOf(q);
+      [...opts.querySelectorAll("select")].forEach((s, i) => {
+        s.disabled = true;
+        s.classList.add(Number(s.value) === b[i].answer ? "sel-correct" : "sel-wrong");
+      });
+    } else if (q.type === "multi") {
+      const a = Array.isArray(answers[current]) ? answers[current] : [];
+      [...opts.children].forEach((n, i) => {
+        n.style.pointerEvents = "none";
+        if (q.answers.includes(i)) n.classList.add("correct");
+        else if (a.includes(i)) n.classList.add("wrong");
+      });
+    } else {
+      [...opts.children].forEach((n, i) => {
+        n.style.pointerEvents = "none";
+        if (i === q.answer) n.classList.add("correct");
+        else if (i === answers[current]) n.classList.add("wrong");
+      });
+    }
+    const right = isCorrect(q, answers[current]);
     const ex = el("qExplain");
-    const right = answers[current] === q.answer;
     ex.innerHTML = `<b style="color:${right ? 'var(--green)' : 'var(--red)'}">${right ? '✓ Correct!' : '✗ Not quite.'}</b> ${q.explain}`;
     ex.classList.add("show");
   }
@@ -317,10 +435,10 @@
     questions.forEach((q, i) => {
       byCat[q.cat] = byCat[q.cat] || { c: 0, t: 0 };
       byCat[q.cat].t++;
-      const isRight = answers[i] === q.answer;
+      const isRight = isCorrect(q, answers[i]);
       if (isRight) { correct++; byCat[q.cat].c++; }
       // only count answered questions toward saved topic progress
-      if (answers[i] !== null) progressBatch.push({ topic: q.topic, correct: isRight });
+      if (isAnswered(q, answers[i])) progressBatch.push({ topic: q.topic, correct: isRight });
     });
     // persist per-topic performance locally
     if (window.AZProgress && progressBatch.length) AZProgress.recordResults(progressBatch);
@@ -344,15 +462,13 @@
 
     // review
     const rv = el("review"); rv.innerHTML = "";
-    const letters = ["A","B","C","D","E"];
     questions.forEach((q, i) => {
-      const right = answers[i] === q.answer;
-      const ua = answers[i] === null ? "—" : letters[answers[i]] + ". " + q.options[answers[i]];
+      const right = isCorrect(q, answers[i]);
       rv.insertAdjacentHTML("beforeend",
         `<div class="card mb" style="background:var(--panel-2)">
-          <div style="font-weight:700;margin-bottom:6px">${i + 1}. ${q.q}</div>
-          <div style="font-size:14px;color:${right ? 'var(--green)' : 'var(--red)'}">${right ? '✓' : '✗'} Your answer: ${ua}</div>
-          ${right ? '' : `<div style="font-size:14px;color:var(--green)">✓ Correct: ${letters[q.answer]}. ${q.options[q.answer]}</div>`}
+          <div style="font-weight:700;margin-bottom:6px">${i + 1}. ${qStem(q)}</div>
+          <div style="font-size:14px;color:${right ? 'var(--green)' : 'var(--red)'}">${right ? '✓' : '✗'} Your answer: ${ansText(q, answers[i])}</div>
+          ${right ? '' : `<div style="font-size:14px;color:var(--green)">✓ Correct: ${correctText(q)}</div>`}
           <div style="font-size:13.5px;color:var(--muted);margin-top:6px">${q.explain}</div>
         </div>`);
     });

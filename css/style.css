@@ -191,6 +191,17 @@ a:hover { text-decoration: underline; }
 
 .q-meta { display: flex; justify-content: space-between; align-items: center; color: var(--muted); font-size: 14px; margin-bottom: 6px; }
 
+/* complete-the-sentence dropdowns */
+.sentence { font-size: 18px; line-height: 2.2; }
+.sentence select {
+  font: inherit; font-size: 16px; margin: 0 4px; padding: 6px 10px; border-radius: 8px;
+  background: var(--panel-2); color: var(--text); border: 1px solid var(--primary);
+  cursor: pointer; vertical-align: middle;
+}
+.sentence select:disabled { cursor: default; opacity: 1; }
+.sentence select.sel-correct { border-color: var(--green); background: rgba(54,211,153,.18); }
+.sentence select.sel-wrong { border-color: var(--red); background: rgba(248,113,113,.16); }
+
 .result-big { text-align: center; padding: 30px; }
 .result-big .score { font-size: 64px; font-weight: 800; }
 .result-big .score.pass { color: var(--green); }
