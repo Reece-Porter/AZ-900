@@ -13,6 +13,9 @@ Open `index.html` in any browser — no build step, no server required.
 | **Mock Tests** (`mock-tests.html`) | ~190 scenario questions: all 100 transcribed from the two provided AZ-900 practice tests (Sets 1 & 2), plus deduped supplementary questions for extra volume and broader Cloud Concepts coverage. Full timed exam, relaxed practice mode, and a focused "By Topic" mode where you can drill any combination of the 14 curriculum topics (or whole domains). A toggle controls whether each answer is marked right/wrong immediately, and a Back button lets you revisit previous questions. Scored results, explanations, and a review breakdown. |
 | **Memory Games** (`games.html`) | Three games — *Match Up*, *Memory Flip*, and *Beat the Clock* — built on key term/definition pairs. |
 | **My Progress** (`progress.html`) | Per-topic strengths & weaknesses dashboard. Mock-test results are saved locally (per device) so you can see what you're good at and what to improve every time you return. |
+| **Cheat Sheet** (`cheatsheet.html`) | A dense, high-yield one-page revision summary with a Print / Save-as-PDF button (print-optimised for paper). |
+
+The **Study Guide home page** also includes an **exam-readiness meter** (driven by your progress), an **exam-date countdown**, and a tickable **7-day study plan**.
 
 ## How progress tracking works
 Every mock-test question is tagged with a specific topic (e.g. *Storage*, *Identity & Security*, *Cost Management*). As you answer questions, your correct/total per topic is saved to `localStorage` under `az900_topic_progress_v1`. The **My Progress** page reads this to show overall readiness, a per-domain breakdown, ranked strengths/weaknesses, and every topic sorted weakest-first. Nothing leaves your browser; use the reset button to clear it.

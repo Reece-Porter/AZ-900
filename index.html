@@ -23,6 +23,7 @@
       <a href="mock-tests.html"><span class="ico">📝</span> Mock Tests</a>
       <a href="games.html"><span class="ico">🎮</span> Memory Games</a>
       <a href="progress.html"><span class="ico">📊</span> My Progress</a>
+      <a href="cheatsheet.html"><span class="ico">🧾</span> Cheat Sheet</a>
     </nav>
     <div class="nav-section">Exam Domains</div>
     <nav class="nav">
@@ -71,6 +72,30 @@
           <h4 style="margin:10px 0 4px">Management & Governance</h4>
           <p style="color:var(--muted);margin:0;font-size:14px">Cost, governance, deployment tools, monitoring.</p>
         </div>
+      </div>
+    </section>
+
+    <!-- ============ READINESS + PLAN ============ -->
+    <section class="grid cols-2 mb" style="align-items:start">
+      <div class="card">
+        <h3 style="margin-top:0">📊 Your exam readiness</h3>
+        <div id="readinessBody">
+          <p style="color:var(--muted)">Take a mock test and your readiness will appear here.</p>
+          <a class="btn primary" href="mock-tests.html">📝 Take a mock test</a>
+        </div>
+        <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+          <label style="font-size:13.5px;color:var(--muted)">Exam date:
+            <input type="date" id="examDate" style="margin-left:8px;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font:inherit">
+          </label>
+          <div id="countdown" style="margin-top:8px;font-weight:700"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">🗓️ 7-day study plan</h3>
+        <p style="color:var(--muted);margin:0 0 6px;font-size:13.5px">Tick items as you go — your progress is saved on this device.</p>
+        <div class="progress mb"><span id="planBar"></span></div>
+        <div id="planList"></div>
       </div>
     </section>
 
@@ -371,5 +396,108 @@
     </footer>
   </main>
 </div>
+
+<script src="js/questions.js"></script>
+<script src="js/questions-formats.js"></script>
+<script src="js/data.js"></script>
+<script src="js/progress.js"></script>
+<script>
+(function () {
+  const el = id => document.getElementById(id);
+
+  /* ---------- Readiness ---------- */
+  const data = AZProgress.load();
+  const topics = AZ.TOPICS;
+  const rows = Object.keys(topics).map(id => {
+    const d = data[id] || { correct: 0, total: 0 };
+    return { id, name: topics[id].name, pct: d.total ? Math.round(d.correct / d.total * 100) : null, total: d.total };
+  });
+  const attempted = rows.filter(r => r.total > 0);
+  if (attempted.length) {
+    const tot = attempted.reduce((s, r) => s + r.total, 0);
+    const overall = Math.round(attempted.reduce((s, r) => s + (r.pct * r.total), 0) / tot);
+    const lv = AZProgress.level(overall);
+    const weakest = attempted.slice().sort((a, b) => a.pct - b.pct).slice(0, 3);
+    let verdict;
+    if (overall >= 85) verdict = "You're exam-ready — keep your weak topics sharp.";
+    else if (overall >= 70) verdict = "You're passing. Push your weak topics higher for a safety margin.";
+    else if (overall >= 50) verdict = "Getting there — focus on the weak topics below, then re-test.";
+    else verdict = "Early days — work the study guide and flashcards, then re-test.";
+    el("readinessBody").innerHTML =
+      `<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+         <span style="font-size:40px;font-weight:800;color:${lv.color}">${overall}%</span>
+         <span class="pill" style="background:${lv.color}22;color:${lv.color}">${lv.label}</span>
+       </div>
+       <div class="progress mt"><span style="width:${overall}%;background:${lv.color}"></span></div>
+       <p style="margin:12px 0 6px">${verdict}</p>
+       <div style="font-size:13.5px;color:var(--muted)">Focus next: ${weakest.map(w => `${w.name} (${w.pct}%)`).join(" · ")}</div>
+       <div class="btn-row mt"><a class="btn" href="progress.html">📊 Full progress</a><a class="btn" href="mock-tests.html">📝 Practice</a></div>`;
+  }
+
+  /* ---------- Exam-date countdown ---------- */
+  const EXAM_KEY = "az900_exam_date";
+  const saved = localStorage.getItem(EXAM_KEY);
+  if (saved) el("examDate").value = saved;
+  function renderCountdown() {
+    const v = el("examDate").value;
+    if (!v) { el("countdown").textContent = ""; return; }
+    const days = Math.ceil((new Date(v + "T00:00:00") - new Date(new Date().toDateString())) / 86400000);
+    el("countdown").textContent = days > 1 ? `⏳ ${days} days to go` : days === 1 ? "⏳ 1 day to go — final review!" : days === 0 ? "🎯 Exam is today — good luck!" : "Exam date has passed.";
+    el("countdown").style.color = days <= 2 && days >= 0 ? "var(--amber)" : "var(--text)";
+  }
+  el("examDate").onchange = () => { localStorage.setItem(EXAM_KEY, el("examDate").value); renderCountdown(); };
+  renderCountdown();
+
+  /* ---------- 7-day study plan ---------- */
+  const PLAN = [
+    { d: "Day 1 — Cloud Concepts", items: ["Read Domain 1 in the Study Guide", "Run the Cloud Concepts flashcards", "By-Topic drill: Cloud Models + Service Types"] },
+    { d: "Day 2 — Architecture & Compute", items: ["Read Core Architecture + Compute", "Flashcards: Architecture & Services", "By-Topic drill: Core Architecture + Compute"] },
+    { d: "Day 3 — Storage & Networking", items: ["Read Storage + Networking", "Memorise LRS/ZRS/GRS/GZRS + access tiers", "By-Topic drill: Storage + Networking"] },
+    { d: "Day 4 — Identity & Governance", items: ["Read Identity + Governance & Compliance", "Learn RBAC vs Azure Policy vs Locks", "By-Topic drill: Identity + Governance"] },
+    { d: "Day 5 — Cost, Tools & Monitoring", items: ["Read Domain 3 (cost, tools, monitoring)", "Learn Advisor vs Service Health vs Monitor", "By-Topic drill: Cost + Tools + Monitoring"] },
+    { d: "Day 6 — Full mock + review", items: ["Full timed mock with feedback OFF", "Review my mistakes, then Retry incorrect", "Watch a free AZ-900 'study cram' video"] },
+    { d: "Day 7 — Final review", items: ["Read the printable cheat sheet", "Flashcards of your weakest topics", "One more full mock — then rest!"] },
+  ];
+  const PLAN_KEY = "az900_plan";
+  let done = {};
+  try { done = JSON.parse(localStorage.getItem(PLAN_KEY) || "{}"); } catch (e) { done = {}; }
+  const list = el("planList");
+  let total = 0, checked = 0;
+  PLAN.forEach((day, di) => {
+    const det = document.createElement("details");
+    if (di === 0) det.open = true;
+    det.style.cssText = "border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--panel-2)";
+    const sum = document.createElement("summary");
+    sum.style.cssText = "cursor:pointer;padding:10px 14px;font-weight:700;font-size:14.5px";
+    sum.textContent = day.d;
+    det.appendChild(sum);
+    const box = document.createElement("div");
+    box.style.cssText = "padding:4px 14px 12px";
+    day.items.forEach((item, ii) => {
+      total++;
+      const key = `${di}-${ii}`;
+      if (done[key]) checked++;
+      const row = document.createElement("label");
+      row.style.cssText = "display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer;font-size:14px";
+      const cb = document.createElement("input");
+      cb.type = "checkbox"; cb.checked = !!done[key];
+      cb.style.cssText = "margin-top:3px;width:17px;height:17px;accent-color:var(--primary)";
+      cb.onchange = () => { done[key] = cb.checked; localStorage.setItem(PLAN_KEY, JSON.stringify(done)); txt.style.opacity = cb.checked ? .5 : 1; txt.style.textDecoration = cb.checked ? "line-through" : "none"; updateBar(); };
+      const txt = document.createElement("span");
+      txt.textContent = item;
+      if (cb.checked) { txt.style.opacity = .5; txt.style.textDecoration = "line-through"; }
+      row.appendChild(cb); row.appendChild(txt);
+      box.appendChild(row);
+    });
+    det.appendChild(box);
+    list.appendChild(det);
+  });
+  function updateBar() {
+    const c = Object.values(done).filter(Boolean).length;
+    el("planBar").style.width = (c / total * 100) + "%";
+  }
+  updateBar();
+})();
+</script>
 </body>
 </html>

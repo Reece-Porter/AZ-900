@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AZ-900 Study Hub — Cheat Sheet</title>
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  .sheet { columns: 2; column-gap: 22px; }
+  @media (max-width: 900px) { .sheet { columns: 1; } }
+  .cs { break-inside: avoid; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin: 0 0 14px; background: var(--panel); }
+  .cs h4 { margin: 0 0 8px; font-size: 14.5px; color: var(--primary-2); }
+  .cs ul { margin: 0; padding-left: 18px; }
+  .cs li { margin: 3px 0; font-size: 13px; line-height: 1.45; }
+  .cs b { color: var(--text); }
+  .cs .hi { color: var(--amber); font-weight: 700; }
+
+  @media print {
+    @page { margin: 12mm; }
+    body { background: #fff !important; color: #000 !important; }
+    .sidebar, .no-print { display: none !important; }
+    .content { max-width: none; padding: 0; }
+    .page-head .eyebrow, .page-head p { color: #333 !important; }
+    .sheet { columns: 2; column-gap: 14px; }
+    .cs { border: 1px solid #bbb; background: #fff !important; box-shadow: none; page-break-inside: avoid; }
+    .cs h4 { color: #1558b0 !important; }
+    .cs b, .cs li { color: #000 !important; }
+    .cs .hi { color: #000 !important; text-decoration: underline; }
+    h2, h3 { color: #000 !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar no-print">
+    <div class="brand">
+      <div class="logo">AZ</div>
+      <div><h1>AZ-900 Study Hub</h1><span>Azure Fundamentals</span></div>
+    </div>
+    <nav class="nav">
+      <a href="index.html"><span class="ico">📖</span> Study Guide</a>
+      <a href="flashcards.html"><span class="ico">🃏</span> Flashcards</a>
+      <a href="mock-tests.html"><span class="ico">📝</span> Mock Tests</a>
+      <a href="games.html"><span class="ico">🎮</span> Memory Games</a>
+      <a href="progress.html"><span class="ico">📊</span> My Progress</a>
+      <a href="cheatsheet.html" class="active"><span class="ico">🧾</span> Cheat Sheet</a>
+    </nav>
+    <div class="sidebar-foot">High-yield facts for last-minute revision. Use the Print button for a paper copy.</div>
+  </aside>
+
+  <main class="content">
+    <header class="page-head">
+      <div class="eyebrow">Last-minute revision</div>
+      <h2>AZ-900 Cheat Sheet</h2>
+      <p>The highest-yield facts on one page. Skim this the morning of your exam. <button class="btn primary no-print" onclick="window.print()" style="margin-left:10px">🖨️ Print / Save as PDF</button></p>
+    </header>
+
+    <div class="sheet">
+
+      <div class="cs">
+        <h4>Cloud service types — responsibility</h4>
+        <ul>
+          <li><b>IaaS</b> = most control; you manage the <b>OS</b> + apps (e.g. Azure VMs).</li>
+          <li><b>PaaS</b> = you manage apps & data only (App Service, Azure SQL DB).</li>
+          <li><b>SaaS</b> = least control; just use it (Microsoft 365).</li>
+          <li><span class="hi">Always customer:</span> data, devices, accounts/identities.</li>
+          <li><span class="hi">Always provider:</span> physical hosts, network, datacenter.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Cloud models</h4>
+        <ul>
+          <li><b>Public</b> = multi-tenant, over internet, no CapEx.</li>
+          <li><b>Private</b> = one org, more control, needs CapEx.</li>
+          <li><b>Hybrid</b> = public + private; move/keep workloads.</li>
+          <li><b>Multi-cloud</b> = more than one provider.</li>
+          <li><b>Azure Arc</b> = manage on-prem/multi-cloud from Azure.</li>
+          <li><b>Azure VMware Solution</b> = run VMware natively in Azure.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Cost: CapEx vs OpEx & benefits</h4>
+        <ul>
+          <li><b>CapEx</b> = big upfront purchase (servers).</li>
+          <li><b>OpEx</b> = pay-as-you-go; cloud favours this.</li>
+          <li><b>Consumption model</b> = pay only for what you use.</li>
+          <li>Benefits: HA, scalability, elasticity, reliability, predictability, security, governance, manageability.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Scaling & reliability</h4>
+        <ul>
+          <li><b>Vertical</b> (up/down) = more power to one resource.</li>
+          <li><b>Horizontal</b> (out/in) = more/fewer instances.</li>
+          <li><b>Elasticity</b> = auto scale to demand.</li>
+          <li><b>High availability</b> = minimal downtime (SLA %).</li>
+          <li><b>Reliability</b> = recover from failure.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Architecture hierarchy & DR</h4>
+        <ul>
+          <li>Top→down: <b>Management groups → Subscriptions → Resource groups → Resources</b>.</li>
+          <li><b>Region</b> = datacenters in a low-latency area.</li>
+          <li><span class="hi">Availability Zones</span> = separate datacenters <b>within a region</b> (datacenter-fault protection).</li>
+          <li><span class="hi">Region pairs</span> = 300+ mi apart, <b>cross-region DR</b>.</li>
+          <li><b>ARM</b> = deployment/management layer (templates, RBAC, tags, locks).</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Compute</h4>
+        <ul>
+          <li><b>VMs</b> = IaaS, full OS control, lift-and-shift.</li>
+          <li><b>VM Scale Sets</b> = identical autoscaling VMs.</li>
+          <li><b>Availability Sets</b> = fault/update domains in a datacenter.</li>
+          <li><b>App Service</b> = PaaS web apps/APIs.</li>
+          <li><b>ACI</b> = single container fast; <b>AKS</b> = orchestrate many.</li>
+          <li><b>Functions</b> = serverless, event-driven, pay-per-run.</li>
+          <li><b>Azure Virtual Desktop</b> = cloud Windows desktops.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Networking</h4>
+        <ul>
+          <li><b>VNet</b> = isolated private network; <b>subnets</b> divide it.</li>
+          <li><b>VNet peering</b> = connect two VNets privately.</li>
+          <li><b>VPN Gateway</b> = encrypted <b>over the internet</b>.</li>
+          <li><span class="hi">ExpressRoute</span> = private, dedicated, <b>not</b> over internet.</li>
+          <li><b>Azure DNS</b> = name resolution. <b>NSG</b> = traffic rules.</li>
+          <li><b>Private endpoint</b> = keep storage/PaaS off public internet.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Storage — tiers & redundancy</h4>
+        <ul>
+          <li>Types: <b>Blob</b> (objects), <b>Files</b> (SMB), <b>Queue</b>, <b>Table</b>, <b>Disk</b>.</li>
+          <li>Tiers: <b>Hot</b> → <b>Cool</b> (30d) → <b>Cold</b> (90d) → <b>Archive</b> (offline, cheapest).</li>
+          <li><b>LRS</b> = 3 copies, 1 datacenter (cheapest).</li>
+          <li><b>ZRS</b> = across zones (datacenter-fault).</li>
+          <li><b>GRS</b> = secondary region (regional outage).</li>
+          <li><b>GZRS</b> = zones + region (max durability).</li>
+          <li>Move data: <b>Migrate</b>, <b>Data Box</b> (~80TB offline), <b>AzCopy</b>, <b>File Sync</b>.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Identity & security</h4>
+        <ul>
+          <li><b>Microsoft Entra ID</b> = cloud identity (SSO).</li>
+          <li><b>AuthN</b> = who you are; <b>AuthZ</b> = what you can do.</li>
+          <li><b>MFA</b> = 2+ factors; <b>SSO</b> = sign in once.</li>
+          <li><b>Conditional Access</b> = rules by user/location/device/risk.</li>
+          <li><b>B2B</b> = partners/guests; <b>B2C</b> = customers.</li>
+          <li><b>Entra ID</b> (cloud, modern) vs <b>AD DS</b> (on-prem, Kerberos/LDAP).</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Cost management tools</h4>
+        <ul>
+          <li><span class="hi">Pricing Calculator</span> = estimate cost <b>before</b> deploy.</li>
+          <li><span class="hi">TCO Calculator</span> = on-prem <b>vs</b> Azure savings.</li>
+          <li><b>Cost Management</b> = track actual spend, budgets, alerts.</li>
+          <li><b>Tags</b> = name/value metadata for cost grouping.</li>
+          <li>Cost factors: region, resource type/size, <b>egress</b> data, subscription type. (Ingress is free.)</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Governance & compliance</h4>
+        <ul>
+          <li><span class="hi">Azure Policy</span> = what resources can exist/config (allowed regions, required tags).</li>
+          <li><span class="hi">RBAC</span> = who can do what (least privilege).</li>
+          <li><b>Locks</b>: CanNotDelete (edit, no delete) · ReadOnly (no edit/delete).</li>
+          <li><b>Microsoft Purview</b> = data governance.</li>
+          <li><b>Service Trust Portal</b> = compliance reports/certs.</li>
+          <li><b>Defender for Cloud</b> = security posture + threat alerts.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Tools & monitoring</h4>
+        <ul>
+          <li><b>Portal</b> = GUI · <b>Cloud Shell</b> = browser Bash/PowerShell.</li>
+          <li><b>CLI</b> (az) vs <b>PowerShell</b> (cmdlets) · <b>ARM/Bicep</b> = IaC.</li>
+          <li><span class="hi">Advisor</span> = recommendations (cost/security/reliability/perf/ops).</li>
+          <li><span class="hi">Service Health</span> = is Azure itself up? (outages/maintenance).</li>
+          <li><span class="hi">Azure Monitor</span> = telemetry from YOUR resources.</li>
+          <li><b>Log Analytics</b> = KQL queries · <b>App Insights</b> = app performance.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>⚠️ Common exam traps</h4>
+        <ul>
+          <li>Datacenter fault → <b>Availability Zones</b>; regional fault → <b>Region pairs/GRS</b>.</li>
+          <li>Estimate before deploy → <b>Pricing</b>; compare on-prem → <b>TCO</b>.</li>
+          <li>Prevent delete but allow edit → <b>CanNotDelete</b> lock (not ReadOnly).</li>
+          <li>Recommendations → <b>Advisor</b>; outages → <b>Service Health</b>.</li>
+          <li>Enforce config/tags → <b>Policy</b>; grant access → <b>RBAC</b>.</li>
+          <li>Cheapest archival w/ slow retrieval → <b>Archive</b> tier.</li>
+          <li>No OS management → <b>PaaS</b>; full OS control → <b>IaaS</b>.</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <footer class="page-foot no-print">
+      AZ-900 Study Hub · Condensed revision aid — always confirm against the official Microsoft Learn AZ-900 skills outline.
+    </footer>
+  </main>
+</div>
+</body>
+</html>
