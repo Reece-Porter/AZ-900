@@ -41,7 +41,7 @@
         <div class="card mode" data-mode="practice" style="cursor:pointer">
           <span class="pill blue">Learn</span>
           <h4 style="margin:10px 0 4px">Practice Mode</h4>
-          <p style="color:var(--muted);margin:0;font-size:14px">Instant feedback and explanation after each question. No timer.</p>
+          <p style="color:var(--muted);margin:0;font-size:14px">A relaxed, untimed run through all questions at your own pace.</p>
         </div>
         <div class="card mode" data-mode="topic" style="cursor:pointer">
           <span class="pill green">Focus</span>
@@ -60,6 +60,15 @@
         </div>
         <p style="color:var(--muted);margin:6px 0 4px;font-size:13.5px">Tap a domain to toggle all its topics, or pick individual topics. You can mix and match.</p>
         <div id="topicGroups"></div>
+      </div>
+
+      <div class="card mt" id="optionsCard">
+        <label class="toggle">
+          <input type="checkbox" id="feedbackToggle" checked>
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          <span class="toggle-label">Show whether each answer is right or wrong straight after I answer it</span>
+        </label>
+        <p style="color:var(--muted);margin:10px 0 0;font-size:13px">Turn this off for a realistic exam run — you'll only see the full breakdown at the end.</p>
       </div>
 
       <div class="card mt center">
@@ -84,7 +93,10 @@
         </div>
         <div class="btn-row mt" style="justify-content:space-between">
           <button class="btn ghost" id="quitBtn">✕ Quit</button>
-          <button class="btn primary" id="nextQBtn" disabled>Next →</button>
+          <div class="btn-row">
+            <button class="btn" id="backQBtn">← Back</button>
+            <button class="btn primary" id="nextQBtn" disabled>Next →</button>
+          </div>
         </div>
       </div>
     </section>
@@ -122,7 +134,9 @@
   const cats = AZ.CATEGORIES;
   const topics = AZ.TOPICS;
   let mode = null, questions = [], current = 0, answers = [], timer = null, seconds = 0;
+  let instantFeedback = true;
   const selectedTopics = new Set();
+  if (el("feedbackToggle")) el("feedbackToggle").onchange = e => { instantFeedback = e.target.checked; };
 
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const topicsIn = k => Object.keys(topics).filter(t => topics[t].cat === k);
@@ -217,6 +231,7 @@
   el("startBtn").onclick = start;
 
   function start() {
+    instantFeedback = el("feedbackToggle").checked;
     let pool = AZ.QUESTIONS;
     if (mode === "topic") pool = pool.filter(q => selectedTopics.has(q.topic));
     questions = shuffle(pool);
@@ -250,22 +265,23 @@
       if (answers[current] === i) d.classList.add("selected");
       opts.appendChild(d);
     });
-    // if already answered in practice mode, show feedback
-    if (mode === "practice" && answers[current] !== null) revealPractice();
+    // if already answered and instant feedback is on, show the reveal
+    if (instantFeedback && answers[current] !== null) reveal();
     el("nextQBtn").disabled = answers[current] === null;
     el("nextQBtn").textContent = current === questions.length - 1 ? "Finish ✓" : "Next →";
+    el("backQBtn").disabled = current === 0;
   }
 
   function choose(i, node) {
-    if (mode === "practice" && answers[current] !== null) return; // lock after answer in practice
+    if (instantFeedback && answers[current] !== null) return; // lock after answering when feedback is on
     answers[current] = i;
-    [...el("qOptions").children].forEach(c => c.classList.remove("selected"));
+    [...el("qOptions").children].forEach(c => c.classList.remove("selected", "correct", "wrong"));
     node.classList.add("selected");
     el("nextQBtn").disabled = false;
-    if (mode === "practice") revealPractice();
+    if (instantFeedback) reveal();
   }
 
-  function revealPractice() {
+  function reveal() {
     const q = questions[current];
     const nodes = [...el("qOptions").children];
     nodes.forEach((n, i) => {
@@ -283,6 +299,7 @@
     if (current === questions.length - 1) return finish();
     current++; renderQ();
   };
+  el("backQBtn").onclick = () => { if (current > 0) { current--; renderQ(); } };
   el("quitBtn").onclick = () => { if (confirm("Quit this test? Progress will be lost.")) reset(); };
 
   function reset() {
