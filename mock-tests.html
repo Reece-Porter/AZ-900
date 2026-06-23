@@ -27,7 +27,7 @@
     <header class="page-head">
       <div class="eyebrow">Exam Simulation</div>
       <h2>Mock Tests</h2>
-      <p>Practice under exam-like conditions. Choose a mode, answer each question, and get a full breakdown with explanations and per-domain scoring at the end.</p>
+      <p>Practice under exam-like conditions. Take a full exam, learn with instant feedback, or focus on specific parts of the curriculum. You get a full breakdown with explanations and per-domain scoring at the end.</p>
     </header>
 
     <!-- SETUP -->
@@ -43,16 +43,23 @@
           <h4 style="margin:10px 0 4px">Practice Mode</h4>
           <p style="color:var(--muted);margin:0;font-size:14px">Instant feedback and explanation after each question. No timer.</p>
         </div>
-        <div class="card mode" data-mode="domain" style="cursor:pointer">
+        <div class="card mode" data-mode="topic" style="cursor:pointer">
           <span class="pill green">Focus</span>
-          <h4 style="margin:10px 0 4px">By Domain</h4>
-          <p style="color:var(--muted);margin:0;font-size:14px">Drill a single exam domain to shore up weak areas.</p>
+          <h4 style="margin:10px 0 4px">By Topic</h4>
+          <p style="color:var(--muted);margin:0;font-size:14px">Pick any part of the curriculum — a whole domain or specific topics — to target weak areas.</p>
         </div>
       </div>
 
-      <div class="card mt" id="domainPick" style="display:none">
-        <h4 style="margin-top:0">Pick a domain</h4>
-        <div class="cat-filter" id="domainChips"></div>
+      <div class="card mt" id="topicPick" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <h4 style="margin:0">Choose what to study</h4>
+          <div class="btn-row">
+            <button class="btn ghost" id="selectAllTopics">Select all</button>
+            <button class="btn ghost" id="clearTopics">Clear</button>
+          </div>
+        </div>
+        <p style="color:var(--muted);margin:6px 0 4px;font-size:13.5px">Tap a domain to toggle all its topics, or pick individual topics. You can mix and match.</p>
+        <div id="topicGroups"></div>
       </div>
 
       <div class="card mt center">
@@ -113,9 +120,13 @@
 (function () {
   const el = id => document.getElementById(id);
   const cats = AZ.CATEGORIES;
-  let mode = null, domain = null, questions = [], current = 0, answers = [], timer = null, seconds = 0;
+  const topics = AZ.TOPICS;
+  let mode = null, questions = [], current = 0, answers = [], timer = null, seconds = 0;
+  const selectedTopics = new Set();
 
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const topicsIn = k => Object.keys(topics).filter(t => topics[t].cat === k);
+  const countTopic = t => AZ.QUESTIONS.filter(q => q.topic === t).length;
 
   // ---- setup ----
   document.querySelectorAll(".mode").forEach(c => {
@@ -123,40 +134,91 @@
       document.querySelectorAll(".mode").forEach(m => m.style.borderColor = "");
       c.style.borderColor = "var(--primary)";
       mode = c.dataset.mode;
-      el("domainPick").style.display = mode === "domain" ? "block" : "none";
-      el("startBtn").disabled = mode === "domain" && !domain;
-      updateSummary();
+      el("topicPick").style.display = mode === "topic" ? "block" : "none";
+      refreshSelection();
     };
   });
 
-  // domain chips
-  const chips = el("domainChips");
+  // build topic picker grouped by domain
+  const groups = el("topicGroups");
   Object.keys(cats).forEach(k => {
-    const n = AZ.QUESTIONS.filter(q => q.cat === k).length;
-    const b = document.createElement("button");
-    b.className = "chip"; b.textContent = `${cats[k].name} (${n})`;
-    b.onclick = () => {
-      domain = k;
-      [...chips.children].forEach(x => x.classList.remove("active"));
-      b.classList.add("active");
-      el("startBtn").disabled = false;
-      updateSummary();
-    };
-    chips.appendChild(b);
+    const wrap = document.createElement("div");
+    wrap.style.margin = "16px 0 4px";
+
+    const dchip = document.createElement("button");
+    dchip.className = "chip"; dchip.dataset.domain = k;
+    dchip.style.fontWeight = "700";
+    dchip.textContent = `${cats[k].name} — all`;
+    dchip.onclick = () => toggleDomain(k);
+
+    const head = document.createElement("div");
+    head.style.cssText = "display:flex;align-items:center;gap:10px;margin-bottom:8px";
+    head.appendChild(dchip);
+    wrap.appendChild(head);
+
+    const chipWrap = document.createElement("div");
+    chipWrap.className = "cat-filter";
+    chipWrap.style.margin = "0 0 4px";
+    topicsIn(k).forEach(t => {
+      const c = document.createElement("button");
+      c.className = "chip"; c.dataset.topic = t;
+      c.textContent = `${topics[t].name} (${countTopic(t)})`;
+      c.onclick = () => toggleTopic(t);
+      chipWrap.appendChild(c);
+    });
+    wrap.appendChild(chipWrap);
+    groups.appendChild(wrap);
   });
+
+  function toggleTopic(t) {
+    selectedTopics.has(t) ? selectedTopics.delete(t) : selectedTopics.add(t);
+    refreshSelection();
+  }
+  function toggleDomain(k) {
+    const ts = topicsIn(k);
+    const allOn = ts.every(t => selectedTopics.has(t));
+    ts.forEach(t => allOn ? selectedTopics.delete(t) : selectedTopics.add(t));
+    refreshSelection();
+  }
+  el("selectAllTopics").onclick = () => { Object.keys(topics).forEach(t => selectedTopics.add(t)); refreshSelection(); };
+  el("clearTopics").onclick = () => { selectedTopics.clear(); refreshSelection(); };
+
+  function refreshSelection() {
+    // update topic chip states
+    document.querySelectorAll("#topicGroups [data-topic]").forEach(c => {
+      c.classList.toggle("active", selectedTopics.has(c.dataset.topic));
+    });
+    // update domain chip states (active only when ALL its topics selected)
+    document.querySelectorAll("#topicGroups [data-domain]").forEach(c => {
+      const ts = topicsIn(c.dataset.domain);
+      c.classList.toggle("active", ts.length > 0 && ts.every(t => selectedTopics.has(t)));
+    });
+    el("startBtn").disabled = (mode === "topic" && selectedTopics.size === 0) || !mode;
+    updateSummary();
+  }
+
+  function selectedCount() {
+    return AZ.QUESTIONS.filter(q => selectedTopics.has(q.topic)).length;
+  }
 
   function updateSummary() {
-    let n = AZ.QUESTIONS.length, label = "all domains";
-    if (mode === "domain" && domain) { n = AZ.QUESTIONS.filter(q => q.cat === domain).length; label = cats[domain].name; }
-    const t = { exam: "Full timed exam", practice: "Practice with instant feedback", domain: "Single-domain drill" }[mode] || "";
-    el("setupSummary").textContent = mode ? `${t} — ${n} questions (${label}).` : "Select a mode above to begin.";
+    if (!mode) { el("setupSummary").textContent = "Select a mode above to begin."; return; }
+    if (mode === "topic") {
+      if (selectedTopics.size === 0) { el("setupSummary").textContent = "Focused drill — pick one or more topics above to begin."; return; }
+      const names = [...selectedTopics].map(t => topics[t].name);
+      const label = names.length <= 3 ? names.join(", ") : `${names.length} topics`;
+      el("setupSummary").textContent = `Focused drill — ${selectedCount()} questions (${label}).`;
+      return;
+    }
+    const t = { exam: "Full timed exam", practice: "Practice with instant feedback" }[mode] || "";
+    el("setupSummary").textContent = `${t} — ${AZ.QUESTIONS.length} questions (all topics).`;
   }
 
   el("startBtn").onclick = start;
 
   function start() {
     let pool = AZ.QUESTIONS;
-    if (mode === "domain" && domain) pool = pool.filter(q => q.cat === domain);
+    if (mode === "topic") pool = pool.filter(q => selectedTopics.has(q.topic));
     questions = shuffle(pool);
     current = 0; answers = new Array(questions.length).fill(null); seconds = 0;
     el("setup").classList.add("hidden");
