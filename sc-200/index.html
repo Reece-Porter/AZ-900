@@ -96,8 +96,8 @@
       </div>
 
       <div class="card">
-        <h3 style="margin-top:0">🗓️ 7-day study plan</h3>
-        <p style="color:var(--muted);margin:0 0 6px;font-size:13.5px">Tick items as you go — your progress is saved on this device.</p>
+        <h3 style="margin-top:0">🗓️ Study plan — pass by 10 August</h3>
+        <p id="planTarget" style="color:var(--muted);margin:0 0 6px;font-size:13.5px">Phased plan with target dates. Tick items as you go — saved on this device.</p>
         <div class="progress mb"><span id="planBar"></span></div>
         <div id="planList"></div>
       </div>
@@ -416,68 +416,87 @@
        <div class="btn-row mt"><a class="btn" href="progress.html">📊 Full progress</a><a class="btn" href="mock-tests.html">📝 Practice</a></div>`;
   }
 
-  /* ---------- Exam-date countdown ---------- */
+  /* ---------- Exam target: 10 August ---------- */
   const EXAM_KEY = "sc200_exam_date";
-  const saved = localStorage.getItem(EXAM_KEY);
-  if (saved) el("examDate").value = saved;
+  const today = new Date(new Date().toDateString());
+  // next 10 August that is still in the future (this year, or next year if already passed)
+  let examDate = new Date(today.getFullYear(), 7, 10); // month is 0-indexed: 7 = August
+  if (examDate < today) examDate = new Date(today.getFullYear() + 1, 7, 10);
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const fmtDate = d => d.toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  // default the exam-date field to 10 Aug (user can still change it)
+  const savedDate = localStorage.getItem(EXAM_KEY);
+  if (savedDate) { el("examDate").value = savedDate; }
+  else { el("examDate").value = iso(examDate); localStorage.setItem(EXAM_KEY, iso(examDate)); }
+
   function renderCountdown() {
     const v = el("examDate").value;
     if (!v) { el("countdown").textContent = ""; return; }
-    const days = Math.ceil((new Date(v + "T00:00:00") - new Date(new Date().toDateString())) / 86400000);
-    el("countdown").textContent = days > 1 ? `⏳ ${days} days to go` : days === 1 ? "⏳ 1 day to go — final review!" : days === 0 ? "🎯 Exam is today — good luck!" : "Exam date has passed.";
-    el("countdown").style.color = days <= 2 && days >= 0 ? "var(--amber)" : "var(--text)";
+    const days = Math.ceil((new Date(v + "T00:00:00") - today) / 86400000);
+    el("countdown").textContent = days > 1 ? `⏳ ${days} days to go (target: ${fmtDate(new Date(v + "T00:00:00"))})` : days === 1 ? "⏳ 1 day to go — final review!" : days === 0 ? "🎯 Exam is today — good luck!" : "Exam date has passed.";
+    el("countdown").style.color = days <= 3 && days >= 0 ? "var(--amber)" : "var(--text)";
   }
-  el("examDate").onchange = () => { localStorage.setItem(EXAM_KEY, el("examDate").value); renderCountdown(); };
+  el("examDate").onchange = () => { localStorage.setItem(EXAM_KEY, el("examDate").value); renderCountdown(); buildPlan(); };
   renderCountdown();
 
-  /* ---------- 7-day study plan ---------- */
-  const PLAN = [
-    { d: "Day 1 — Defender for Endpoint", items: ["Read the MDE section in the Study Guide", "Learn response actions + ASR rules + custom indicators", "By-Topic drill: Defender for Endpoint"] },
-    { d: "Day 2 — Office 365 & Identity", items: ["Safe Links/Attachments, ZAP, preset policies", "MDI sensors & attacks vs Entra ID Protection", "By-Topic drill: Office 365 + Identity"] },
-    { d: "Day 3 — Cloud Apps & XDR incidents", items: ["Cloud Discovery, session policies (CASB)", "Incidents, AIR, and advanced hunting tables", "By-Topic drill: Cloud Apps + XDR Incidents"] },
-    { d: "Day 4 — Defender for Cloud", items: ["CSPM, Secure Score, MCSB, multicloud", "Defender plans, JIT, FIM, compliance dashboard", "By-Topic drill: all Defender for Cloud topics"] },
-    { d: "Day 5 — Sentinel core", items: ["Workspace, roles, connectors & DCRs", "Analytics rule types + entity mapping", "By-Topic drill: Workspace + Connectors + Analytics"] },
-    { d: "Day 6 — Sentinel SOAR, hunting & TI", items: ["Playbooks vs automation rules", "Hunting, bookmarks, UEBA, threat intelligence", "Full timed mock with feedback OFF"] },
-    { d: "Day 7 — KQL + final review", items: ["Drill KQL operators and read queries", "Read the printable cheat sheet", "Review my mistakes, then one more full mock"] },
+  /* ---------- Phased study plan targeting the exam date ---------- */
+  const PHASES = [
+    { t: "Phase 1 — Defender for Endpoint", items: ["Read the MDE + Endpoint hardening sections", "Response actions, ASR, indicators, tamper/EDR block mode", "By-Topic drill: Defender for Endpoint"] },
+    { t: "Phase 2 — Office 365, Identity & Cloud Apps", items: ["Safe Links/Attachments, ZAP, preset policies, submissions", "MDI (on-prem AD) vs Entra ID Protection; Cloud Apps (CASB)", "By-Topic drill: Office 365 + Identity + Cloud Apps"] },
+    { t: "Phase 3 — XDR incidents, hunting & KQL basics", items: ["Incidents, AIR, Action center, Secure Score, Threat analytics", "Advanced hunting tables + custom detection rules", "Learn core KQL: where / project / extend / summarize"] },
+    { t: "Phase 4 — Defender for Cloud", items: ["CSPM, Secure Score, MCSB, Defender CSPM plan, multicloud", "Defender plans, JIT, FIM, governance, compliance dashboard", "By-Topic drill: all Defender for Cloud topics"] },
+    { t: "Phase 5 — Sentinel core", items: ["Workspace, roles, log plans/retention, connectors & DCRs", "Analytics rule types, entity mapping, alert/event grouping", "By-Topic drill: Workspace + Connectors + Analytics"] },
+    { t: "Phase 6 — Sentinel SOAR, hunting, TI & KQL mastery", items: ["Playbooks vs automation rules; triggers & permissions", "Hunting, bookmarks, UEBA, threat intelligence (TAXII vs Upload API)", "KQL mastery: join/union, arg_max, dcount, mv-expand, has"] },
+    { t: "Final stretch — mocks & review", items: ["Full timed mocks with feedback OFF", "Review my mistakes, then Retry incorrect", "Read the printable cheat sheet the day before"] },
   ];
   const PLAN_KEY = "sc200_plan";
   let done = {};
-  try { done = JSON.parse(localStorage.getItem(PLAN_KEY) || "{}"); } catch (e) { done = {}; }
-  const list = el("planList");
-  let total = 0;
-  PLAN.forEach((day, di) => {
-    const det = document.createElement("details");
-    if (di === 0) det.open = true;
-    det.style.cssText = "border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--panel-2)";
-    const sum = document.createElement("summary");
-    sum.style.cssText = "cursor:pointer;padding:10px 14px;font-weight:700;font-size:14.5px";
-    sum.textContent = day.d;
-    det.appendChild(sum);
-    const box = document.createElement("div");
-    box.style.cssText = "padding:4px 14px 12px";
-    day.items.forEach((item, ii) => {
-      total++;
-      const key = `${di}-${ii}`;
-      const row = document.createElement("label");
-      row.style.cssText = "display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer;font-size:14px";
-      const cb = document.createElement("input");
-      cb.type = "checkbox"; cb.checked = !!done[key];
-      cb.style.cssText = "margin-top:3px;width:17px;height:17px;accent-color:var(--primary)";
-      cb.onchange = () => { done[key] = cb.checked; localStorage.setItem(PLAN_KEY, JSON.stringify(done)); txt.style.opacity = cb.checked ? .5 : 1; txt.style.textDecoration = cb.checked ? "line-through" : "none"; updateBar(); };
-      const txt = document.createElement("span");
-      txt.textContent = item;
-      if (cb.checked) { txt.style.opacity = .5; txt.style.textDecoration = "line-through"; }
-      row.appendChild(cb); row.appendChild(txt);
-      box.appendChild(row);
-    });
-    det.appendChild(box);
-    list.appendChild(det);
-  });
+  let planTotal = 0;
   function updateBar() {
     const c = Object.values(done).filter(Boolean).length;
-    el("planBar").style.width = (c / total * 100) + "%";
+    el("planBar").style.width = (planTotal ? (c / planTotal * 100) : 0) + "%";
   }
-  updateBar();
+
+  function buildPlan() {
+    try { done = JSON.parse(localStorage.getItem(PLAN_KEY) || "{}"); } catch (e) { done = {}; }
+    const list = el("planList"); list.innerHTML = "";
+    const target = el("examDate").value ? new Date(el("examDate").value + "T00:00:00") : examDate;
+    const totalDays = Math.max(1, Math.round((target - today) / 86400000));
+    const P = PHASES.length;
+    planTotal = 0;
+    PHASES.forEach((phase, di) => {
+      const dl = new Date(today.getTime() + Math.round((di + 1) / P * totalDays) * 86400000);
+      const det = document.createElement("details");
+      if (di === 0) det.open = true;
+      det.style.cssText = "border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--panel-2)";
+      const sum = document.createElement("summary");
+      sum.style.cssText = "cursor:pointer;padding:10px 14px;font-weight:700;font-size:14.5px;display:flex;justify-content:space-between;gap:10px;align-items:center";
+      sum.innerHTML = `<span>${phase.t}</span><span class="pill blue" style="font-weight:600">by ${fmtDate(dl)}</span>`;
+      det.appendChild(sum);
+      const box = document.createElement("div");
+      box.style.cssText = "padding:4px 14px 12px";
+      phase.items.forEach((item, ii) => {
+        planTotal++;
+        const key = `${di}-${ii}`;
+        const row = document.createElement("label");
+        row.style.cssText = "display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer;font-size:14px";
+        const cb = document.createElement("input");
+        cb.type = "checkbox"; cb.checked = !!done[key];
+        cb.style.cssText = "margin-top:3px;width:17px;height:17px;accent-color:var(--primary)";
+        const txt = document.createElement("span");
+        txt.textContent = item;
+        if (cb.checked) { txt.style.opacity = .5; txt.style.textDecoration = "line-through"; }
+        cb.onchange = () => { done[key] = cb.checked; localStorage.setItem(PLAN_KEY, JSON.stringify(done)); txt.style.opacity = cb.checked ? .5 : 1; txt.style.textDecoration = cb.checked ? "line-through" : "none"; updateBar(); };
+        row.appendChild(cb); row.appendChild(txt);
+        box.appendChild(row);
+      });
+      det.appendChild(box);
+      list.appendChild(det);
+    });
+    el("planTarget").textContent = `${PHASES.length} phases with target dates leading to your exam. Tick items as you go — saved on this device.`;
+    updateBar();
+  }
+  buildPlan();
 })();
 </script>
 </body>
