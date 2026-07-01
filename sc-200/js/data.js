@@ -119,6 +119,30 @@ const FLASHCARDS = [
   { cat: "sentinel", q: "What do ago() and bin() do in KQL?", a: "ago(1d) returns a time relative to now (for filtering); bin(TimeGenerated, 1h) rounds timestamps into buckets (useful with summarize and render timechart)." },
   { cat: "sentinel", q: "What does 'join' vs 'union' do in KQL?", a: "join combines rows from two tables on a matching key; union returns rows from multiple tables together (stacked)." },
   { cat: "sentinel", q: "How do you limit KQL results or get the top rows?", a: "Use take/limit N for an arbitrary sample, or top N by Column to get the highest/lowest by a value; sort/order by orders results." },
+
+  // ---- Deeper coverage ----
+  { cat: "xdr", q: "What is tamper protection in Defender for Endpoint?", a: "Prevents attackers and malicious apps from disabling Microsoft Defender Antivirus or changing its security settings (real-time protection, cloud protection, etc.)." },
+  { cat: "xdr", q: "What is EDR in block mode?", a: "Lets Defender for Endpoint remediate malicious artifacts detected post-breach even when a non-Microsoft antivirus is the primary product." },
+  { cat: "xdr", q: "What does the device group automation level control?", a: "How Automated Investigation and Response (AIR) acts — e.g., 'Full' auto-remediates threats, while semi-automated levels require analyst approval." },
+  { cat: "xdr", q: "What is Microsoft Secure Score (Defender portal)?", a: "A measurement of your Microsoft 365 security posture (identities, devices, apps, data) with prioritized improvement actions. Different from Defender for Cloud's Secure Score for cloud resources." },
+  { cat: "xdr", q: "What is Threat analytics in Defender XDR?", a: "Threat-intelligence reports on active campaigns and actors, showing your exposure, impacted assets, and recommended mitigations." },
+  { cat: "xdr", q: "What is the Action center in Defender XDR?", a: "The central place to review, approve, and track pending and completed remediation actions (automated and manual)." },
+  { cat: "xdr", q: "What can a custom detection rule do when it triggers?", a: "Generate an alert AND take response actions such as isolate device, run AV scan, collect investigation package, or block/quarantine a file. It runs on a frequency from continuous up to every 24 hours." },
+  { cat: "cloud", q: "What does the paid Defender CSPM plan add?", a: "Advanced posture features: attack path analysis, the cloud security explorer, agentless machine scanning, and more — beyond the free foundational CSPM." },
+  { cat: "cloud", q: "What is an exemption in Defender for Cloud?", a: "Excludes a specific resource from a recommendation (with justification) so it doesn't affect Secure Score, without disabling the recommendation for everyone." },
+  { cat: "cloud", q: "What are governance rules in Defender for Cloud?", a: "Assign owners and remediation due dates to recommendations to drive accountability." },
+  { cat: "cloud", q: "What is continuous export in Defender for Cloud?", a: "Streams alerts, recommendations, and secure score continuously to a Log Analytics workspace or Event Hub for retention and integration (e.g., with Sentinel/SIEM)." },
+  { cat: "cloud", q: "Defender for Servers Plan 1 vs Plan 2?", a: "Plan 1 focuses on Defender for Endpoint integration. Plan 2 adds FIM, JIT VM access, OS-level threat detection, regulatory standards, and a data-ingestion benefit." },
+  { cat: "cloud", q: "Which agent does Defender for Cloud use to collect data now?", a: "The Azure Monitor Agent (AMA) on Azure and Azure Arc-enabled servers; the legacy Log Analytics (MMA) agent has been retired." },
+  { cat: "sentinel", q: "Analytics vs Basic vs archive log plans?", a: "Analytics logs = full features (alerts, interactive retention). Basic logs = cheap for high-volume/low-value data with limited querying. Archive/long-term retention = cheap storage queried via search jobs/restore." },
+  { cat: "sentinel", q: "What is a search job in Microsoft Sentinel?", a: "A way to run a KQL search over archived/long-term data that isn't in interactive retention, returning results to a new table." },
+  { cat: "sentinel", q: "What are summary rules in Sentinel?", a: "Rules that periodically aggregate high-volume data into a summarized table to reduce cost and speed up detections/queries." },
+  { cat: "sentinel", q: "What is the Codeless Connector Platform (CCP)?", a: "Lets you build custom Sentinel data connectors declaratively (no code to write or host)." },
+  { cat: "sentinel", q: "What are Sentinel Repositories?", a: "Connect a GitHub or Azure DevOps repo to deploy Sentinel content (analytics rules, workbooks, etc.) as code via CI/CD." },
+  { cat: "sentinel", q: "Event grouping vs alert grouping in an analytics rule?", a: "Event grouping decides whether all query results form one alert or one alert per result row. Alert grouping (incident settings) combines related alerts into a single incident." },
+  { cat: "sentinel", q: "What are incident tasks in Sentinel?", a: "A standardized checklist of steps attached to an incident to guide and track analyst investigation and response." },
+  { cat: "sentinel", q: "Upload Indicators API vs TAXII connector?", a: "Upload Indicators API (platforms) lets a TI platform PUSH STIX indicators into Sentinel; the TAXII connector PULLS indicators from a TAXII server." },
+  { cat: "sentinel", q: "What is a playbook's managed identity used for?", a: "It lets the Logic App authenticate and act (read Sentinel, take Azure actions) with least-privilege RBAC roles instead of stored credentials." },
 ];
 
 /* ---------------------------------------------------------------------
@@ -157,6 +181,21 @@ const PAIRS = [
   { term: "UEBA", def: "User & Entity Behavior Analytics", cat: "sentinel" },
   { term: "Workbook", def: "Interactive visualization dashboard", cat: "sentinel" },
   { term: "KQL", def: "Kusto Query Language", cat: "sentinel" },
+  { term: "Tamper protection", def: "Stops disabling of Defender AV settings", cat: "xdr" },
+  { term: "EDR in block mode", def: "Remediate artifacts behind 3rd-party AV", cat: "xdr" },
+  { term: "Threat analytics", def: "Reports on active campaigns & exposure", cat: "xdr" },
+  { term: "Action center", def: "Track & approve remediation actions", cat: "xdr" },
+  { term: "Microsoft Secure Score", def: "M365 posture score (Defender portal)", cat: "xdr" },
+  { term: "Defender CSPM plan", def: "Attack paths & cloud security explorer", cat: "cloud" },
+  { term: "Governance rules", def: "Owners + due dates for recommendations", cat: "cloud" },
+  { term: "Continuous export", def: "Stream alerts to Log Analytics/Event Hub", cat: "cloud" },
+  { term: "Basic logs", def: "Low-cost plan for high-volume data", cat: "sentinel" },
+  { term: "Search job", def: "Query archived long-term data", cat: "sentinel" },
+  { term: "Summary rules", def: "Aggregate high-volume data on a schedule", cat: "sentinel" },
+  { term: "Incident tasks", def: "Analyst checklist on an incident", cat: "sentinel" },
+  { term: "arg_max()", def: "Latest row per group in KQL", cat: "sentinel" },
+  { term: "dcount()", def: "Distinct count in KQL", cat: "sentinel" },
+  { term: "has vs contains", def: "Term match (fast) vs substring (slow)", cat: "sentinel" },
 ];
 
 /* expose globally.

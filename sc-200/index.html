@@ -182,6 +182,20 @@
         </div>
 
         <div class="topic">
+          <h4>Endpoint hardening & XDR operations</h4>
+          <ul>
+            <li><b>Tamper protection</b> — stop attackers/malware disabling Defender AV settings.</li>
+            <li><b>Controlled folder access</b> (anti-ransomware) · <b>Network protection</b> (block bad domains/IPs) · <b>Web content filtering</b>.</li>
+            <li><b>EDR in block mode</b> — remediate artifacts even behind a third-party AV.</li>
+            <li><b>Automation level</b> (per device group) — Full auto-remediates; semi levels need approval.</li>
+            <li><b>Microsoft Secure Score</b> — M365 posture with improvement actions (vs Defender for Cloud's Secure Score for cloud).</li>
+            <li><b>Threat analytics</b> — campaign/actor reports + your exposure. <b>Action center</b> — approve/track remediations.</li>
+            <li><b>Alert tuning/suppression</b> to cut benign noise. <b>Unified RBAC</b> for cross-workload permissions.</li>
+            <li><b>Submissions</b> (report missed phish/false positives) · <b>Attack simulation training</b>.</li>
+          </ul>
+        </div>
+
+        <div class="topic">
           <h4>XDR incidents, response & advanced hunting</h4>
           <ul>
             <li><b>Incidents</b> — correlated alerts/evidence; assign owners, set status, <b>classify</b> true/false positive.</li>
@@ -232,6 +246,7 @@
             <li><b>File Integrity Monitoring (FIM)</b> — watch critical files/registry/OS for changes.</li>
             <li><b>Workflow automation</b> — trigger a <b>Logic App</b> on alerts/recommendations (ticket, notify, remediate).</li>
           </ul>
+          <div class="key"><b>Posture ops:</b> the paid <b>Defender CSPM</b> plan adds <b>attack path analysis</b>, the <b>cloud security explorer</b>, and <b>agentless scanning</b>. Use <b>exemptions</b> to exclude a resource from a recommendation, <b>governance rules</b> to assign owners/due dates, and <b>continuous export</b> to send alerts to Log Analytics/Event Hub. The <b>Azure Monitor Agent (AMA)</b> replaces the legacy MMA agent.</div>
         </div>
 
         <div class="topic">
@@ -259,6 +274,13 @@
             <li><b>SIEM</b> = collect/detect/analyse; <b>SOAR</b> = orchestrate/automate/respond.</li>
             <li><b>Roles:</b> Sentinel <b>Reader</b> (view), <b>Responder</b> (manage incidents), <b>Contributor</b> (create content), <b>Playbook Operator</b> (run playbooks), <b>Automation Contributor</b> (let Sentinel run playbooks).</li>
             <li><b>Commitment tiers</b> reserve daily ingestion volume at a discount vs pay-as-you-go.</li>
+          </ul>
+          <h5>Log plans, retention & scale</h5>
+          <ul>
+            <li><b>Table plans:</b> <b>Analytics</b> (full features/alerting) · <b>Basic</b> (cheap, high-volume/low-value, limited queries) · <b>Auxiliary</b>.</li>
+            <li><b>Retention:</b> interactive retention for querying + <b>archive/long-term</b> for cheap compliance storage; query archived data with <b>search jobs</b> / restore.</li>
+            <li><b>Summary rules</b> aggregate high-volume data to cut cost. <b>Codeless Connector Platform</b> builds connectors without code.</li>
+            <li><b>Repositories</b> deploy content as code (GitHub/DevOps CI/CD). <b>Azure Lighthouse</b> + <code>workspace()</code> enable cross-workspace/MSSP scenarios.</li>
           </ul>
         </div>
 
