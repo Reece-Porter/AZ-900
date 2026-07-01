@@ -3,17 +3,18 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AZ-900 Study Hub — Mock Tests</title>
-<link rel="stylesheet" href="css/style.css" />
+<title>SC-200 Study Hub — Mock Tests</title>
+<link rel="stylesheet" href="../css/style.css" />
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
     <div class="brand">
-      <div class="logo">AZ</div>
-      <div><h1>AZ-900 Study Hub</h1><span>Azure Fundamentals</span></div>
+      <div class="logo">SC</div>
+      <div><h1>SC-200 Study Hub</h1><span>Security Operations Analyst</span></div>
     </div>
     <nav class="nav">
+      <a href="../index.html" style="opacity:.85"><span class="ico">⇄</span> All courses</a>
       <a href="index.html"><span class="ico">📖</span> Study Guide</a>
       <a href="flashcards.html"><span class="ico">🃏</span> Flashcards</a>
       <a href="mock-tests.html" class="active"><span class="ico">📝</span> Mock Tests</a>
@@ -154,7 +155,7 @@
   if (el("feedbackToggle")) el("feedbackToggle").onchange = e => { instantFeedback = e.target.checked; };
 
   // ---- flagged & missed questions (persisted locally) ----
-  const FLAG_KEY = "az900_flagged", MISS_KEY = "az900_missed";
+  const FLAG_KEY = "sc200_flagged", MISS_KEY = "sc200_missed";
   const loadSet = k => { try { return new Set(JSON.parse(localStorage.getItem(k) || "[]")); } catch (e) { return new Set(); } };
   const saveSet = (k, s) => localStorage.setItem(k, JSON.stringify([...s]));
   const flagged = loadSet(FLAG_KEY), missed = loadSet(MISS_KEY);

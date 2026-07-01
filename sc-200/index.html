@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SC-200 Study Hub — Complete Study Guide</title>
+<link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">SC</div>
+      <div>
+        <h1>SC-200 Study Hub</h1>
+        <span>Security Operations Analyst</span>
+      </div>
+    </div>
+    <nav class="nav">
+      <a href="../index.html" style="opacity:.85"><span class="ico">⇄</span> All courses</a>
+      <a href="index.html" class="active"><span class="ico">📖</span> Study Guide</a>
+      <a href="flashcards.html"><span class="ico">🃏</span> Flashcards</a>
+      <a href="mock-tests.html"><span class="ico">📝</span> Mock Tests</a>
+      <a href="games.html"><span class="ico">🎮</span> Memory Games</a>
+      <a href="progress.html"><span class="ico">📊</span> My Progress</a>
+      <a href="cheatsheet.html"><span class="ico">🧾</span> Cheat Sheet</a>
+    </nav>
+    <div class="nav-section">Exam Domains</div>
+    <nav class="nav">
+      <a href="#domain1"><span class="ico">🛡️</span> Defender XDR</a>
+      <a href="#domain2"><span class="ico">☁️</span> Defender for Cloud</a>
+      <a href="#domain3"><span class="ico">🔭</span> Microsoft Sentinel</a>
+    </nav>
+    <div class="sidebar-foot">
+      Microsoft Certified: Security Operations Analyst Associate.<br />
+      Exam: ~40–60 questions · pass ≥ 700/1000.
+    </div>
+  </aside>
+
+  <!-- Content -->
+  <main class="content">
+    <header class="page-head">
+      <div class="eyebrow">Complete Study Guide</div>
+      <h2>Everything you need to pass the SC-200</h2>
+      <p>This guide covers the SC-200 across the three product areas the exam is built on. Work through each section, then reinforce with the
+         <a href="flashcards.html">Flashcards</a>, test yourself with the <a href="mock-tests.html">Mock Tests</a>, and
+         lock it in with the <a href="games.html">Memory Games</a>. KQL runs through everything — practise it.</p>
+    </header>
+
+    <!-- Exam overview -->
+    <section class="card mb">
+      <h3 style="margin-top:0">Exam at a glance</h3>
+      <div class="grid cols-4 mt">
+        <div class="stat"><div class="num">3</div><div class="lbl">Product areas</div></div>
+        <div class="stat"><div class="num">700</div><div class="lbl">Score to pass (/1000)</div></div>
+        <div class="stat"><div class="num">~100</div><div class="lbl">Minutes</div></div>
+        <div class="stat"><div class="num">40–60</div><div class="lbl">Questions</div></div>
+      </div>
+      <div class="grid cols-3 mt">
+        <div class="card" style="background:var(--panel-2)">
+          <span class="pill blue">Defender XDR · ~35–40%</span>
+          <h4 style="margin:10px 0 4px">Microsoft Defender XDR</h4>
+          <p style="color:var(--muted);margin:0;font-size:14px">Endpoint, Office 365, Identity, Cloud Apps, incidents & advanced hunting.</p>
+        </div>
+        <div class="card" style="background:var(--panel-2)">
+          <span class="pill green">Defender for Cloud · ~15–20%</span>
+          <h4 style="margin:10px 0 4px">Microsoft Defender for Cloud</h4>
+          <p style="color:var(--muted);margin:0;font-size:14px">CSPM, Secure Score, workload protection plans, compliance.</p>
+        </div>
+        <div class="card" style="background:var(--panel-2)">
+          <span class="pill purple">Sentinel · ~40–45%</span>
+          <h4 style="margin:10px 0 4px">Microsoft Sentinel</h4>
+          <p style="color:var(--muted);margin:0;font-size:14px">Connectors, analytics, SOAR, hunting, threat intel, incidents, KQL.</p>
+        </div>
+      </div>
+      <div class="topic" style="margin-top:16px">
+        <div class="key"><b>Official skills grouping:</b> Microsoft groups the exam as <i>Manage a security operations environment</i> (20–25%), <i>Configure protections and detections</i> (15–20%), and <i>Manage incident response</i> (35–40%). The three product areas above map directly onto that content — always confirm against the current Microsoft Learn SC-200 skills outline.</div>
+      </div>
+    </section>
+
+    <!-- ============ READINESS + PLAN ============ -->
+    <section class="grid cols-2 mb" style="align-items:start">
+      <div class="card">
+        <h3 style="margin-top:0">📊 Your exam readiness</h3>
+        <div id="readinessBody">
+          <p style="color:var(--muted)">Take a mock test and your readiness will appear here.</p>
+          <a class="btn primary" href="mock-tests.html">📝 Take a mock test</a>
+        </div>
+        <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
+          <label style="font-size:13.5px;color:var(--muted)">Exam date:
+            <input type="date" id="examDate" style="margin-left:8px;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font:inherit">
+          </label>
+          <div id="countdown" style="margin-top:8px;font-weight:700"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-top:0">🗓️ 7-day study plan</h3>
+        <p style="color:var(--muted);margin:0 0 6px;font-size:13.5px">Tick items as you go — your progress is saved on this device.</p>
+        <div class="progress mb"><span id="planBar"></span></div>
+        <div id="planList"></div>
+      </div>
+    </section>
+
+    <!-- ============ DOMAIN 1 — DEFENDER XDR ============ -->
+    <details class="domain" id="domain1" open>
+      <summary>🛡️ Domain 1 — Microsoft Defender XDR <span class="weight">~35–40%</span></summary>
+      <div class="body">
+
+        <div class="topic">
+          <h4>What is Microsoft Defender XDR?</h4>
+          <p>Microsoft Defender XDR (formerly Microsoft 365 Defender) is a unified pre- and post-breach suite that
+             natively coordinates detection, prevention, investigation, and response across endpoints, identities,
+             email, and applications. It <b>correlates alerts and evidence into incidents</b> and is managed from the
+             <b>Microsoft Defender portal (security.microsoft.com)</b>.</p>
+          <div class="key"><b>Alert vs incident:</b> an <i>alert</i> is one detection; an <i>incident</i> is a correlated group of alerts telling the story of an attack across products.</div>
+          <h5>The workloads</h5>
+          <ul>
+            <li><b>Defender for Endpoint (MDE)</b> — endpoints (EDR).</li>
+            <li><b>Defender for Office 365 (MDO)</b> — email & collaboration.</li>
+            <li><b>Defender for Identity (MDI)</b> — on-premises Active Directory.</li>
+            <li><b>Defender for Cloud Apps (MDA)</b> — SaaS apps (CASB).</li>
+            <li><b>Microsoft Entra ID Protection</b> — cloud identity risk.</li>
+            <li><b>Defender Vulnerability Management</b> — weaknesses & misconfigurations.</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <h4>Defender for Endpoint (MDE)</h4>
+          <p>Endpoint detection & response with next-gen antivirus, attack surface reduction, vulnerability management, automated investigation, and rich response actions.</p>
+          <h5>Response actions on a device</h5>
+          <ul>
+            <li><b>Isolate device</b> — cut network access (keeps Defender connectivity) to stop spread.</li>
+            <li><b>Restrict app execution</b> — only Microsoft-signed apps may run.</li>
+            <li><b>Run antivirus scan</b> · <b>Collect investigation package</b> (forensics) · <b>Live response</b> (remote shell).</li>
+            <li>For files: <b>stop and quarantine</b>.</li>
+          </ul>
+          <h5>Prevention & configuration</h5>
+          <ul>
+            <li><b>Attack Surface Reduction (ASR) rules</b> — block risky behaviours (Office child processes, LSASS credential theft, executable email content). Run in <b>Audit</b> or <b>Block</b> mode.</li>
+            <li><b>Custom indicators (IoCs)</b> — allow/block file hashes, IPs, URLs/domains, certificates.</li>
+            <li><b>Defender Vulnerability Management (TVM)</b> — risk-based weakness prioritisation.</li>
+            <li><b>Onboarding</b> — local script, Group Policy, Intune, Configuration Manager, VDI.</li>
+            <li><b>RBAC + device groups</b> — scope who can see/act on which devices.</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <h4>Defender for Office 365 (MDO)</h4>
+          <ul>
+            <li><b>Safe Attachments</b> — detonate attachments in a sandbox before delivery.</li>
+            <li><b>Safe Links</b> — rewrite and scan URLs at <b>time of click</b>.</li>
+            <li><b>Anti-phishing</b> — spoof & impersonation protection (mailbox intelligence).</li>
+            <li><b>Zero-hour Auto Purge (ZAP)</b> — retroactively remove already-delivered malicious mail.</li>
+            <li><b>Threat Explorer</b> — investigate mail threats & take actions (soft-delete).</li>
+            <li><b>Tenant Allow/Block List</b> — manual allow/block for senders, domains, URLs, files.</li>
+            <li><b>Preset security policies</b> (Standard/Strict) — Microsoft's recommended baselines.</li>
+            <li><b>Attack simulation training</b> — run phishing simulations to train users.</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <h4>Defender for Identity (MDI)</h4>
+          <p>Monitors <b>on-premises Active Directory</b> using sensors installed directly on <b>domain controllers, AD FS, and AD CS</b> servers.</p>
+          <ul>
+            <li>Detects <b>reconnaissance</b> (LDAP/DNS enumeration), <b>lateral movement</b> (Pass-the-Hash, Pass-the-Ticket), and <b>domain dominance</b> (Golden Ticket, DCSync).</li>
+            <li>Uses UEBA and feeds signals into Defender XDR incidents.</li>
+          </ul>
+          <div class="key"><b>Don't confuse:</b> <b>Defender for Identity</b> = on-prem AD threats. <b>Entra ID Protection</b> = cloud identity risk (risky sign-ins/users → risk-based Conditional Access).</div>
+        </div>
+
+        <div class="topic">
+          <h4>Defender for Cloud Apps (MDA)</h4>
+          <p>A <b>Cloud Access Security Broker (CASB)</b> for SaaS visibility and control.</p>
+          <ul>
+            <li><b>Cloud Discovery</b> — analyse proxy/firewall/MDE logs to find <b>Shadow IT</b> and app risk.</li>
+            <li><b>App connectors</b> — API integration for deep activity/file visibility & governance.</li>
+            <li><b>Conditional Access App Control</b> — reverse proxy for real-time <b>session policies</b> (block downloads, read-only).</li>
+            <li><b>Policies</b> — activity, file, and <b>anomaly detection</b> (e.g., impossible travel).</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <h4>XDR incidents, response & advanced hunting</h4>
+          <ul>
+            <li><b>Incidents</b> — correlated alerts/evidence; assign owners, set status, <b>classify</b> true/false positive.</li>
+            <li><b>Automated investigation & response (AIR)</b> — auto-investigate and remediate to cut analyst load.</li>
+            <li><b>Advanced hunting</b> — <b>KQL</b> over a unified schema (DeviceProcessEvents, EmailEvents, IdentityLogonEvents, CloudAppEvents, <b>AlertInfo</b> + <b>AlertEvidence</b>).</li>
+            <li><b>Custom detection rules</b> — turn a hunting query into a scheduled alert with response actions.</li>
+            <li>Stream XDR incidents into <b>Microsoft Sentinel</b> with the Defender XDR connector.</li>
+          </ul>
+        </div>
+
+      </div>
+    </details>
+
+    <!-- ============ DOMAIN 2 — DEFENDER FOR CLOUD ============ -->
+    <details class="domain" id="domain2">
+      <summary>☁️ Domain 2 — Microsoft Defender for Cloud <span class="weight">~15–20%</span></summary>
+      <div class="body">
+
+        <div class="topic">
+          <h4>What is Microsoft Defender for Cloud?</h4>
+          <p>A <b>Cloud-Native Application Protection Platform (CNAPP)</b> combining <b>CSPM</b> (posture) and <b>CWPP</b> (workload protection) across Azure, on-premises, AWS, and GCP.</p>
+        </div>
+
+        <div class="topic">
+          <h4>CSPM & Secure Score</h4>
+          <ul>
+            <li><b>Foundational CSPM</b> is <b>free</b> — continuous assessment producing <b>recommendations</b>.</li>
+            <li><b>Secure Score</b> — a percentage of your posture; remediating recommendations raises it (many offer <b>Quick Fix</b>).</li>
+            <li><b>Microsoft Cloud Security Benchmark (MCSB)</b> — the default initiative driving recommendations & score.</li>
+            <li><b>Asset inventory</b> — all resources with posture, recommendations, and Defender coverage.</li>
+            <li><b>Multicloud</b> — connect AWS/GCP accounts for unified posture.</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <h4>Workload protection plans (CWPP)</h4>
+          <p>Paid <b>Defender plans</b> add threat alerts for specific resource types:</p>
+          <table>
+            <tr><th>Plan</th><th>Protects / provides</th></tr>
+            <tr><td>Defender for Servers</td><td>VMs — MDE integration, <b>JIT VM access</b>, <b>FIM</b>, vulnerability assessment</td></tr>
+            <tr><td>Defender for Storage</td><td>Malware scanning + suspicious access on storage accounts</td></tr>
+            <tr><td>Defender for SQL / Databases</td><td>Threat detection for databases</td></tr>
+            <tr><td>Defender for Containers</td><td>Kubernetes/container hardening & runtime protection</td></tr>
+            <tr><td>Defender for App Service / Key Vault / DNS / Resource Manager / APIs</td><td>Threat detection for those services (e.g., Resource Manager = suspicious control-plane ops)</td></tr>
+          </table>
+          <ul>
+            <li><b>Just-in-Time (JIT) VM access</b> — keep RDP/SSH closed; open on approved, time-limited request.</li>
+            <li><b>File Integrity Monitoring (FIM)</b> — watch critical files/registry/OS for changes.</li>
+            <li><b>Workflow automation</b> — trigger a <b>Logic App</b> on alerts/recommendations (ticket, notify, remediate).</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <h4>Regulatory compliance</h4>
+          <ul>
+            <li><b>Regulatory compliance dashboard</b> — maps your environment to standards (ISO 27001, PCI-DSS, NIST, CIS).</li>
+            <li>Adding standards beyond the default benchmark generally requires an enabled <b>Defender plan</b>.</li>
+            <li>Improve compliance by <b>remediating the recommendations</b> mapped to each control.</li>
+            <li>Send Defender for Cloud alerts to <b>Microsoft Sentinel</b> via its data connector.</li>
+          </ul>
+        </div>
+
+      </div>
+    </details>
+
+    <!-- ============ DOMAIN 3 — MICROSOFT SENTINEL ============ -->
+    <details class="domain" id="domain3">
+      <summary>🔭 Domain 3 — Microsoft Sentinel <span class="weight">~40–45%</span></summary>
+      <div class="body">
+
+        <div class="topic">
+          <h4>Workspace, architecture & roles</h4>
+          <ul>
+            <li>Sentinel is a cloud-native <b>SIEM + SOAR</b> built on a <b>Log Analytics workspace</b>; queried with <b>KQL</b>.</li>
+            <li><b>SIEM</b> = collect/detect/analyse; <b>SOAR</b> = orchestrate/automate/respond.</li>
+            <li><b>Roles:</b> Sentinel <b>Reader</b> (view), <b>Responder</b> (manage incidents), <b>Contributor</b> (create content), <b>Playbook Operator</b> (run playbooks), <b>Automation Contributor</b> (let Sentinel run playbooks).</li>
+            <li><b>Commitment tiers</b> reserve daily ingestion volume at a discount vs pay-as-you-go.</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <h4>Data connectors & ingestion</h4>
+          <ul>
+            <li><b>Data connectors</b> ingest sources — Microsoft first-party (often no extra ingestion cost), <b>CEF/Syslog via the Azure Monitor Agent (AMA)</b> on a Linux forwarder, REST APIs, and codeless connectors.</li>
+            <li><b>Data Collection Rules (DCRs)</b> define what the AMA collects (filter to control cost).</li>
+            <li><b>Content hub</b> — packaged solutions (connector + analytics + workbooks + playbooks) per product.</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <h4>Analytics rules (detections)</h4>
+          <table>
+            <tr><th>Type</th><th>Use</th></tr>
+            <tr><td><b>Scheduled</b></td><td>Run a KQL query on an interval → alerts/incidents</td></tr>
+            <tr><td><b>Near-real-time (NRT)</b></td><td>Runs ~every minute for fastest detection</td></tr>
+            <tr><td><b>Microsoft Security</b></td><td>Create incidents from Microsoft security product alerts</td></tr>
+            <tr><td><b>Fusion</b></td><td>ML multistage attack correlation (high-fidelity incidents)</td></tr>
+            <tr><td><b>Anomaly / Threat Intelligence</b></td><td>Behavioural anomalies · match logs to TI indicators</td></tr>
+          </table>
+          <ul>
+            <li><b>Entity mapping</b> — map query columns to accounts/hosts/IPs for investigation.</li>
+            <li><b>Alert grouping</b> — combine related alerts into one incident to cut noise; tune queries to reduce false positives.</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <h4>Automation (SOAR)</h4>
+          <ul>
+            <li><b>Playbooks</b> — automated workflows built on <b>Azure Logic Apps</b> (block user, isolate device, notify Teams). Use the <b>incident trigger</b> for full context.</li>
+            <li><b>Automation rules</b> — centrally orchestrate incidents: run playbooks, assign owners, change status/severity, tag, suppress.</li>
+            <li>Grant <b>Automation Contributor</b> so automation rules can run a playbook (least privilege).</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <h4>Hunting, workbooks & UEBA</h4>
+          <ul>
+            <li><b>Hunting queries</b> — proactive KQL (mapped to <b>MITRE ATT&CK</b>) for undetected threats; save findings as <b>bookmarks</b> (attach to incidents).</li>
+            <li><b>Livestream</b> — run a hunt continuously for near-real-time matches.</li>
+            <li><b>Notebooks</b> (Jupyter/MSTICPy) — advanced code-driven investigation.</li>
+            <li><b>UEBA</b> — behavioural baselines & anomalies (BehaviorAnalytics table).</li>
+            <li><b>Workbooks</b> — interactive dashboards. <b>Watchlists</b> — imported reference lists for queries.</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <h4>Threat intelligence & incident management</h4>
+          <ul>
+            <li><b>TI connectors</b> — TAXII feeds or the <b>Upload Indicators API / platforms</b> connector → <b>ThreatIntelligenceIndicator</b> table.</li>
+            <li>TI-map <b>analytics rules</b> match your logs against indicators to raise alerts.</li>
+            <li><b>Incidents</b> — triage, assign, and close with an accurate <b>classification</b>; explore scope with the <b>investigation graph</b> and <b>entities</b>.</li>
+          </ul>
+        </div>
+
+        <div class="topic">
+          <h4>KQL essentials</h4>
+          <table>
+            <tr><th>Operator</th><th>Does</th></tr>
+            <tr><td><code>where</code></td><td>Filter rows by a condition</td></tr>
+            <tr><td><code>project</code> / <code>extend</code></td><td>Select/rename columns · add a calculated column</td></tr>
+            <tr><td><code>summarize</code></td><td>Aggregate (count(), dcount()) by groups</td></tr>
+            <tr><td><code>join</code> / <code>union</code></td><td>Merge tables on a key · stack tables together</td></tr>
+            <tr><td><code>ago()</code> / <code>bin()</code></td><td>Relative time · bucket timestamps</td></tr>
+            <tr><td><code>top</code> / <code>take</code> / <code>sort</code></td><td>Highest N by value · arbitrary N · order</td></tr>
+          </table>
+          <div class="key"><b>Example:</b> <code>SigninLogs | where TimeGenerated > ago(1d) | summarize Count = count() by UserPrincipalName | top 10 by Count desc</code></div>
+        </div>
+
+      </div>
+    </details>
+
+    <!-- Exam-day tips -->
+    <section class="card mt">
+      <h3 style="margin-top:0">🎯 Exam-day tips</h3>
+      <ul>
+        <li>Know <b>which product solves which problem</b> — most questions are "which tool/feature?" scenarios.</li>
+        <li>On-prem AD → <b>Defender for Identity</b>; cloud identity risk → <b>Entra ID Protection</b>.</li>
+        <li>"Create incidents from Microsoft alerts" → <b>Microsoft Security</b> rule; "multistage ML" → <b>Fusion</b>; "fastest" → <b>NRT</b>.</li>
+        <li>Automate a response → <b>playbook</b>; orchestrate the incident → <b>automation rule</b>.</li>
+        <li>Be comfortable reading <b>KQL</b> — expect to pick the right operator or query.</li>
+        <li>Watch for <b>NOT</b>, <b>least privilege</b>, and "choose two" multi-response questions.</li>
+      </ul>
+      <div class="btn-row mt">
+        <a class="btn primary" href="flashcards.html">🃏 Review Flashcards</a>
+        <a class="btn" href="mock-tests.html">📝 Take a Mock Test</a>
+        <a class="btn" href="games.html">🎮 Play Memory Games</a>
+      </div>
+    </section>
+
+    <footer class="page-foot">
+      SC-200 Study Hub · Built as a personal study aid. Always confirm details against the official Microsoft Learn SC-200 skills outline.
+    </footer>
+  </main>
+</div>
+
+<script src="js/questions.js"></script>
+<script src="js/questions-formats.js"></script>
+<script src="js/data.js"></script>
+<script src="js/progress.js"></script>
+<script>
+(function () {
+  const el = id => document.getElementById(id);
+
+  /* ---------- Readiness ---------- */
+  const data = AZProgress.load();
+  const topics = AZ.TOPICS;
+  const rows = Object.keys(topics).map(id => {
+    const d = data[id] || { correct: 0, total: 0 };
+    return { id, name: topics[id].name, pct: d.total ? Math.round(d.correct / d.total * 100) : null, total: d.total };
+  });
+  const attempted = rows.filter(r => r.total > 0);
+  if (attempted.length) {
+    const tot = attempted.reduce((s, r) => s + r.total, 0);
+    const overall = Math.round(attempted.reduce((s, r) => s + (r.pct * r.total), 0) / tot);
+    const lv = AZProgress.level(overall);
+    const weakest = attempted.slice().sort((a, b) => a.pct - b.pct).slice(0, 3);
+    let verdict;
+    if (overall >= 85) verdict = "You're exam-ready — keep your weak topics sharp.";
+    else if (overall >= 70) verdict = "You're passing. Push your weak topics higher for a safety margin.";
+    else if (overall >= 50) verdict = "Getting there — focus on the weak topics below, then re-test.";
+    else verdict = "Early days — work the study guide and flashcards, then re-test.";
+    el("readinessBody").innerHTML =
+      `<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
+         <span style="font-size:40px;font-weight:800;color:${lv.color}">${overall}%</span>
+         <span class="pill" style="background:${lv.color}22;color:${lv.color}">${lv.label}</span>
+       </div>
+       <div class="progress mt"><span style="width:${overall}%;background:${lv.color}"></span></div>
+       <p style="margin:12px 0 6px">${verdict}</p>
+       <div style="font-size:13.5px;color:var(--muted)">Focus next: ${weakest.map(w => `${w.name} (${w.pct}%)`).join(" · ")}</div>
+       <div class="btn-row mt"><a class="btn" href="progress.html">📊 Full progress</a><a class="btn" href="mock-tests.html">📝 Practice</a></div>`;
+  }
+
+  /* ---------- Exam-date countdown ---------- */
+  const EXAM_KEY = "sc200_exam_date";
+  const saved = localStorage.getItem(EXAM_KEY);
+  if (saved) el("examDate").value = saved;
+  function renderCountdown() {
+    const v = el("examDate").value;
+    if (!v) { el("countdown").textContent = ""; return; }
+    const days = Math.ceil((new Date(v + "T00:00:00") - new Date(new Date().toDateString())) / 86400000);
+    el("countdown").textContent = days > 1 ? `⏳ ${days} days to go` : days === 1 ? "⏳ 1 day to go — final review!" : days === 0 ? "🎯 Exam is today — good luck!" : "Exam date has passed.";
+    el("countdown").style.color = days <= 2 && days >= 0 ? "var(--amber)" : "var(--text)";
+  }
+  el("examDate").onchange = () => { localStorage.setItem(EXAM_KEY, el("examDate").value); renderCountdown(); };
+  renderCountdown();
+
+  /* ---------- 7-day study plan ---------- */
+  const PLAN = [
+    { d: "Day 1 — Defender for Endpoint", items: ["Read the MDE section in the Study Guide", "Learn response actions + ASR rules + custom indicators", "By-Topic drill: Defender for Endpoint"] },
+    { d: "Day 2 — Office 365 & Identity", items: ["Safe Links/Attachments, ZAP, preset policies", "MDI sensors & attacks vs Entra ID Protection", "By-Topic drill: Office 365 + Identity"] },
+    { d: "Day 3 — Cloud Apps & XDR incidents", items: ["Cloud Discovery, session policies (CASB)", "Incidents, AIR, and advanced hunting tables", "By-Topic drill: Cloud Apps + XDR Incidents"] },
+    { d: "Day 4 — Defender for Cloud", items: ["CSPM, Secure Score, MCSB, multicloud", "Defender plans, JIT, FIM, compliance dashboard", "By-Topic drill: all Defender for Cloud topics"] },
+    { d: "Day 5 — Sentinel core", items: ["Workspace, roles, connectors & DCRs", "Analytics rule types + entity mapping", "By-Topic drill: Workspace + Connectors + Analytics"] },
+    { d: "Day 6 — Sentinel SOAR, hunting & TI", items: ["Playbooks vs automation rules", "Hunting, bookmarks, UEBA, threat intelligence", "Full timed mock with feedback OFF"] },
+    { d: "Day 7 — KQL + final review", items: ["Drill KQL operators and read queries", "Read the printable cheat sheet", "Review my mistakes, then one more full mock"] },
+  ];
+  const PLAN_KEY = "sc200_plan";
+  let done = {};
+  try { done = JSON.parse(localStorage.getItem(PLAN_KEY) || "{}"); } catch (e) { done = {}; }
+  const list = el("planList");
+  let total = 0;
+  PLAN.forEach((day, di) => {
+    const det = document.createElement("details");
+    if (di === 0) det.open = true;
+    det.style.cssText = "border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--panel-2)";
+    const sum = document.createElement("summary");
+    sum.style.cssText = "cursor:pointer;padding:10px 14px;font-weight:700;font-size:14.5px";
+    sum.textContent = day.d;
+    det.appendChild(sum);
+    const box = document.createElement("div");
+    box.style.cssText = "padding:4px 14px 12px";
+    day.items.forEach((item, ii) => {
+      total++;
+      const key = `${di}-${ii}`;
+      const row = document.createElement("label");
+      row.style.cssText = "display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer;font-size:14px";
+      const cb = document.createElement("input");
+      cb.type = "checkbox"; cb.checked = !!done[key];
+      cb.style.cssText = "margin-top:3px;width:17px;height:17px;accent-color:var(--primary)";
+      cb.onchange = () => { done[key] = cb.checked; localStorage.setItem(PLAN_KEY, JSON.stringify(done)); txt.style.opacity = cb.checked ? .5 : 1; txt.style.textDecoration = cb.checked ? "line-through" : "none"; updateBar(); };
+      const txt = document.createElement("span");
+      txt.textContent = item;
+      if (cb.checked) { txt.style.opacity = .5; txt.style.textDecoration = "line-through"; }
+      row.appendChild(cb); row.appendChild(txt);
+      box.appendChild(row);
+    });
+    det.appendChild(box);
+    list.appendChild(det);
+  });
+  function updateBar() {
+    const c = Object.values(done).filter(Boolean).length;
+    el("planBar").style.width = (c / total * 100) + "%";
+  }
+  updateBar();
+})();
+</script>
+</body>
+</html>

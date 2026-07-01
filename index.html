@@ -3,501 +3,56 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AZ-900 Study Hub — Complete Study Guide</title>
+<title>Certification Study Hub</title>
 <link rel="stylesheet" href="css/style.css" />
+<style>
+  .landing { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; text-align: center; }
+  .landing .logo-big { width: 68px; height: 68px; border-radius: 18px; background: linear-gradient(135deg, var(--primary), var(--accent)); display: grid; place-items: center; font-weight: 800; font-size: 26px; color: #fff; box-shadow: var(--shadow); margin-bottom: 18px; }
+  .landing h1 { font-size: clamp(28px, 5vw, 44px); margin: 0 0 8px; }
+  .landing .sub { color: var(--muted); max-width: 60ch; margin: 0 0 40px; }
+  .courses { display: grid; grid-template-columns: repeat(2, minmax(240px, 320px)); gap: 22px; width: 100%; max-width: 720px; }
+  @media (max-width: 640px) { .courses { grid-template-columns: 1fr; } }
+  .course-btn {
+    display: block; text-align: left; text-decoration: none; color: var(--text);
+    background: linear-gradient(135deg, var(--panel), var(--panel-2));
+    border: 1px solid var(--border); border-radius: 18px; padding: 26px; transition: .18s; position: relative; overflow: hidden;
+  }
+  .course-btn:hover { transform: translateY(-4px); border-color: var(--primary); text-decoration: none; box-shadow: var(--shadow); }
+  .course-btn .code { font-size: 13px; font-weight: 800; letter-spacing: .1em; }
+  .course-btn.az .code { color: var(--primary-2); }
+  .course-btn.sc .code { color: #c4b5ff; }
+  .course-btn h2 { margin: 6px 0 10px; font-size: 22px; }
+  .course-btn p { color: var(--muted); margin: 0 0 16px; font-size: 14px; min-height: 40px; }
+  .course-btn .go { font-weight: 700; color: var(--primary-2); }
+  .badge-done { position: absolute; top: 16px; right: 16px; }
+  .footer-note { margin-top: 40px; color: var(--muted); font-size: 13px; }
+</style>
 </head>
 <body>
-<div class="app">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="logo">AZ</div>
-      <div>
-        <h1>AZ-900 Study Hub</h1>
-        <span>Azure Fundamentals</span>
-      </div>
-    </div>
-    <nav class="nav">
-      <a href="index.html" class="active"><span class="ico">📖</span> Study Guide</a>
-      <a href="flashcards.html"><span class="ico">🃏</span> Flashcards</a>
-      <a href="mock-tests.html"><span class="ico">📝</span> Mock Tests</a>
-      <a href="games.html"><span class="ico">🎮</span> Memory Games</a>
-      <a href="progress.html"><span class="ico">📊</span> My Progress</a>
-      <a href="cheatsheet.html"><span class="ico">🧾</span> Cheat Sheet</a>
-    </nav>
-    <div class="nav-section">Exam Domains</div>
-    <nav class="nav">
-      <a href="#domain1"><span class="ico">☁️</span> Cloud Concepts</a>
-      <a href="#domain2"><span class="ico">🏗️</span> Architecture & Services</a>
-      <a href="#domain3"><span class="ico">🛡️</span> Management & Governance</a>
-    </nav>
-    <div class="sidebar-foot">
-      Microsoft Certified: Azure Fundamentals.<br />
-      Exam: ~40–60 questions · 45 min · pass ≥ 700/1000.
-    </div>
-  </aside>
+<div class="landing">
+  <div class="logo-big">✦</div>
+  <h1>Certification Study Hub</h1>
+  <p class="sub">Pick a certification to open its complete study guide, flashcards, mock tests, memory games, progress tracker, and printable cheat sheet.</p>
 
-  <!-- Content -->
-  <main class="content">
-    <header class="page-head">
-      <div class="eyebrow">Complete Study Guide</div>
-      <h2>Everything you need to pass the AZ-900</h2>
-      <p>This single guide covers all three exam domains in depth. Work through each section, then reinforce with the
-         <a href="flashcards.html">Flashcards</a>, test yourself with the <a href="mock-tests.html">Mock Tests</a>, and
-         lock it in with the <a href="games.html">Memory Games</a>.</p>
-    </header>
+  <div class="courses">
+    <a class="course-btn az" href="az-900/index.html">
+      <span class="badge-done pill green">✓ Passed</span>
+      <div class="code">AZ-900</div>
+      <h2>Azure Fundamentals</h2>
+      <p>Cloud concepts, Azure architecture &amp; services, and management &amp; governance.</p>
+      <div class="go">Open course →</div>
+    </a>
 
-    <!-- Exam overview -->
-    <section class="card mb">
-      <h3 style="margin-top:0">Exam at a glance</h3>
-      <div class="grid cols-4 mt">
-        <div class="stat"><div class="num">3</div><div class="lbl">Knowledge domains</div></div>
-        <div class="stat"><div class="num">700</div><div class="lbl">Score to pass (/1000)</div></div>
-        <div class="stat"><div class="num">~45</div><div class="lbl">Minutes</div></div>
-        <div class="stat"><div class="num">40–60</div><div class="lbl">Questions</div></div>
-      </div>
-      <div class="grid cols-3 mt">
-        <div class="card" style="background:var(--panel-2)">
-          <span class="pill blue">Domain 1 · 25–30%</span>
-          <h4 style="margin:10px 0 4px">Cloud Concepts</h4>
-          <p style="color:var(--muted);margin:0;font-size:14px">Cloud models, benefits, shared responsibility, IaaS/PaaS/SaaS.</p>
-        </div>
-        <div class="card" style="background:var(--panel-2)">
-          <span class="pill purple">Domain 2 · 35–40%</span>
-          <h4 style="margin:10px 0 4px">Architecture & Services</h4>
-          <p style="color:var(--muted);margin:0;font-size:14px">Regions, compute, networking, storage, identity.</p>
-        </div>
-        <div class="card" style="background:var(--panel-2)">
-          <span class="pill green">Domain 3 · 30–35%</span>
-          <h4 style="margin:10px 0 4px">Management & Governance</h4>
-          <p style="color:var(--muted);margin:0;font-size:14px">Cost, governance, deployment tools, monitoring.</p>
-        </div>
-      </div>
-    </section>
+    <a class="course-btn sc" href="sc-200/index.html">
+      <span class="badge-done pill purple">In progress</span>
+      <div class="code">SC-200</div>
+      <h2>Security Operations Analyst</h2>
+      <p>Microsoft Defender XDR, Microsoft Defender for Cloud, and Microsoft Sentinel.</p>
+      <div class="go">Open course →</div>
+    </a>
+  </div>
 
-    <!-- ============ READINESS + PLAN ============ -->
-    <section class="grid cols-2 mb" style="align-items:start">
-      <div class="card">
-        <h3 style="margin-top:0">📊 Your exam readiness</h3>
-        <div id="readinessBody">
-          <p style="color:var(--muted)">Take a mock test and your readiness will appear here.</p>
-          <a class="btn primary" href="mock-tests.html">📝 Take a mock test</a>
-        </div>
-        <div style="margin-top:16px;border-top:1px solid var(--border);padding-top:14px">
-          <label style="font-size:13.5px;color:var(--muted)">Exam date:
-            <input type="date" id="examDate" style="margin-left:8px;background:var(--panel-2);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:6px 10px;font:inherit">
-          </label>
-          <div id="countdown" style="margin-top:8px;font-weight:700"></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3 style="margin-top:0">🗓️ 7-day study plan</h3>
-        <p style="color:var(--muted);margin:0 0 6px;font-size:13.5px">Tick items as you go — your progress is saved on this device.</p>
-        <div class="progress mb"><span id="planBar"></span></div>
-        <div id="planList"></div>
-      </div>
-    </section>
-
-    <!-- ============ DOMAIN 1 ============ -->
-    <details class="domain" id="domain1" open>
-      <summary>☁️ Domain 1 — Describe Cloud Concepts <span class="weight">25–30%</span></summary>
-      <div class="body">
-
-        <div class="topic">
-          <h4>What is cloud computing?</h4>
-          <p>Cloud computing is the delivery of computing services — including servers, storage, databases,
-             networking, software, analytics, and intelligence — over the internet (“the cloud”). Instead of buying
-             and maintaining physical hardware, you rent capacity from a provider like Microsoft Azure and pay for
-             what you use.</p>
-          <div class="key"><b>Key idea:</b> The cloud turns IT from something you <i>build and own</i> into something you <i>consume as a service</i>.</div>
-        </div>
-
-        <div class="topic">
-          <h4>The consumption-based model (CapEx vs OpEx)</h4>
-          <p>Traditional on-premises IT is a <b>capital expense (CapEx)</b>: you spend a large amount upfront on
-             hardware that depreciates over time. The cloud uses an <b>operational expense (OpEx)</b>, pay-as-you-go
-             model: you pay only for resources you use, when you use them.</p>
-          <table>
-            <tr><th>CapEx (on-premises)</th><th>OpEx (cloud)</th></tr>
-            <tr><td>Large upfront purchase of hardware</td><td>No upfront cost — pay per use</td></tr>
-            <tr><td>You maintain & depreciate assets</td><td>Provider maintains infrastructure</td></tr>
-            <tr><td>Pay whether used or not</td><td>Stop paying when you stop using</td></tr>
-          </table>
-          <div class="key"><b>Remember:</b> Consumption-based pricing means <b>no upfront cost</b>, you only pay for what you use, and you can stop at any time.</div>
-        </div>
-
-        <div class="topic">
-          <h4>Benefits of cloud computing</h4>
-          <ul>
-            <li><b>High availability:</b> Services stay up with minimal downtime, backed by SLAs (e.g., 99.9%).</li>
-            <li><b>Scalability:</b> Add resources to meet demand — <b>vertically</b> (scale up/down = more power per resource) or <b>horizontally</b> (scale out/in = more instances).</li>
-            <li><b>Elasticity:</b> Automatically add/remove resources as demand changes, so you only pay for what's needed.</li>
-            <li><b>Reliability:</b> The ability to recover from failures, thanks to a decentralized, globally distributed design.</li>
-            <li><b>Predictability:</b> Cost predictability (forecast spend) and performance predictability (autoscaling, load balancing).</li>
-            <li><b>Security:</b> Cloud providers offer a large set of policies, technologies, and controls; you choose the level you need.</li>
-            <li><b>Governance & manageability:</b> Standards and templates keep deployments compliant; manage via portal, CLI, APIs, and automatic scaling.</li>
-          </ul>
-        </div>
-
-        <div class="topic">
-          <h4>The shared responsibility model</h4>
-          <p>Security and management responsibilities are <b>shared</b> between you and the cloud provider. Who is
-             responsible for what depends on the service type (IaaS/PaaS/SaaS).</p>
-          <table>
-            <tr><th>Responsibility</th><th>On-prem</th><th>IaaS</th><th>PaaS</th><th>SaaS</th></tr>
-            <tr><td>Data & information</td><td>You</td><td>You</td><td>You</td><td>You</td></tr>
-            <tr><td>Accounts & identities</td><td>You</td><td>You</td><td>You</td><td>You</td></tr>
-            <tr><td>Devices</td><td>You</td><td>You</td><td>You</td><td>You</td></tr>
-            <tr><td>OS</td><td>You</td><td>You</td><td>Provider</td><td>Provider</td></tr>
-            <tr><td>Network controls</td><td>You</td><td>Shared</td><td>Provider</td><td>Provider</td></tr>
-            <tr><td>Applications</td><td>You</td><td>You</td><td>Shared</td><td>Provider</td></tr>
-            <tr><td>Physical hosts/network/datacenter</td><td>You</td><td>Provider</td><td>Provider</td><td>Provider</td></tr>
-          </table>
-          <div class="key"><b>Always yours:</b> data, devices, and accounts/identities. <b>Always the provider's:</b> physical hosts, physical network, physical datacenter.</div>
-        </div>
-
-        <div class="topic">
-          <h4>Cloud deployment models</h4>
-          <table>
-            <tr><th>Model</th><th>Description</th><th>Best for</th></tr>
-            <tr><td><b>Public</b></td><td>Multi-tenant services delivered over the internet by a third party. No CapEx.</td><td>Most general workloads, scalability, low cost</td></tr>
-            <tr><td><b>Private</b></td><td>Resources used exclusively by one organization (on-prem or hosted). More control, requires CapEx.</td><td>Strict compliance, full control</td></tr>
-            <tr><td><b>Hybrid</b></td><td>Combines public + private; data/apps move between them.</td><td>Legacy systems, gradual migration, burst capacity</td></tr>
-            <tr><td><b>Multi-cloud</b></td><td>Using more than one public cloud provider at once.</td><td>Avoiding lock-in, best-of-breed services</td></tr>
-          </table>
-          <p><b>Azure Arc</b> helps manage hybrid and multi-cloud environments from Azure. <b>Azure VMware Solution</b> lets you run VMware workloads natively in Azure.</p>
-        </div>
-
-        <div class="topic">
-          <h4>Cloud service types — IaaS, PaaS, SaaS</h4>
-          <table>
-            <tr><th>Type</th><th>You manage</th><th>Example</th><th>Control</th></tr>
-            <tr><td><b>IaaS</b> (Infrastructure)</td><td>OS, runtime, apps, data</td><td>Azure Virtual Machines</td><td>Most</td></tr>
-            <tr><td><b>PaaS</b> (Platform)</td><td>Apps & data only</td><td>Azure App Service, Azure SQL DB</td><td>Medium</td></tr>
-            <tr><td><b>SaaS</b> (Software)</td><td>Data, devices, accounts only</td><td>Microsoft 365, Outlook</td><td>Least</td></tr>
-          </table>
-          <div class="key"><b>Mnemonic:</b> IaaS = “I manage the most.” SaaS = “Someone else manages, I just use it.” PaaS sits in between (great for developers).</div>
-        </div>
-
-      </div>
-    </details>
-
-    <!-- ============ DOMAIN 2 ============ -->
-    <details class="domain" id="domain2">
-      <summary>🏗️ Domain 2 — Describe Azure Architecture & Services <span class="weight">35–40%</span></summary>
-      <div class="body">
-
-        <div class="topic">
-          <h4>Core architectural components</h4>
-          <h5>Regions, geographies & datacenters</h5>
-          <ul>
-            <li><b>Datacenter:</b> A physical facility with servers, networking, power, and cooling.</li>
-            <li><b>Region:</b> A set of datacenters deployed within a latency-defined perimeter, connected by a low-latency network. You deploy resources into a region.</li>
-            <li><b>Geography:</b> An area of the world containing at least one region; respects data-residency and compliance boundaries.</li>
-            <li><b>Region pairs:</b> Two regions in the same geography ≥ 300 miles apart. Updates roll out one region at a time; one region per pair is prioritized in recovery — used for disaster recovery.</li>
-            <li><b>Sovereign regions:</b> Isolated instances for compliance (e.g., Azure Government, Azure operated by 21Vianet in China).</li>
-          </ul>
-          <h5>Availability Zones</h5>
-          <p>Physically separate datacenters <i>within</i> a region, each with independent power, cooling, and networking
-             (minimum 3 in an enabled region). Use them to protect against datacenter-level failures. Pair zones with
-             <b>zone-redundant services</b> for high availability.</p>
-
-          <h5>Management hierarchy</h5>
-          <p>From top to bottom: <b>Management groups → Subscriptions → Resource groups → Resources</b>.</p>
-          <ul>
-            <li><b>Resource:</b> A manageable item (VM, database, storage account, VNet).</li>
-            <li><b>Resource group:</b> A logical container for related resources. A resource lives in exactly one group; deleting the group deletes everything inside.</li>
-            <li><b>Subscription:</b> A unit of billing and access management. Acts as a boundary for limits/quotas.</li>
-            <li><b>Management group:</b> Containers above subscriptions for applying policy and access across many subscriptions at once.</li>
-          </ul>
-          <h5>Azure Resource Manager (ARM)</h5>
-          <p>ARM is the deployment and management layer. Every request (portal, CLI, PowerShell, SDK, REST) goes through
-             ARM, which authenticates and authorizes it. ARM enables <b>templates (IaC)</b>, <b>RBAC</b>, <b>tags</b>, and <b>locks</b>.</p>
-        </div>
-
-        <div class="topic">
-          <h4>Compute services</h4>
-          <table>
-            <tr><th>Service</th><th>What it is</th><th>Use when</th></tr>
-            <tr><td><b>Virtual Machines</b></td><td>IaaS virtual servers (Windows/Linux); full OS control</td><td>You need full control or lift-and-shift</td></tr>
-            <tr><td><b>VM Scale Sets</b></td><td>Identical, load-balanced, autoscaling VMs</td><td>Large-scale, elastic VM workloads</td></tr>
-            <tr><td><b>Availability Sets</b></td><td>Spread VMs across fault & update domains in a datacenter</td><td>Protect against hardware failure & maintenance</td></tr>
-            <tr><td><b>App Service</b></td><td>PaaS for web apps, APIs, mobile backends</td><td>Host apps without managing servers</td></tr>
-            <tr><td><b>Container Instances (ACI)</b></td><td>Run a single container, fast & simple</td><td>Quick, isolated container tasks</td></tr>
-            <tr><td><b>Kubernetes Service (AKS)</b></td><td>Managed Kubernetes orchestration</td><td>Run/scale many containers</td></tr>
-            <tr><td><b>Azure Functions</b></td><td>Serverless, event-driven, pay-per-execution</td><td>Short event-triggered tasks</td></tr>
-            <tr><td><b>Virtual Desktop</b></td><td>Cloud-hosted Windows desktops & apps</td><td>Remote/secure desktops anywhere</td></tr>
-          </table>
-          <h5>Containers vs VMs</h5>
-          <p>VMs virtualize <i>hardware</i> and each runs its own full OS (heavier, slower to start). Containers
-             virtualize the <i>OS</i>, are lightweight, start in seconds, and share the host kernel — ideal for
-             microservices and portability.</p>
-        </div>
-
-        <div class="topic">
-          <h4>Networking services</h4>
-          <ul>
-            <li><b>Virtual Network (VNet):</b> An isolated private network in Azure; resources communicate securely with each other, the internet, and on-premises. Divided into <b>subnets</b>.</li>
-            <li><b>VNet peering:</b> Connects two VNets privately over the Microsoft backbone.</li>
-            <li><b>VPN Gateway:</b> Encrypted connection over the public internet — site-to-site (network↔network) or point-to-site (client↔network).</li>
-            <li><b>ExpressRoute:</b> Private, dedicated connection that does <b>not</b> traverse the public internet — higher speed, reliability, security.</li>
-            <li><b>Azure DNS:</b> Hosting service for DNS domains using Azure infrastructure for name resolution.</li>
-          </ul>
-          <div class="key"><b>VPN vs ExpressRoute:</b> VPN = encrypted <i>over</i> the internet (cheaper). ExpressRoute = private link that <i>bypasses</i> the internet (faster, more secure, more expensive).</div>
-        </div>
-
-        <div class="topic">
-          <h4>Storage services</h4>
-          <h5>Storage data services</h5>
-          <table>
-            <tr><th>Service</th><th>Stores</th></tr>
-            <tr><td><b>Blob storage</b></td><td>Unstructured object data (files, images, video, backups)</td></tr>
-            <tr><td><b>File storage</b></td><td>Managed SMB/NFS file shares accessible from cloud & on-prem</td></tr>
-            <tr><td><b>Queue storage</b></td><td>Messages for app component communication</td></tr>
-            <tr><td><b>Table storage</b></td><td>NoSQL key-value structured data</td></tr>
-            <tr><td><b>Disk storage</b></td><td>Block-level volumes for Azure VMs</td></tr>
-          </table>
-          <h5>Blob access tiers (cost optimization)</h5>
-          <table>
-            <tr><th>Tier</th><th>Access pattern</th><th>Cost</th></tr>
-            <tr><td>Hot</td><td>Frequent access</td><td>Highest storage, lowest access cost</td></tr>
-            <tr><td>Cool</td><td>Infrequent (≥ 30 days)</td><td>Lower storage, higher access cost</td></tr>
-            <tr><td>Cold</td><td>Rare (≥ 90 days)</td><td>Even lower storage cost</td></tr>
-            <tr><td>Archive</td><td>Rarely accessed, offline</td><td>Lowest cost; needs rehydration to read</td></tr>
-          </table>
-          <h5>Redundancy options</h5>
-          <table>
-            <tr><th>Option</th><th>Protects against</th></tr>
-            <tr><td><b>LRS</b> (Locally Redundant)</td><td>Drive/server failure — 3 copies in one datacenter</td></tr>
-            <tr><td><b>ZRS</b> (Zone-Redundant)</td><td>Datacenter (zone) failure — across 3 zones</td></tr>
-            <tr><td><b>GRS</b> (Geo-Redundant)</td><td>Regional outage — copies to a secondary region</td></tr>
-            <tr><td><b>GZRS</b> (Geo-Zone-Redundant)</td><td>Both zone + regional failure (highest durability)</td></tr>
-          </table>
-          <h5>Migration & file movement tools</h5>
-          <ul>
-            <li><b>Azure Migrate:</b> Central hub to discover, assess, and migrate servers, databases, and apps.</li>
-            <li><b>Azure Data Box:</b> Physical appliance for offline transfer of large datasets (~80 TB).</li>
-            <li><b>AzCopy:</b> Command-line tool to copy blobs/files to/from storage.</li>
-            <li><b>Azure Storage Explorer:</b> GUI app to manage storage data.</li>
-            <li><b>Azure File Sync:</b> Sync Azure Files with a local Windows Server cache.</li>
-          </ul>
-        </div>
-
-        <div class="topic">
-          <h4>Identity, access & security</h4>
-          <ul>
-            <li><b>Microsoft Entra ID</b> (formerly Azure AD): Cloud identity & access management — handles sign-in and access to apps/resources.</li>
-            <li><b>Authentication (AuthN):</b> Proving who you are. <b>Authorization (AuthZ):</b> Determining what you can access. AuthN first.</li>
-            <li><b>Single Sign-On (SSO):</b> Sign in once, access many apps.</li>
-            <li><b>Multi-Factor Authentication (MFA):</b> Two+ factors — something you know / have / are.</li>
-            <li><b>Conditional Access:</b> Grant/block/step-up (MFA) access based on signals (user, location, device, risk).</li>
-            <li><b>External identities:</b> <b>B2B</b> (partners/guests use their own credentials) and <b>B2C</b> (customer/consumer identities).</li>
-          </ul>
-          <h5>Entra ID vs Active Directory Domain Services (AD DS)</h5>
-          <table>
-            <tr><th>Microsoft Entra ID</th><th>AD DS (on-prem)</th></tr>
-            <tr><td>Cloud-based</td><td>On-premises</td></tr>
-            <tr><td>Modern protocols (SAML, OAuth, OpenID)</td><td>Kerberos, LDAP</td></tr>
-            <tr><td>Manages web/cloud apps & users</td><td>Manages domain-joined devices & GPOs</td></tr>
-            <tr><td>Flat structure</td><td>Organizational units & forests</td></tr>
-          </table>
-        </div>
-
-      </div>
-    </details>
-
-    <!-- ============ DOMAIN 3 ============ -->
-    <details class="domain" id="domain3">
-      <summary>🛡️ Domain 3 — Describe Azure Management & Governance <span class="weight">30–35%</span></summary>
-      <div class="body">
-
-        <div class="topic">
-          <h4>Cost management</h4>
-          <h5>Factors that affect cost</h5>
-          <ul>
-            <li><b>Resource type</b> and its settings/size.</li>
-            <li><b>Services consumed</b> (each has its own pricing).</li>
-            <li><b>Location/region</b> — prices vary by region.</li>
-            <li><b>Data transfer</b> — <i>ingress</i> (inbound) is usually free; <i>egress</i> (outbound) is charged.</li>
-            <li><b>Subscription type</b> (e.g., free trial vs pay-as-you-go) and Azure Marketplace purchases.</li>
-          </ul>
-          <h5>Cost tools</h5>
-          <table>
-            <tr><th>Tool</th><th>Purpose</th></tr>
-            <tr><td><b>Pricing Calculator</b></td><td>Estimate cost of services <i>before</i> deploying</td></tr>
-            <tr><td><b>TCO Calculator</b></td><td>Compare on-premises vs Azure costs (savings)</td></tr>
-            <tr><td><b>Microsoft Cost Management</b></td><td>Monitor, analyze & optimize actual spend; budgets & alerts</td></tr>
-            <tr><td><b>Tags</b></td><td>Group resources to track and report costs</td></tr>
-          </table>
-          <div class="key"><b>Easy mix-up:</b> Pricing Calculator = <i>before</i> deployment (estimate). Cost Management = <i>after</i> deployment (track actual). TCO = on-prem vs cloud comparison.</div>
-        </div>
-
-        <div class="topic">
-          <h4>Governance & compliance</h4>
-          <ul>
-            <li><b>Azure Policy:</b> Create/assign rules so resources stay compliant (e.g., allowed regions, required tags, allowed VM sizes). Can audit or enforce.</li>
-            <li><b>Role-Based Access Control (RBAC):</b> Assign roles (permissions) scoped to management group, subscription, resource group, or resource. Least-privilege, allow-based.</li>
-            <li><b>Resource locks:</b> Prevent accidental changes — <b>CanNotDelete</b> (can read/modify, not delete) and <b>ReadOnly</b> (read only).</li>
-            <li><b>Microsoft Purview:</b> Unified data governance & compliance across on-prem, multi-cloud, and SaaS data.</li>
-            <li><b>Service Trust Portal:</b> Microsoft's published audit reports, certifications, and compliance resources.</li>
-          </ul>
-          <div class="key"><b>Policy vs RBAC:</b> RBAC controls <i>who can do what</i> (access). Azure Policy controls <i>what resources can exist / how they're configured</i> (compliance). Locks protect against accidental delete/change.</div>
-        </div>
-
-        <div class="topic">
-          <h4>Tools for managing & deploying</h4>
-          <ul>
-            <li><b>Azure portal:</b> Web GUI to build, manage, and monitor resources.</li>
-            <li><b>Azure Cloud Shell:</b> Browser-based Bash or PowerShell — no local install.</li>
-            <li><b>Azure CLI:</b> Cross-platform <code>az</code> commands.</li>
-            <li><b>Azure PowerShell:</b> Cmdlets (Verb-Noun) for scripting management.</li>
-            <li><b>Azure Arc:</b> Manage on-prem, multi-cloud, and edge resources from Azure.</li>
-            <li><b>ARM templates / Bicep:</b> Infrastructure as code — declarative, repeatable deployments. Bicep is a cleaner language that compiles to ARM JSON.</li>
-          </ul>
-        </div>
-
-        <div class="topic">
-          <h4>Monitoring tools</h4>
-          <table>
-            <tr><th>Tool</th><th>Purpose</th></tr>
-            <tr><td><b>Azure Advisor</b></td><td>Free, personalized best-practice recommendations across Cost, Security, Reliability, Operational Excellence, Performance</td></tr>
-            <tr><td><b>Azure Service Health</b></td><td>Personalized status of Azure services/regions you use — outages, planned maintenance, advisories</td></tr>
-            <tr><td><b>Azure Monitor</b></td><td>Collect, analyze & act on telemetry (metrics + logs) from Azure & on-prem</td></tr>
-            <tr><td><b>Log Analytics</b></td><td>Write & run KQL queries against collected log data (part of Monitor)</td></tr>
-            <tr><td><b>Application Insights</b></td><td>Monitor live web app performance, availability & usage (part of Monitor)</td></tr>
-            <tr><td><b>Alerts</b></td><td>Notify or trigger actions when data crosses a threshold</td></tr>
-          </table>
-          <div class="key"><b>Don't confuse:</b> Advisor = recommendations to improve. Service Health = is Azure itself healthy? Monitor = telemetry from <i>your</i> resources.</div>
-        </div>
-
-      </div>
-    </details>
-
-    <!-- Exam-day tips -->
-    <section class="card mt">
-      <h3 style="margin-top:0">🎯 Exam-day tips</h3>
-      <ul>
-        <li>Read every question fully — watch for words like <i>NOT</i>, <i>always</i>, and <i>least/most</i>.</li>
-        <li>Eliminate obviously wrong answers first; many questions hinge on one keyword.</li>
-        <li>There's no penalty for wrong answers — never leave a question blank.</li>
-        <li>“Yes/No” case questions can't be revisited once you move on — answer carefully.</li>
-        <li>Manage time: ~45 minutes for 40–60 questions ≈ under a minute each. Flag and return.</li>
-      </ul>
-      <div class="btn-row mt">
-        <a class="btn primary" href="flashcards.html">🃏 Review Flashcards</a>
-        <a class="btn" href="mock-tests.html">📝 Take a Mock Test</a>
-        <a class="btn" href="games.html">🎮 Play Memory Games</a>
-      </div>
-    </section>
-
-    <footer class="page-foot">
-      AZ-900 Study Hub · Built as a personal study aid. Always confirm details against the official Microsoft Learn AZ-900 skills outline.
-    </footer>
-  </main>
+  <div class="footer-note">Your progress is saved separately for each course, on this device.</div>
 </div>
-
-<script src="js/questions.js"></script>
-<script src="js/questions-formats.js"></script>
-<script src="js/data.js"></script>
-<script src="js/progress.js"></script>
-<script>
-(function () {
-  const el = id => document.getElementById(id);
-
-  /* ---------- Readiness ---------- */
-  const data = AZProgress.load();
-  const topics = AZ.TOPICS;
-  const rows = Object.keys(topics).map(id => {
-    const d = data[id] || { correct: 0, total: 0 };
-    return { id, name: topics[id].name, pct: d.total ? Math.round(d.correct / d.total * 100) : null, total: d.total };
-  });
-  const attempted = rows.filter(r => r.total > 0);
-  if (attempted.length) {
-    const tot = attempted.reduce((s, r) => s + r.total, 0);
-    const overall = Math.round(attempted.reduce((s, r) => s + (r.pct * r.total), 0) / tot);
-    const lv = AZProgress.level(overall);
-    const weakest = attempted.slice().sort((a, b) => a.pct - b.pct).slice(0, 3);
-    let verdict;
-    if (overall >= 85) verdict = "You're exam-ready — keep your weak topics sharp.";
-    else if (overall >= 70) verdict = "You're passing. Push your weak topics higher for a safety margin.";
-    else if (overall >= 50) verdict = "Getting there — focus on the weak topics below, then re-test.";
-    else verdict = "Early days — work the study guide and flashcards, then re-test.";
-    el("readinessBody").innerHTML =
-      `<div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap">
-         <span style="font-size:40px;font-weight:800;color:${lv.color}">${overall}%</span>
-         <span class="pill" style="background:${lv.color}22;color:${lv.color}">${lv.label}</span>
-       </div>
-       <div class="progress mt"><span style="width:${overall}%;background:${lv.color}"></span></div>
-       <p style="margin:12px 0 6px">${verdict}</p>
-       <div style="font-size:13.5px;color:var(--muted)">Focus next: ${weakest.map(w => `${w.name} (${w.pct}%)`).join(" · ")}</div>
-       <div class="btn-row mt"><a class="btn" href="progress.html">📊 Full progress</a><a class="btn" href="mock-tests.html">📝 Practice</a></div>`;
-  }
-
-  /* ---------- Exam-date countdown ---------- */
-  const EXAM_KEY = "az900_exam_date";
-  const saved = localStorage.getItem(EXAM_KEY);
-  if (saved) el("examDate").value = saved;
-  function renderCountdown() {
-    const v = el("examDate").value;
-    if (!v) { el("countdown").textContent = ""; return; }
-    const days = Math.ceil((new Date(v + "T00:00:00") - new Date(new Date().toDateString())) / 86400000);
-    el("countdown").textContent = days > 1 ? `⏳ ${days} days to go` : days === 1 ? "⏳ 1 day to go — final review!" : days === 0 ? "🎯 Exam is today — good luck!" : "Exam date has passed.";
-    el("countdown").style.color = days <= 2 && days >= 0 ? "var(--amber)" : "var(--text)";
-  }
-  el("examDate").onchange = () => { localStorage.setItem(EXAM_KEY, el("examDate").value); renderCountdown(); };
-  renderCountdown();
-
-  /* ---------- 7-day study plan ---------- */
-  const PLAN = [
-    { d: "Day 1 — Cloud Concepts", items: ["Read Domain 1 in the Study Guide", "Run the Cloud Concepts flashcards", "By-Topic drill: Cloud Models + Service Types"] },
-    { d: "Day 2 — Architecture & Compute", items: ["Read Core Architecture + Compute", "Flashcards: Architecture & Services", "By-Topic drill: Core Architecture + Compute"] },
-    { d: "Day 3 — Storage & Networking", items: ["Read Storage + Networking", "Memorise LRS/ZRS/GRS/GZRS + access tiers", "By-Topic drill: Storage + Networking"] },
-    { d: "Day 4 — Identity & Governance", items: ["Read Identity + Governance & Compliance", "Learn RBAC vs Azure Policy vs Locks", "By-Topic drill: Identity + Governance"] },
-    { d: "Day 5 — Cost, Tools & Monitoring", items: ["Read Domain 3 (cost, tools, monitoring)", "Learn Advisor vs Service Health vs Monitor", "By-Topic drill: Cost + Tools + Monitoring"] },
-    { d: "Day 6 — Full mock + review", items: ["Full timed mock with feedback OFF", "Review my mistakes, then Retry incorrect", "Watch a free AZ-900 'study cram' video"] },
-    { d: "Day 7 — Final review", items: ["Read the printable cheat sheet", "Flashcards of your weakest topics", "One more full mock — then rest!"] },
-  ];
-  const PLAN_KEY = "az900_plan";
-  let done = {};
-  try { done = JSON.parse(localStorage.getItem(PLAN_KEY) || "{}"); } catch (e) { done = {}; }
-  const list = el("planList");
-  let total = 0, checked = 0;
-  PLAN.forEach((day, di) => {
-    const det = document.createElement("details");
-    if (di === 0) det.open = true;
-    det.style.cssText = "border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:var(--panel-2)";
-    const sum = document.createElement("summary");
-    sum.style.cssText = "cursor:pointer;padding:10px 14px;font-weight:700;font-size:14.5px";
-    sum.textContent = day.d;
-    det.appendChild(sum);
-    const box = document.createElement("div");
-    box.style.cssText = "padding:4px 14px 12px";
-    day.items.forEach((item, ii) => {
-      total++;
-      const key = `${di}-${ii}`;
-      if (done[key]) checked++;
-      const row = document.createElement("label");
-      row.style.cssText = "display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer;font-size:14px";
-      const cb = document.createElement("input");
-      cb.type = "checkbox"; cb.checked = !!done[key];
-      cb.style.cssText = "margin-top:3px;width:17px;height:17px;accent-color:var(--primary)";
-      cb.onchange = () => { done[key] = cb.checked; localStorage.setItem(PLAN_KEY, JSON.stringify(done)); txt.style.opacity = cb.checked ? .5 : 1; txt.style.textDecoration = cb.checked ? "line-through" : "none"; updateBar(); };
-      const txt = document.createElement("span");
-      txt.textContent = item;
-      if (cb.checked) { txt.style.opacity = .5; txt.style.textDecoration = "line-through"; }
-      row.appendChild(cb); row.appendChild(txt);
-      box.appendChild(row);
-    });
-    det.appendChild(box);
-    list.appendChild(det);
-  });
-  function updateBar() {
-    const c = Object.values(done).filter(Boolean).length;
-    el("planBar").style.width = (c / total * 100) + "%";
-  }
-  updateBar();
-})();
-</script>
 </body>
 </html>

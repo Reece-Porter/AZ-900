@@ -3,17 +3,18 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>AZ-900 Study Hub — Flashcards</title>
-<link rel="stylesheet" href="css/style.css" />
+<title>SC-200 Study Hub — Flashcards</title>
+<link rel="stylesheet" href="../css/style.css" />
 </head>
 <body>
 <div class="app">
   <aside class="sidebar">
     <div class="brand">
-      <div class="logo">AZ</div>
-      <div><h1>AZ-900 Study Hub</h1><span>Azure Fundamentals</span></div>
+      <div class="logo">SC</div>
+      <div><h1>SC-200 Study Hub</h1><span>Security Operations Analyst</span></div>
     </div>
     <nav class="nav">
+      <a href="../index.html" style="opacity:.85"><span class="ico">⇄</span> All courses</a>
       <a href="index.html"><span class="ico">📖</span> Study Guide</a>
       <a href="flashcards.html" class="active"><span class="ico">🃏</span> Flashcards</a>
       <a href="mock-tests.html"><span class="ico">📝</span> Mock Tests</a>
@@ -78,11 +79,11 @@
   let activeCat = "all";
   let deck = [];
   let idx = 0;
-  const mastered = new Set(JSON.parse(localStorage.getItem("az900_fc_mastered") || "[]"));
+  const mastered = new Set(JSON.parse(localStorage.getItem("sc200_fc_mastered") || "[]"));
 
   const el = id => document.getElementById(id);
 
-  function saveMastered() { localStorage.setItem("az900_fc_mastered", JSON.stringify([...mastered])); }
+  function saveMastered() { localStorage.setItem("sc200_fc_mastered", JSON.stringify([...mastered])); }
 
   function buildFilters() {
     const wrap = el("catFilter");

@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SC-200 Study Hub — My Progress</title>
+<link rel="stylesheet" href="../css/style.css" />
+<style>
+  .topic-row { display: grid; grid-template-columns: 1fr 200px 150px; gap: 16px; align-items: center;
+    padding: 14px 16px; border: 1px solid var(--border); border-radius: 12px; background: var(--panel-2); margin-bottom: 10px; }
+  .topic-row .t-name { font-weight: 700; }
+  .topic-row .t-name small { display: block; color: var(--muted); font-weight: 500; font-size: 12px; }
+  .topic-row .t-meta { text-align: right; font-size: 13.5px; }
+  .lvl { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .empty-state { text-align: center; padding: 40px 20px; }
+  @media (max-width: 720px) { .topic-row { grid-template-columns: 1fr; gap: 8px; } .topic-row .t-meta { text-align: left; } }
+  .domain-summary { display:grid; grid-template-columns: 1fr 1fr 1fr; gap:16px; }
+  @media (max-width: 760px){ .domain-summary{ grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">SC</div>
+      <div><h1>SC-200 Study Hub</h1><span>Security Operations Analyst</span></div>
+    </div>
+    <nav class="nav">
+      <a href="../index.html" style="opacity:.85"><span class="ico">⇄</span> All courses</a>
+      <a href="index.html"><span class="ico">📖</span> Study Guide</a>
+      <a href="flashcards.html"><span class="ico">🃏</span> Flashcards</a>
+      <a href="mock-tests.html"><span class="ico">📝</span> Mock Tests</a>
+      <a href="games.html"><span class="ico">🎮</span> Memory Games</a>
+      <a href="progress.html" class="active"><span class="ico">📊</span> My Progress</a>
+      <a href="cheatsheet.html"><span class="ico">🧾</span> Cheat Sheet</a>
+    </nav>
+    <div class="sidebar-foot">Your scores are saved on this device only. Take mock tests to build up your topic stats.</div>
+  </aside>
+
+  <main class="content">
+    <header class="page-head">
+      <div class="eyebrow">Track Your Readiness</div>
+      <h2>My Progress</h2>
+      <p>This page shows how you’re doing in every SC-200 topic, based on the mock-test questions you’ve answered. Everything is saved locally in this browser, so it’s here whenever you come back.</p>
+    </header>
+
+    <!-- empty -->
+    <section id="empty" class="card empty-state hidden">
+      <div style="font-size:46px">📊</div>
+      <h3>No progress yet</h3>
+      <p style="color:var(--muted)">Take a mock test and your per-topic scores will appear here automatically.</p>
+      <a class="btn primary" href="mock-tests.html">📝 Take your first mock test</a>
+    </section>
+
+    <!-- data -->
+    <section id="data" class="hidden">
+      <!-- overall -->
+      <div class="grid cols-3 mb">
+        <div class="card stat"><div class="num" id="ovAcc">0%</div><div class="lbl">Overall accuracy</div></div>
+        <div class="card stat"><div class="num" id="ovAnswered">0</div><div class="lbl">Questions answered</div></div>
+        <div class="card stat"><div class="num" id="ovTopics">0/0</div><div class="lbl">Topics practiced</div></div>
+      </div>
+
+      <div class="card mb">
+        <h3 style="margin-top:0">Readiness verdict</h3>
+        <div id="verdict"></div>
+      </div>
+
+      <!-- strengths / focus -->
+      <div class="grid cols-2 mb">
+        <div class="card">
+          <h4 style="margin-top:0">💪 Your strengths</h4>
+          <div id="strengths"></div>
+        </div>
+        <div class="card">
+          <h4 style="margin-top:0">🎯 Focus next</h4>
+          <div id="weaknesses"></div>
+        </div>
+      </div>
+
+      <!-- by domain -->
+      <div class="card mb">
+        <h3 style="margin-top:0">By domain</h3>
+        <div class="domain-summary" id="domainSummary"></div>
+      </div>
+
+      <!-- by topic -->
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <h3 style="margin:0">Every topic</h3>
+          <button class="btn ghost" id="resetBtn">↺ Reset all progress</button>
+        </div>
+        <p style="color:var(--muted)">Sorted weakest first, so what needs work is at the top.</p>
+        <div id="topicList"></div>
+      </div>
+
+      <div class="btn-row center mt" style="justify-content:center">
+        <a class="btn primary" href="mock-tests.html">📝 Practice more</a>
+        <a class="btn" href="flashcards.html">🃏 Review flashcards</a>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="js/questions.js"></script>
+<script src="js/data.js"></script>
+<script src="js/progress.js"></script>
+<script>
+(function () {
+  const el = id => document.getElementById(id);
+  const cats = AZ.CATEGORIES, topics = AZ.TOPICS;
+  const data = AZProgress.load();
+
+  // Build a row per defined topic (whether attempted or not)
+  const rows = Object.keys(topics).map(id => {
+    const d = data[id] || { correct: 0, total: 0 };
+    const pct = d.total ? Math.round(d.correct / d.total * 100) : null;
+    return { id, name: topics[id].name, cat: topics[id].cat, correct: d.correct, total: d.total, pct };
+  });
+
+  const attempted = rows.filter(r => r.total > 0);
+  const totalAnswered = attempted.reduce((s, r) => s + r.total, 0);
+  const totalCorrect = attempted.reduce((s, r) => s + r.correct, 0);
+
+  if (!totalAnswered) {
+    el("empty").classList.remove("hidden");
+    return;
+  }
+  el("data").classList.remove("hidden");
+
+  const overallPct = Math.round(totalCorrect / totalAnswered * 100);
+  el("ovAcc").textContent = overallPct + "%";
+  el("ovAnswered").textContent = totalAnswered;
+  el("ovTopics").textContent = attempted.length + "/" + rows.length;
+
+  // verdict
+  const v = AZProgress.level(overallPct);
+  let msg;
+  if (overallPct >= 85) msg = "You're in great shape — you're consistently above the pass mark. Keep your weak topics sharp and you're ready to book the exam.";
+  else if (overallPct >= 70) msg = "You're passing! You're over the 700/1000 threshold. Tighten up the topics marked 'Needs work' or 'Weak' below to build a safety margin.";
+  else if (overallPct >= 50) msg = "Getting there. You're below the ~70% pass mark — focus on the weakest topics listed below, then re-test.";
+  else msg = "Early days. Work through the Study Guide for your weak areas, drill the flashcards, then come back and re-test.";
+  el("verdict").innerHTML =
+    `<span class="lvl" style="background:${v.color}22;color:${v.color}">${v.label} · ${overallPct}%</span>
+     <p style="margin:10px 0 0;color:var(--text)">${msg}</p>`;
+
+  // strengths & weaknesses (only attempted)
+  const sorted = attempted.slice().sort((a, b) => b.pct - a.pct);
+  const renderList = (arr, emptyTxt) => arr.length
+    ? arr.map(r => {
+        const lv = AZProgress.level(r.pct);
+        return `<div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)">
+          <span>${r.name}</span>
+          <span style="color:${lv.color};font-weight:700">${r.pct}%</span></div>`;
+      }).join("")
+    : `<p style="color:var(--muted)">${emptyTxt}</p>`;
+  el("strengths").innerHTML = renderList(sorted.slice(0, 4), "Answer more questions to see your strengths.");
+  el("weaknesses").innerHTML = renderList(sorted.slice().reverse().slice(0, 4), "Nothing weak — nice!");
+
+  // by domain
+  const dom = {};
+  attempted.forEach(r => {
+    dom[r.cat] = dom[r.cat] || { c: 0, t: 0 };
+    dom[r.cat].c += r.correct; dom[r.cat].t += r.total;
+  });
+  el("domainSummary").innerHTML = Object.keys(cats).map(k => {
+    const d = dom[k];
+    if (!d) return `<div class="card" style="background:var(--panel-2)">
+      <div style="font-weight:700">${cats[k].name}</div>
+      <p style="color:var(--muted);margin:6px 0 0;font-size:13px">Not practiced yet</p></div>`;
+    const p = Math.round(d.c / d.t * 100);
+    const lv = AZProgress.level(p);
+    return `<div class="card" style="background:var(--panel-2)">
+      <div style="font-weight:700">${cats[k].name}</div>
+      <div style="font-size:26px;font-weight:800;color:${lv.color};margin:4px 0">${p}%</div>
+      <div class="progress"><span style="width:${p}%;background:${lv.color}"></span></div>
+      <p style="color:var(--muted);margin:8px 0 0;font-size:13px">${d.c}/${d.t} correct · ${lv.label}</p>
+    </div>`;
+  }).join("");
+
+  // every topic — weakest first, then untested
+  const ordered = rows.slice().sort((a, b) => {
+    if (a.pct === null && b.pct === null) return 0;
+    if (a.pct === null) return 1;   // untested last
+    if (b.pct === null) return -1;
+    return a.pct - b.pct;           // weakest first
+  });
+  el("topicList").innerHTML = ordered.map(r => {
+    if (r.pct === null) {
+      return `<div class="topic-row">
+        <div class="t-name">${r.name}<small>${cats[r.cat].name}</small></div>
+        <div class="progress"><span style="width:0"></span></div>
+        <div class="t-meta"><span class="lvl" style="background:#ffffff14;color:var(--muted)">Not started</span></div>
+      </div>`;
+    }
+    const lv = AZProgress.level(r.pct);
+    return `<div class="topic-row">
+      <div class="t-name">${r.name}<small>${cats[r.cat].name}</small></div>
+      <div class="progress"><span style="width:${r.pct}%;background:${lv.color}"></span></div>
+      <div class="t-meta">${r.correct}/${r.total} · ${r.pct}%
+        <span class="lvl" style="background:${lv.color}22;color:${lv.color};margin-left:6px">${lv.label}</span></div>
+    </div>`;
+  }).join("");
+
+  // reset
+  el("resetBtn").onclick = () => {
+    if (confirm("Reset ALL saved topic progress on this device? This cannot be undone.")) {
+      AZProgress.reset();
+      location.reload();
+    }
+  };
+})();
+</script>
+</body>
+</html>

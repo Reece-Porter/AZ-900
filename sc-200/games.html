@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SC-200 Study Hub — Memory Games</title>
+<link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">SC</div>
+      <div><h1>SC-200 Study Hub</h1><span>Security Operations Analyst</span></div>
+    </div>
+    <nav class="nav">
+      <a href="../index.html" style="opacity:.85"><span class="ico">⇄</span> All courses</a>
+      <a href="index.html"><span class="ico">📖</span> Study Guide</a>
+      <a href="flashcards.html"><span class="ico">🃏</span> Flashcards</a>
+      <a href="mock-tests.html"><span class="ico">📝</span> Mock Tests</a>
+      <a href="games.html" class="active"><span class="ico">🎮</span> Memory Games</a>
+      <a href="progress.html"><span class="ico">📊</span> My Progress</a>
+      <a href="cheatsheet.html"><span class="ico">🧾</span> Cheat Sheet</a>
+    </nav>
+    <div class="sidebar-foot">Games use key SC-200 term/definition pairs. Great for spaced repetition and quick warm-ups.</div>
+  </aside>
+
+  <main class="content">
+    <header class="page-head">
+      <div class="eyebrow">Learn by Playing</div>
+      <h2>Memory Games</h2>
+      <p>Three ways to drill the terminology that the exam loves. Switch games anytime — each one reshuffles fresh pairs.</p>
+    </header>
+
+    <div class="game-tabs">
+      <button class="game-tab active" data-game="match">🔗 Match Up</button>
+      <button class="game-tab" data-game="memory">🧠 Memory Flip</button>
+      <button class="game-tab" data-game="speed">⚡ Beat the Clock</button>
+    </div>
+
+    <div class="cat-filter" id="catFilter"></div>
+
+    <!-- MATCH UP -->
+    <section id="game-match" class="card">
+      <div class="game-stats">
+        <div>Matched <b id="m-matched">0</b></div>
+        <div>Attempts <b id="m-attempts">0</b></div>
+        <div>Accuracy <b id="m-acc">100%</b></div>
+      </div>
+      <p style="color:var(--muted);margin-top:0">Click a term on the left, then its matching definition on the right.</p>
+      <div class="tdm">
+        <div class="tdm-col"><h4>Terms</h4><div id="m-terms"></div></div>
+        <div class="tdm-col"><h4>Definitions</h4><div id="m-defs"></div></div>
+      </div>
+      <div class="btn-row mt"><button class="btn primary" id="m-new">🔀 New Round</button></div>
+      <div id="m-win" class="explain"></div>
+    </section>
+
+    <!-- MEMORY FLIP -->
+    <section id="game-memory" class="card hidden">
+      <div class="game-stats">
+        <div>Pairs found <b id="f-found">0</b></div>
+        <div>Moves <b id="f-moves">0</b></div>
+        <div>Time <b id="f-time">00:00</b></div>
+      </div>
+      <p style="color:var(--muted);margin-top:0">Flip two tiles to find a matching term &amp; definition. Find all pairs.</p>
+      <div class="match-grid" id="f-grid"></div>
+      <div class="btn-row mt"><button class="btn primary" id="f-new">🔀 New Round</button></div>
+      <div id="f-win" class="explain"></div>
+    </section>
+
+    <!-- BEAT THE CLOCK -->
+    <section id="game-speed" class="card hidden">
+      <div id="s-intro" class="center">
+        <h4>⚡ Beat the Clock</h4>
+        <p style="color:var(--muted)">You have <b>60 seconds</b>. Read each definition and pick the correct term. How many can you nail?</p>
+        <button class="btn primary" id="s-start">Start</button>
+      </div>
+      <div id="s-play" class="hidden">
+        <div class="game-stats">
+          <div>Score <b id="s-score">0</b></div>
+          <div>Streak <b id="s-streak">0</b></div>
+          <div>Time <b id="s-time">60</b></div>
+        </div>
+        <div class="progress mb"><span id="s-bar" style="width:100%"></span></div>
+        <div class="q-card">
+          <div class="q-text" id="s-def"></div>
+          <div class="options" id="s-opts"></div>
+        </div>
+      </div>
+      <div id="s-over" class="hidden center">
+        <div class="score" id="s-final" style="font-size:54px;font-weight:800;color:var(--primary-2)">0</div>
+        <div style="font-size:18px;font-weight:700" id="s-msg"></div>
+        <p style="color:var(--muted)" id="s-detail"></p>
+        <button class="btn primary" id="s-again">Play Again</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="js/questions.js"></script>
+<script src="js/data.js"></script>
+<script>
+(function () {
+  const el = id => document.getElementById(id);
+  const cats = AZ.CATEGORIES;
+  let activeCat = "all";
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const pool = () => AZ.PAIRS.filter(p => activeCat === "all" || p.cat === activeCat);
+
+  /* ---- category filter ---- */
+  const cf = el("catFilter");
+  function buildFilters() {
+    cf.innerHTML = "";
+    const make = (key, label) => {
+      const b = document.createElement("button");
+      b.className = "chip" + (activeCat === key ? " active" : "");
+      b.textContent = label;
+      b.onclick = () => { activeCat = key; buildFilters(); restartCurrent(); };
+      return b;
+    };
+    cf.appendChild(make("all", `All (${AZ.PAIRS.length})`));
+    Object.keys(cats).forEach(k => cf.appendChild(make(k, `${cats[k].name} (${AZ.PAIRS.filter(p=>p.cat===k).length})`)));
+  }
+
+  /* ---- tab switching ---- */
+  let activeGame = "match";
+  document.querySelectorAll(".game-tab").forEach(t => {
+    t.onclick = () => {
+      document.querySelectorAll(".game-tab").forEach(x => x.classList.remove("active"));
+      t.classList.add("active");
+      activeGame = t.dataset.game;
+      ["match","memory","speed"].forEach(g => el("game-" + g).classList.toggle("hidden", g !== activeGame));
+      restartCurrent();
+    };
+  });
+  function restartCurrent() {
+    if (activeGame === "match") initMatch();
+    else if (activeGame === "memory") initMemory();
+    else { speedStop(); el("s-intro").classList.remove("hidden"); el("s-play").classList.add("hidden"); el("s-over").classList.add("hidden"); }
+  }
+
+  /* ============ GAME 1: MATCH UP ============ */
+  let mSel = null, mMatched = 0, mAttempts = 0, mTotal = 0;
+  function initMatch() {
+    const data = shuffle(pool()).slice(0, 6);
+    mTotal = data.length; mMatched = 0; mAttempts = 0; mSel = null;
+    el("m-win").classList.remove("show");
+    updateMatchStats();
+    const terms = el("m-terms"), defs = el("m-defs");
+    terms.innerHTML = ""; defs.innerHTML = "";
+    data.forEach(p => {
+      const t = document.createElement("div");
+      t.className = "tdm-item"; t.textContent = p.term; t.dataset.key = p.term;
+      t.onclick = () => selectTerm(t, p.term);
+      terms.appendChild(t);
+    });
+    shuffle(data).forEach(p => {
+      const d = document.createElement("div");
+      d.className = "tdm-item"; d.textContent = p.def; d.dataset.key = p.term;
+      d.onclick = () => selectDef(d, p.term);
+      defs.appendChild(d);
+    });
+  }
+  function selectTerm(node, key) {
+    if (node.classList.contains("matched")) return;
+    [...el("m-terms").children].forEach(c => c.classList.remove("selected"));
+    node.classList.add("selected");
+    mSel = { node, key };
+  }
+  function selectDef(node, key) {
+    if (!mSel || node.classList.contains("matched")) return;
+    mAttempts++;
+    if (mSel.key === key) {
+      mSel.node.classList.add("matched"); mSel.node.classList.remove("selected");
+      node.classList.add("matched");
+      mMatched++;
+      mSel = null;
+      if (mMatched === mTotal) {
+        const acc = Math.round(mMatched / mAttempts * 100);
+        el("m-win").innerHTML = `<b style="color:var(--green)">🎉 All matched!</b> ${mAttempts} attempts · ${acc}% accuracy. Click “New Round” for fresh terms.`;
+        el("m-win").classList.add("show");
+      }
+    } else {
+      node.classList.add("wrong");
+      setTimeout(() => node.classList.remove("wrong"), 350);
+    }
+    updateMatchStats();
+  }
+  function updateMatchStats() {
+    el("m-matched").textContent = `${mMatched}/${mTotal}`;
+    el("m-attempts").textContent = mAttempts;
+    el("m-acc").textContent = (mAttempts ? Math.round(mMatched / mAttempts * 100) : 100) + "%";
+  }
+  el("m-new").onclick = initMatch;
+
+  /* ============ GAME 2: MEMORY FLIP ============ */
+  let fFirst = null, fLock = false, fFound = 0, fMoves = 0, fPairs = 0, fTimer = null, fSecs = 0;
+  function initMemory() {
+    clearInterval(fTimer); fSecs = 0; fFound = 0; fMoves = 0; fFirst = null; fLock = false;
+    el("f-time").textContent = "00:00";
+    el("f-win").classList.remove("show");
+    const data = shuffle(pool()).slice(0, 6);
+    fPairs = data.length;
+    const cards = [];
+    data.forEach((p, i) => {
+      cards.push({ pair: i, text: p.term, type: "term" });
+      cards.push({ pair: i, text: p.def, type: "def" });
+    });
+    const grid = el("f-grid"); grid.innerHTML = "";
+    shuffle(cards).forEach(c => {
+      const t = document.createElement("div");
+      t.className = "tile";
+      t.innerHTML = `<span class="face-down">?</span>`;
+      t.dataset.pair = c.pair;
+      t._text = c.text;
+      t.onclick = () => flipTile(t);
+      grid.appendChild(t);
+    });
+    updateMemStats();
+    fTimer = setInterval(() => { fSecs++; el("f-time").textContent = fmt(fSecs); }, 1000);
+  }
+  const fmt = s => String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0");
+  function flipTile(t) {
+    if (fLock || t.classList.contains("flipped") || t.classList.contains("matched")) return;
+    t.classList.add("flipped"); t.innerHTML = `<span>${t._text}</span>`;
+    if (!fFirst) { fFirst = t; return; }
+    fMoves++; updateMemStats();
+    if (fFirst.dataset.pair === t.dataset.pair && fFirst !== t) {
+      fFirst.classList.add("matched"); t.classList.add("matched");
+      fFirst = null; fFound++;
+      updateMemStats();
+      if (fFound === fPairs) {
+        clearInterval(fTimer);
+        el("f-win").innerHTML = `<b style="color:var(--green)">🎉 Cleared in ${fmt(fSecs)}!</b> ${fMoves} moves. Nicely done.`;
+        el("f-win").classList.add("show");
+      }
+    } else {
+      fLock = true;
+      const a = fFirst, b = t; fFirst = null;
+      setTimeout(() => {
+        [a, b].forEach(x => { x.classList.remove("flipped"); x.innerHTML = `<span class="face-down">?</span>`; });
+        fLock = false;
+      }, 900);
+    }
+  }
+  function updateMemStats() {
+    el("f-found").textContent = `${fFound}/${fPairs}`;
+    el("f-moves").textContent = fMoves;
+  }
+  el("f-new").onclick = initMemory;
+
+  /* ============ GAME 3: BEAT THE CLOCK ============ */
+  let sScore = 0, sStreak = 0, sTime = 60, sTimer = null, sCurrent = null;
+  function speedStop() { clearInterval(sTimer); }
+  el("s-start").onclick = startSpeed;
+  el("s-again").onclick = startSpeed;
+  function startSpeed() {
+    sScore = 0; sStreak = 0; sTime = 60;
+    el("s-intro").classList.add("hidden"); el("s-over").classList.add("hidden");
+    el("s-play").classList.remove("hidden");
+    el("s-score").textContent = 0; el("s-streak").textContent = 0; el("s-time").textContent = 60;
+    el("s-bar").style.width = "100%";
+    nextSpeed();
+    clearInterval(sTimer);
+    sTimer = setInterval(() => {
+      sTime--; el("s-time").textContent = sTime;
+      el("s-bar").style.width = (sTime / 60 * 100) + "%";
+      if (sTime <= 0) endSpeed();
+    }, 1000);
+  }
+  function nextSpeed() {
+    const p = pool();
+    const correct = p[Math.floor(Math.random() * p.length)];
+    const distractors = shuffle(p.filter(x => x.term !== correct.term)).slice(0, 3);
+    const opts = shuffle([correct, ...distractors]);
+    sCurrent = correct.term;
+    el("s-def").textContent = correct.def;
+    const box = el("s-opts"); box.innerHTML = "";
+    opts.forEach(o => {
+      const d = document.createElement("div");
+      d.className = "opt"; d.innerHTML = `<span class="mark">★</span><span>${o.term}</span>`;
+      d.onclick = () => answerSpeed(o.term, d, correct.term);
+      box.appendChild(d);
+    });
+  }
+  function answerSpeed(pick, node, correct) {
+    if (sTime <= 0) return;
+    [...el("s-opts").children].forEach(c => c.style.pointerEvents = "none");
+    if (pick === correct) {
+      node.classList.add("correct");
+      sStreak++; sScore += 10 + Math.min(sStreak, 5) * 2; // streak bonus
+    } else {
+      node.classList.add("wrong");
+      [...el("s-opts").children].forEach(c => { if (c.textContent.includes(correct)) c.classList.add("correct"); });
+      sStreak = 0;
+    }
+    el("s-score").textContent = sScore;
+    el("s-streak").textContent = sStreak;
+    setTimeout(nextSpeed, 450);
+  }
+  function endSpeed() {
+    clearInterval(sTimer);
+    el("s-play").classList.add("hidden");
+    el("s-over").classList.remove("hidden");
+    el("s-final").textContent = sScore;
+    let msg = "Keep practicing!";
+    if (sScore >= 200) msg = "🏆 Azure master!";
+    else if (sScore >= 120) msg = "🔥 Great recall!";
+    else if (sScore >= 60) msg = "👍 Solid effort!";
+    el("s-msg").textContent = msg;
+    el("s-detail").textContent = "Score combines correct answers and streak bonuses. Play again to beat it!";
+  }
+
+  /* init */
+  buildFilters();
+  initMatch();
+})();
+</script>
+</body>
+</html>

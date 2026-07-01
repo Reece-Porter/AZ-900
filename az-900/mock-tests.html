@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AZ-900 Study Hub — Mock Tests</title>
+<link rel="stylesheet" href="../css/style.css" />
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">AZ</div>
+      <div><h1>AZ-900 Study Hub</h1><span>Azure Fundamentals</span></div>
+    </div>
+    <nav class="nav">
+      <a href="../index.html" style="opacity:.85"><span class="ico">⇄</span> All courses</a>
+      <a href="index.html"><span class="ico">📖</span> Study Guide</a>
+      <a href="flashcards.html"><span class="ico">🃏</span> Flashcards</a>
+      <a href="mock-tests.html" class="active"><span class="ico">📝</span> Mock Tests</a>
+      <a href="games.html"><span class="ico">🎮</span> Memory Games</a>
+      <a href="progress.html"><span class="ico">📊</span> My Progress</a>
+      <a href="cheatsheet.html"><span class="ico">🧾</span> Cheat Sheet</a>
+    </nav>
+    <div class="sidebar-foot">Pass mark is 700/1000 (~70%). Aim for 85%+ consistently before booking the real exam.</div>
+  </aside>
+
+  <main class="content">
+    <header class="page-head">
+      <div class="eyebrow">Exam Simulation</div>
+      <h2>Mock Tests</h2>
+      <p>Practice under exam-like conditions. Take a full exam, learn with instant feedback, or focus on specific parts of the curriculum. You get a full breakdown with explanations and per-domain scoring at the end.</p>
+    </header>
+
+    <!-- SETUP -->
+    <section id="setup">
+      <div class="grid cols-3">
+        <div class="card mode" data-mode="exam" style="cursor:pointer">
+          <span class="pill purple">Recommended</span>
+          <h4 style="margin:10px 0 4px">Full Exam</h4>
+          <p style="color:var(--muted);margin:0;font-size:14px">All questions, shuffled, timed. Results shown at the end — just like the real thing.</p>
+        </div>
+        <div class="card mode" data-mode="practice" style="cursor:pointer">
+          <span class="pill blue">Learn</span>
+          <h4 style="margin:10px 0 4px">Practice Mode</h4>
+          <p style="color:var(--muted);margin:0;font-size:14px">A relaxed, untimed run through all questions at your own pace.</p>
+        </div>
+        <div class="card mode" data-mode="topic" style="cursor:pointer">
+          <span class="pill green">Focus</span>
+          <h4 style="margin:10px 0 4px">By Topic</h4>
+          <p style="color:var(--muted);margin:0;font-size:14px">Pick any part of the curriculum — a whole domain or specific topics — to target weak areas.</p>
+        </div>
+      </div>
+
+      <div class="card mt" id="topicPick" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+          <h4 style="margin:0">Choose what to study</h4>
+          <div class="btn-row">
+            <button class="btn ghost" id="selectAllTopics">Select all</button>
+            <button class="btn ghost" id="clearTopics">Clear</button>
+          </div>
+        </div>
+        <p style="color:var(--muted);margin:6px 0 4px;font-size:13.5px">Tap a domain to toggle all its topics, or pick individual topics. You can mix and match.</p>
+        <div id="topicGroups"></div>
+      </div>
+
+      <div class="card mt" id="optionsCard">
+        <label class="toggle">
+          <input type="checkbox" id="feedbackToggle" checked>
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+          <span class="toggle-label">Show whether each answer is right or wrong straight after I answer it</span>
+        </label>
+        <p style="color:var(--muted);margin:10px 0 0;font-size:13px">Turn this off for a realistic exam run — you'll only see the full breakdown at the end.</p>
+      </div>
+
+      <div class="card mt center">
+        <p id="setupSummary" style="color:var(--muted)">Select a mode above to begin.</p>
+        <button class="btn primary" id="startBtn" disabled>Start Test</button>
+      </div>
+
+      <div class="card mt" id="drillCard" style="display:none">
+        <h4 style="margin-top:0">⚡ Quick drills</h4>
+        <p style="color:var(--muted);margin:0 0 12px;font-size:13.5px">Jump straight into the questions you most need to revisit.</p>
+        <div class="btn-row">
+          <button class="btn" id="reviewMistakesBtn" style="display:none"></button>
+          <button class="btn" id="flaggedBtn" style="display:none"></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- QUIZ -->
+    <section id="quiz" class="hidden">
+      <div class="card">
+        <div class="q-meta">
+          <span id="qProgress">Question 1</span>
+          <span id="qCat" class="pill blue">—</span>
+          <span style="display:flex;align-items:center;gap:12px">
+            <button class="btn ghost" id="flagBtn" style="padding:4px 10px;font-size:13px">☆ Flag</button>
+            <span id="qTimer">⏱ 00:00</span>
+          </span>
+        </div>
+        <div class="progress mb"><span id="qBar"></span></div>
+        <div class="q-card">
+          <div class="q-text" id="qText"></div>
+          <div class="options" id="qOptions"></div>
+          <div class="explain" id="qExplain"></div>
+        </div>
+        <div class="btn-row mt" style="justify-content:space-between">
+          <button class="btn ghost" id="quitBtn">✕ Quit</button>
+          <div class="btn-row">
+            <button class="btn" id="backQBtn">← Back</button>
+            <button class="btn primary" id="nextQBtn" disabled>Next →</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS -->
+    <section id="results" class="hidden">
+      <div class="card result-big">
+        <div class="score" id="scorePct">0%</div>
+        <div id="scoreVerdict" style="font-size:20px;font-weight:700"></div>
+        <p id="scoreDetail" style="color:var(--muted)"></p>
+      </div>
+      <div class="card mt">
+        <h4 style="margin-top:0">Score by domain</h4>
+        <div id="domainBreakdown"></div>
+      </div>
+      <div class="card mt">
+        <h4 style="margin-top:0">Review your answers</h4>
+        <div id="review"></div>
+      </div>
+      <div class="btn-row center mt" style="justify-content:center">
+        <button class="btn primary" id="retryWrongBtn" style="display:none">↻ Retry incorrect</button>
+        <button class="btn" id="retryBtn">↻ New Test</button>
+        <a class="btn" href="progress.html">📊 View My Progress</a>
+        <a class="btn" href="index.html">📖 Back to Study Guide</a>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="js/questions.js"></script>
+<script src="js/questions-formats.js"></script>
+<script src="js/data.js"></script>
+<script src="js/progress.js"></script>
+<script>
+(function () {
+  const el = id => document.getElementById(id);
+  const cats = AZ.CATEGORIES;
+  const topics = AZ.TOPICS;
+  let mode = null, questions = [], current = 0, answers = [], timer = null, seconds = 0;
+  let instantFeedback = true, timed = true, lastWrong = [];
+  const selectedTopics = new Set();
+  if (el("feedbackToggle")) el("feedbackToggle").onchange = e => { instantFeedback = e.target.checked; };
+
+  // ---- flagged & missed questions (persisted locally) ----
+  const FLAG_KEY = "az900_flagged", MISS_KEY = "az900_missed";
+  const loadSet = k => { try { return new Set(JSON.parse(localStorage.getItem(k) || "[]")); } catch (e) { return new Set(); } };
+  const saveSet = (k, s) => localStorage.setItem(k, JSON.stringify([...s]));
+  const flagged = loadSet(FLAG_KEY), missed = loadSet(MISS_KEY);
+  function qid(q) {
+    const str = q.type === "sentence" ? q.segments.map(x => typeof x === "string" ? x : x.options.join("|")).join("~") : q.q;
+    let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
+    return "q" + (h >>> 0);
+  }
+  function refreshDrills() {
+    const missCount = AZ.QUESTIONS.filter(q => missed.has(qid(q))).length;
+    const flagCount = AZ.QUESTIONS.filter(q => flagged.has(qid(q))).length;
+    const mb = el("reviewMistakesBtn"), fb = el("flaggedBtn");
+    mb.style.display = missCount ? "inline-flex" : "none";
+    mb.textContent = `🔁 Review my mistakes (${missCount})`;
+    fb.style.display = flagCount ? "inline-flex" : "none";
+    fb.textContent = `⭐ Flagged questions (${flagCount})`;
+    el("drillCard").style.display = (missCount || flagCount) ? "block" : "none";
+  }
+  el("reviewMistakesBtn").onclick = () => { mode = "review"; startPool(AZ.QUESTIONS.filter(q => missed.has(qid(q))), { timed: false }); };
+  el("flaggedBtn").onclick = () => { mode = "review"; startPool(AZ.QUESTIONS.filter(q => flagged.has(qid(q))), { timed: false }); };
+  el("flagBtn").onclick = () => {
+    const id = qid(questions[current]);
+    flagged.has(id) ? flagged.delete(id) : flagged.add(id);
+    saveSet(FLAG_KEY, flagged); renderFlag();
+  };
+  function renderFlag() {
+    const on = flagged.has(qid(questions[current]));
+    el("flagBtn").textContent = on ? "★ Flagged" : "☆ Flag";
+    el("flagBtn").style.color = on ? "var(--amber)" : "";
+    el("flagBtn").style.borderColor = on ? "var(--amber)" : "";
+  }
+
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const topicsIn = k => Object.keys(topics).filter(t => topics[t].cat === k);
+  const countTopic = t => AZ.QUESTIONS.filter(q => q.topic === t).length;
+
+  // ---- setup ----
+  document.querySelectorAll(".mode").forEach(c => {
+    c.onclick = () => {
+      document.querySelectorAll(".mode").forEach(m => m.style.borderColor = "");
+      c.style.borderColor = "var(--primary)";
+      mode = c.dataset.mode;
+      el("topicPick").style.display = mode === "topic" ? "block" : "none";
+      refreshSelection();
+    };
+  });
+
+  // build topic picker grouped by domain
+  const groups = el("topicGroups");
+  Object.keys(cats).forEach(k => {
+    const wrap = document.createElement("div");
+    wrap.style.margin = "16px 0 4px";
+
+    const dchip = document.createElement("button");
+    dchip.className = "chip"; dchip.dataset.domain = k;
+    dchip.style.fontWeight = "700";
+    dchip.textContent = `${cats[k].name} — all`;
+    dchip.onclick = () => toggleDomain(k);
+
+    const head = document.createElement("div");
+    head.style.cssText = "display:flex;align-items:center;gap:10px;margin-bottom:8px";
+    head.appendChild(dchip);
+    wrap.appendChild(head);
+
+    const chipWrap = document.createElement("div");
+    chipWrap.className = "cat-filter";
+    chipWrap.style.margin = "0 0 4px";
+    topicsIn(k).forEach(t => {
+      const c = document.createElement("button");
+      c.className = "chip"; c.dataset.topic = t;
+      c.textContent = `${topics[t].name} (${countTopic(t)})`;
+      c.onclick = () => toggleTopic(t);
+      chipWrap.appendChild(c);
+    });
+    wrap.appendChild(chipWrap);
+    groups.appendChild(wrap);
+  });
+
+  function toggleTopic(t) {
+    selectedTopics.has(t) ? selectedTopics.delete(t) : selectedTopics.add(t);
+    refreshSelection();
+  }
+  function toggleDomain(k) {
+    const ts = topicsIn(k);
+    const allOn = ts.every(t => selectedTopics.has(t));
+    ts.forEach(t => allOn ? selectedTopics.delete(t) : selectedTopics.add(t));
+    refreshSelection();
+  }
+  el("selectAllTopics").onclick = () => { Object.keys(topics).forEach(t => selectedTopics.add(t)); refreshSelection(); };
+  el("clearTopics").onclick = () => { selectedTopics.clear(); refreshSelection(); };
+
+  function refreshSelection() {
+    // update topic chip states
+    document.querySelectorAll("#topicGroups [data-topic]").forEach(c => {
+      c.classList.toggle("active", selectedTopics.has(c.dataset.topic));
+    });
+    // update domain chip states (active only when ALL its topics selected)
+    document.querySelectorAll("#topicGroups [data-domain]").forEach(c => {
+      const ts = topicsIn(c.dataset.domain);
+      c.classList.toggle("active", ts.length > 0 && ts.every(t => selectedTopics.has(t)));
+    });
+    el("startBtn").disabled = (mode === "topic" && selectedTopics.size === 0) || !mode;
+    updateSummary();
+  }
+
+  function selectedCount() {
+    return AZ.QUESTIONS.filter(q => selectedTopics.has(q.topic)).length;
+  }
+
+  function updateSummary() {
+    if (!mode) { el("setupSummary").textContent = "Select a mode above to begin."; return; }
+    if (mode === "topic") {
+      if (selectedTopics.size === 0) { el("setupSummary").textContent = "Focused drill — pick one or more topics above to begin."; return; }
+      const names = [...selectedTopics].map(t => topics[t].name);
+      const label = names.length <= 3 ? names.join(", ") : `${names.length} topics`;
+      el("setupSummary").textContent = `Focused drill — ${selectedCount()} questions (${label}).`;
+      return;
+    }
+    const t = { exam: "Full timed exam", practice: "Practice with instant feedback" }[mode] || "";
+    el("setupSummary").textContent = `${t} — ${AZ.QUESTIONS.length} questions (all topics).`;
+  }
+
+  el("startBtn").onclick = start;
+
+  function start() {
+    let pool = AZ.QUESTIONS;
+    if (mode === "topic") pool = pool.filter(q => selectedTopics.has(q.topic));
+    startPool(pool, { timed: mode !== "practice" });
+  }
+
+  function startPool(pool, opts) {
+    opts = opts || {};
+    if (!pool.length) { alert("No questions available for that selection yet."); return; }
+    instantFeedback = el("feedbackToggle").checked;
+    questions = shuffle(pool);
+    current = 0; answers = new Array(questions.length).fill(null); seconds = 0;
+    el("setup").classList.add("hidden");
+    el("results").classList.add("hidden");
+    el("quiz").classList.remove("hidden");
+    timed = opts.timed !== false;
+    clearInterval(timer);
+    if (timed) {
+      el("qTimer").style.display = "";
+      el("qTimer").textContent = "⏱ 00:00";
+      timer = setInterval(() => { seconds++; el("qTimer").textContent = "⏱ " + fmt(seconds); }, 1000);
+    } else { el("qTimer").style.display = "none"; }
+    renderQ();
+  }
+
+  const fmt = s => String(Math.floor(s/60)).padStart(2,"0") + ":" + String(s%60).padStart(2,"0");
+
+  // ---- question-type helpers ----
+  const LETTERS = ["A","B","C","D","E","F"];
+  const blanksOf = q => q.segments.filter(s => typeof s === "object");
+  const sortedEq = (a, b) => {
+    const x = [...a].sort((m,n)=>m-n), y = [...b].sort((m,n)=>m-n);
+    return x.length === y.length && x.every((v,i)=>v===y[i]);
+  };
+  function isComplete(q, a) {
+    if (a == null) return false;
+    if (q.type === "multi") return Array.isArray(a) && a.length === q.answers.length;
+    if (q.type === "sentence") { const b = blanksOf(q); return Array.isArray(a) && a.length === b.length && a.every(x => x != null); }
+    return true; // single / yesno
+  }
+  function isAnswered(q, a) {
+    if (a == null) return false;
+    if (q.type === "multi") return Array.isArray(a) && a.length > 0;
+    if (q.type === "sentence") return Array.isArray(a) && a.some(x => x != null);
+    return true;
+  }
+  function isCorrect(q, a) {
+    if (!isComplete(q, a)) return false;
+    if (q.type === "multi") return sortedEq(a, q.answers);
+    if (q.type === "sentence") { const b = blanksOf(q); return a.every((x,i)=>x===b[i].answer); }
+    return a === q.answer;
+  }
+  function qStem(q) { return q.type === "sentence" ? q.segments.map(s => typeof s === "string" ? s : "____").join("") : q.q; }
+  function ansText(q, a) {
+    if (!isAnswered(q, a)) return "—";
+    if (q.type === "multi") return a.map(i => LETTERS[i] + ". " + q.options[i]).join("; ");
+    if (q.type === "sentence") { const b = blanksOf(q); return a.map((x,i)=> x == null ? "—" : b[i].options[x]).join("  /  "); }
+    return LETTERS[a] + ". " + q.options[a];
+  }
+  function correctText(q) {
+    if (q.type === "multi") return q.answers.map(i => LETTERS[i] + ". " + q.options[i]).join("; ");
+    if (q.type === "sentence") return blanksOf(q).map(x => x.options[x.answer]).join("  /  ");
+    return LETTERS[q.answer] + ". " + q.options[q.answer];
+  }
+
+  function updateNav() {
+    el("nextQBtn").disabled = !isComplete(questions[current], answers[current]);
+    el("nextQBtn").textContent = current === questions.length - 1 ? "Finish ✓" : "Next →";
+    el("backQBtn").disabled = current === 0;
+  }
+
+  function renderQ() {
+    const q = questions[current];
+    el("qProgress").textContent = `Question ${current + 1} of ${questions.length}`;
+    el("qCat").textContent = cats[q.cat].name;
+    el("qBar").style.width = ((current) / questions.length * 100) + "%";
+    el("qExplain").classList.remove("show");
+    const opts = el("qOptions"); opts.innerHTML = "";
+
+    if (q.type === "sentence") {
+      el("qText").textContent = "Select the option that best completes each sentence.";
+      renderSentence(q, opts);
+    } else if (q.type === "multi") {
+      el("qText").innerHTML = q.q + ` <span class="pill blue" style="margin-left:6px">Choose ${q.answers.length}</span>`;
+      renderMulti(q, opts);
+    } else {
+      el("qText").textContent = q.q;
+      renderSingle(q, opts);
+    }
+
+    if (instantFeedback && isComplete(q, answers[current])) reveal();
+    updateNav();
+    renderFlag();
+  }
+
+  function renderSingle(q, opts) {
+    q.options.forEach((opt, i) => {
+      const d = document.createElement("div");
+      d.className = "opt";
+      d.innerHTML = `<span class="mark">${LETTERS[i]}</span><span>${opt}</span>`;
+      if (answers[current] === i) d.classList.add("selected");
+      d.onclick = () => {
+        if (instantFeedback && answers[current] !== null) return;
+        answers[current] = i;
+        [...opts.children].forEach(c => c.classList.remove("selected","correct","wrong"));
+        d.classList.add("selected");
+        if (instantFeedback) reveal();
+        updateNav();
+      };
+      opts.appendChild(d);
+    });
+  }
+
+  function renderMulti(q, opts) {
+    const sel = Array.isArray(answers[current]) ? answers[current] : [];
+    q.options.forEach((opt, i) => {
+      const d = document.createElement("div");
+      d.className = "opt";
+      d.innerHTML = `<span class="mark" style="border-radius:6px">${sel.includes(i) ? "✓" : ""}</span><span>${opt}</span>`;
+      if (sel.includes(i)) d.classList.add("selected");
+      d.onclick = () => {
+        if (instantFeedback && isComplete(q, answers[current])) return; // locked after reveal
+        let a = Array.isArray(answers[current]) ? answers[current].slice() : [];
+        const idx = a.indexOf(i);
+        if (idx >= 0) a.splice(idx, 1);
+        else { if (a.length >= q.answers.length) return; a.push(i); }
+        answers[current] = a.length ? a : null;
+        [...opts.children].forEach((c, j) => {
+          const on = a.includes(j);
+          c.classList.toggle("selected", on);
+          c.querySelector(".mark").textContent = on ? "✓" : "";
+        });
+        if (instantFeedback && isComplete(q, answers[current])) reveal();
+        updateNav();
+      };
+      opts.appendChild(d);
+    });
+  }
+
+  function renderSentence(q, opts) {
+    const wrap = document.createElement("div");
+    wrap.className = "sentence";
+    const stored = Array.isArray(answers[current]) ? answers[current] : null;
+    let bi = -1;
+    q.segments.forEach(seg => {
+      if (typeof seg === "string") { wrap.appendChild(document.createTextNode(seg)); return; }
+      const blankIndex = ++bi;
+      const s = document.createElement("select");
+      s.innerHTML = `<option value="">— choose —</option>` + seg.options.map((o,oi)=>`<option value="${oi}">${o}</option>`).join("");
+      if (stored && stored[blankIndex] != null) s.value = stored[blankIndex];
+      s.onchange = () => {
+        const b = blanksOf(q);
+        let a = Array.isArray(answers[current]) ? answers[current].slice() : new Array(b.length).fill(null);
+        a[blankIndex] = s.value === "" ? null : Number(s.value);
+        answers[current] = a;
+        if (instantFeedback && isComplete(q, answers[current])) reveal();
+        updateNav();
+      };
+      wrap.appendChild(s);
+    });
+    opts.appendChild(wrap);
+  }
+
+  function reveal() {
+    const q = questions[current];
+    const opts = el("qOptions");
+    if (q.type === "sentence") {
+      const b = blanksOf(q);
+      [...opts.querySelectorAll("select")].forEach((s, i) => {
+        s.disabled = true;
+        s.classList.add(Number(s.value) === b[i].answer ? "sel-correct" : "sel-wrong");
+      });
+    } else if (q.type === "multi") {
+      const a = Array.isArray(answers[current]) ? answers[current] : [];
+      [...opts.children].forEach((n, i) => {
+        n.style.pointerEvents = "none";
+        if (q.answers.includes(i)) n.classList.add("correct");
+        else if (a.includes(i)) n.classList.add("wrong");
+      });
+    } else {
+      [...opts.children].forEach((n, i) => {
+        n.style.pointerEvents = "none";
+        if (i === q.answer) n.classList.add("correct");
+        else if (i === answers[current]) n.classList.add("wrong");
+      });
+    }
+    const right = isCorrect(q, answers[current]);
+    const ex = el("qExplain");
+    ex.innerHTML = `<b style="color:${right ? 'var(--green)' : 'var(--red)'}">${right ? '✓ Correct!' : '✗ Not quite.'}</b> ${q.explain}`;
+    ex.classList.add("show");
+  }
+
+  el("nextQBtn").onclick = () => {
+    if (current === questions.length - 1) return finish();
+    current++; renderQ();
+  };
+  el("backQBtn").onclick = () => { if (current > 0) { current--; renderQ(); } };
+  el("quitBtn").onclick = () => { if (confirm("Quit this test? Progress will be lost.")) reset(); };
+
+  function reset() {
+    clearInterval(timer);
+    el("quiz").classList.add("hidden");
+    el("results").classList.add("hidden");
+    el("setup").classList.remove("hidden");
+    refreshDrills();
+  }
+
+  function finish() {
+    clearInterval(timer);
+    let correct = 0;
+    const byCat = {};
+    const progressBatch = [];
+    lastWrong = [];
+    questions.forEach((q, i) => {
+      byCat[q.cat] = byCat[q.cat] || { c: 0, t: 0 };
+      byCat[q.cat].t++;
+      const answered = isAnswered(q, answers[i]);
+      const isRight = isCorrect(q, answers[i]);
+      if (isRight) { correct++; byCat[q.cat].c++; }
+      // only count answered questions toward saved topic progress
+      if (answered) progressBatch.push({ topic: q.topic, correct: isRight });
+      // track mistakes for "review my mistakes" and "retry incorrect"
+      if (answered) {
+        const id = qid(q);
+        if (isRight) missed.delete(id); else { missed.add(id); lastWrong.push(q); }
+      } else { lastWrong.push(q); }
+    });
+    saveSet(MISS_KEY, missed);
+    // persist per-topic performance locally
+    if (window.AZProgress && progressBatch.length) AZProgress.recordResults(progressBatch);
+    // show/hide retry-incorrect button
+    const rw = el("retryWrongBtn");
+    if (lastWrong.length) { rw.style.display = "inline-flex"; rw.textContent = `↻ Retry incorrect (${lastWrong.length})`; }
+    else rw.style.display = "none";
+    const pct = Math.round(correct / questions.length * 100);
+    const pass = pct >= 70;
+    el("quiz").classList.add("hidden");
+    el("results").classList.remove("hidden");
+    el("scorePct").textContent = pct + "%";
+    el("scorePct").className = "score " + (pass ? "pass" : "fail");
+    el("scoreVerdict").textContent = pass ? "🎉 Pass — well done!" : "Keep studying — you'll get there.";
+    el("scoreDetail").textContent = `You answered ${correct} of ${questions.length} correctly` + (timed ? ` in ${fmt(seconds)}.` : ".") + ` (Pass mark ≈ 70%.)`;
+
+    // domain breakdown
+    const bd = el("domainBreakdown"); bd.innerHTML = "";
+    Object.keys(byCat).forEach(k => {
+      const d = byCat[k]; const p = Math.round(d.c / d.t * 100);
+      bd.insertAdjacentHTML("beforeend",
+        `<div class="mb"><div class="q-meta"><span>${cats[k].name}</span><span>${d.c}/${d.t} (${p}%)</span></div>
+         <div class="progress"><span style="width:${p}%"></span></div></div>`);
+    });
+
+    // review
+    const rv = el("review"); rv.innerHTML = "";
+    questions.forEach((q, i) => {
+      const right = isCorrect(q, answers[i]);
+      rv.insertAdjacentHTML("beforeend",
+        `<div class="card mb" style="background:var(--panel-2)">
+          <div style="font-weight:700;margin-bottom:6px">${i + 1}. ${qStem(q)}</div>
+          <div style="font-size:14px;color:${right ? 'var(--green)' : 'var(--red)'}">${right ? '✓' : '✗'} Your answer: ${ansText(q, answers[i])}</div>
+          ${right ? '' : `<div style="font-size:14px;color:var(--green)">✓ Correct: ${correctText(q)}</div>`}
+          <div style="font-size:13.5px;color:var(--muted);margin-top:6px">${q.explain}</div>
+        </div>`);
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  el("retryBtn").onclick = reset;
+  el("retryWrongBtn").onclick = () => { if (lastWrong.length) { mode = "review"; startPool(lastWrong.slice(), { timed: false }); } };
+
+  refreshDrills();
+})();
+</script>
+</body>
+</html>

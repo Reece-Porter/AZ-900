@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SC-200 Study Hub — Cheat Sheet</title>
+<link rel="stylesheet" href="../css/style.css" />
+<style>
+  .sheet { columns: 2; column-gap: 22px; }
+  @media (max-width: 900px) { .sheet { columns: 1; } }
+  .cs { break-inside: avoid; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin: 0 0 14px; background: var(--panel); }
+  .cs h4 { margin: 0 0 8px; font-size: 14.5px; color: var(--primary-2); }
+  .cs ul { margin: 0; padding-left: 18px; }
+  .cs li { margin: 3px 0; font-size: 13px; line-height: 1.45; }
+  .cs b { color: var(--text); }
+  .cs .hi { color: var(--amber); font-weight: 700; }
+  @media print {
+    @page { margin: 12mm; }
+    body { background: #fff !important; color: #000 !important; }
+    .sidebar, .no-print { display: none !important; }
+    .content { max-width: none; padding: 0; }
+    .page-head .eyebrow, .page-head p { color: #333 !important; }
+    .sheet { columns: 2; column-gap: 14px; }
+    .cs { border: 1px solid #bbb; background: #fff !important; box-shadow: none; page-break-inside: avoid; }
+    .cs h4 { color: #1558b0 !important; }
+    .cs b, .cs li { color: #000 !important; }
+    .cs .hi { color: #000 !important; text-decoration: underline; }
+    h2, h3 { color: #000 !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar no-print">
+    <div class="brand">
+      <div class="logo">SC</div>
+      <div><h1>SC-200 Study Hub</h1><span>Security Operations Analyst</span></div>
+    </div>
+    <nav class="nav">
+      <a href="../index.html" style="opacity:.85"><span class="ico">⇄</span> All courses</a>
+      <a href="index.html"><span class="ico">📖</span> Study Guide</a>
+      <a href="flashcards.html"><span class="ico">🃏</span> Flashcards</a>
+      <a href="mock-tests.html"><span class="ico">📝</span> Mock Tests</a>
+      <a href="games.html"><span class="ico">🎮</span> Memory Games</a>
+      <a href="progress.html"><span class="ico">📊</span> My Progress</a>
+      <a href="cheatsheet.html" class="active"><span class="ico">🧾</span> Cheat Sheet</a>
+    </nav>
+    <div class="sidebar-foot">High-yield facts for last-minute revision. Use the Print button for a paper copy.</div>
+  </aside>
+
+  <main class="content">
+    <header class="page-head">
+      <div class="eyebrow">Last-minute revision</div>
+      <h2>SC-200 Cheat Sheet</h2>
+      <p>The highest-yield facts on one page. Skim this the morning of your exam. <button class="btn primary no-print" onclick="window.print()" style="margin-left:10px">🖨️ Print / Save as PDF</button></p>
+    </header>
+
+    <div class="sheet">
+
+      <div class="cs">
+        <h4>Defender XDR — the workloads</h4>
+        <ul>
+          <li><b>MDE</b> = Defender for Endpoint (EDR).</li>
+          <li><b>MDO</b> = Defender for Office 365 (email).</li>
+          <li><b>MDI</b> = Defender for Identity (on-prem AD).</li>
+          <li><b>MDA</b> = Defender for Cloud Apps (CASB).</li>
+          <li><b>Entra ID Protection</b> = cloud identity risk.</li>
+          <li>Managed at <span class="hi">security.microsoft.com</span>. Alerts → <b>incidents</b>.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Defender for Endpoint</h4>
+        <ul>
+          <li>Device actions: <b>Isolate</b>, restrict app execution, run AV scan, collect investigation package, <b>live response</b>.</li>
+          <li><b>ASR rules</b> = block risky behaviours (audit/block).</li>
+          <li><b>Custom indicators</b> = allow/block hash, IP, URL, cert.</li>
+          <li><b>Defender Vulnerability Management</b> = risk-based weaknesses.</li>
+          <li>Onboard via script, GPO, Intune, ConfigMgr.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Defender for Office 365</h4>
+        <ul>
+          <li><span class="hi">Safe Attachments</span> = sandbox detonation.</li>
+          <li><span class="hi">Safe Links</span> = time-of-click URL scan.</li>
+          <li><b>ZAP</b> = remove already-delivered bad mail.</li>
+          <li><b>Tenant Allow/Block List</b> = manual allow/block.</li>
+          <li><b>Preset policies</b> = Standard/Strict baselines.</li>
+          <li><b>Threat Explorer</b> = investigate & soft-delete mail.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Identity: MDI vs Entra ID Protection</h4>
+        <ul>
+          <li><span class="hi">Defender for Identity</span> = on-prem AD; sensors on <b>DCs / AD FS / AD CS</b>.</li>
+          <li>Detects Pass-the-Hash/Ticket, <b>Golden Ticket</b>, <b>DCSync</b>, recon, lateral movement.</li>
+          <li><span class="hi">Entra ID Protection</span> = cloud risky sign-ins/users → risk-based Conditional Access.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Defender for Cloud Apps (CASB)</h4>
+        <ul>
+          <li><b>Cloud Discovery</b> = find Shadow IT from logs.</li>
+          <li><b>App connectors</b> = API deep visibility.</li>
+          <li><b>Conditional Access App Control</b> = real-time session policies (block download / read-only).</li>
+          <li><b>Anomaly policies</b> = e.g., impossible travel.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Advanced hunting (KQL)</h4>
+        <ul>
+          <li>Key tables: <b>DeviceProcessEvents</b>, <b>EmailEvents</b>, <b>IdentityLogonEvents</b>, <b>CloudAppEvents</b>.</li>
+          <li><span class="hi">AlertInfo + AlertEvidence</span> = link alerts to entities.</li>
+          <li>Save a hunting query as a <b>custom detection rule</b> → scheduled alerts + response.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Defender for Cloud — CSPM</h4>
+        <ul>
+          <li><b>CNAPP</b> = CSPM (posture) + CWPP (workload).</li>
+          <li><span class="hi">Foundational CSPM is free</span> → recommendations + <b>Secure Score</b>.</li>
+          <li><b>MCSB</b> = default benchmark driving score.</li>
+          <li>Multicloud: connect <b>AWS/GCP</b> accounts.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Defender for Cloud — plans</h4>
+        <ul>
+          <li><b>Defender for Servers</b> → MDE, <b>JIT</b>, <b>FIM</b>, vuln assessment.</li>
+          <li><b>JIT VM access</b> = open RDP/SSH only on request.</li>
+          <li><b>FIM</b> = watch critical files/registry.</li>
+          <li>Other plans: Storage, SQL, Containers, App Service, Key Vault, DNS, Resource Manager, APIs.</li>
+          <li><b>Workflow automation</b> = Logic App on alert.</li>
+          <li><b>Regulatory compliance</b> dashboard needs a paid plan for extra standards.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Sentinel — basics & roles</h4>
+        <ul>
+          <li><span class="hi">SIEM + SOAR</span> on a <b>Log Analytics workspace</b>; uses <b>KQL</b>.</li>
+          <li>Roles: <b>Reader</b> (view), <b>Responder</b> (manage incidents), <b>Contributor</b> (content), <b>Playbook Operator</b> (run), <b>Automation Contributor</b> (let Sentinel run playbooks).</li>
+          <li><b>Commitment tier</b> = reserved daily GB discount.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Sentinel — connectors</h4>
+        <ul>
+          <li><b>Data connectors</b> ingest sources (MS first-party often free).</li>
+          <li><b>CEF/Syslog</b> via <b>Azure Monitor Agent</b> on a Linux forwarder.</li>
+          <li><b>DCR</b> = defines what AMA collects (control cost).</li>
+          <li><b>Content hub</b> = packaged solutions.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Sentinel — analytics rules</h4>
+        <ul>
+          <li><b>Scheduled</b> = KQL on an interval.</li>
+          <li><span class="hi">NRT</span> = ~every minute (fastest).</li>
+          <li><span class="hi">Microsoft Security</span> = incidents from MS product alerts.</li>
+          <li><span class="hi">Fusion</span> = ML multistage attacks.</li>
+          <li><b>TI</b> = match logs to indicators. <b>Entity mapping</b> for investigation.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Sentinel — SOAR, hunting, TI</h4>
+        <ul>
+          <li><span class="hi">Playbook</span> = Logic App workflow (the actions).</li>
+          <li><span class="hi">Automation rule</span> = orchestrate incidents (run playbook, assign, status).</li>
+          <li><b>Hunting queries</b> (MITRE ATT&CK) → <b>bookmarks</b>.</li>
+          <li><b>UEBA</b> = behaviour baselines. <b>Watchlist</b> = reference list.</li>
+          <li>TI via <b>TAXII</b> / Upload Indicators → <b>ThreatIntelligenceIndicator</b>.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>KQL essentials</h4>
+        <ul>
+          <li><code>where</code> = filter · <code>project</code> = pick cols · <code>extend</code> = add col.</li>
+          <li><code>summarize count() by X</code> = aggregate.</li>
+          <li><code>join</code> = merge on key · <code>union</code> = stack tables.</li>
+          <li><code>ago(1d)</code> = relative time · <code>bin()</code> = bucket time.</li>
+          <li><code>top N by C</code> = highest · <code>take</code> = arbitrary N.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>⚠️ Common exam traps</h4>
+        <ul>
+          <li>On-prem AD → <b>Defender for Identity</b>; cloud identity → <b>Entra ID Protection</b>.</li>
+          <li>Incidents from MS alerts → <b>Microsoft Security</b> rule; multistage ML → <b>Fusion</b>; fastest → <b>NRT</b>.</li>
+          <li>Do the action → <b>playbook</b>; orchestrate the incident → <b>automation rule</b>.</li>
+          <li>Manage incidents but not edit content → <b>Responder</b> (not Reader).</li>
+          <li>Reduce RDP brute force → <b>JIT VM access</b>.</li>
+          <li>Shadow IT → <b>Cloud Discovery</b>; real-time session control → <b>Conditional Access App Control</b>.</li>
+          <li>Free posture + score → <b>foundational CSPM</b>; threat alerts → paid <b>Defender plan</b>.</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <footer class="page-foot no-print">
+      SC-200 Study Hub · Condensed revision aid — always confirm against the official Microsoft Learn SC-200 skills outline.
+    </footer>
+  </main>
+</div>
+</body>
+</html>
