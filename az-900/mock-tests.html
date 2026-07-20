@@ -160,7 +160,7 @@
   const saveSet = (k, s) => localStorage.setItem(k, JSON.stringify([...s]));
   const flagged = loadSet(FLAG_KEY), missed = loadSet(MISS_KEY);
   function qid(q) {
-    const str = q.type === "sentence" ? q.segments.map(x => typeof x === "string" ? x : x.options.join("|")).join("~") : q.q;
+    const str = q.type === "sentence" ? q.segments.map(x => typeof x === "string" ? x : x.options.slice().sort().join("|")).join("~") : q.q;
     let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
     return "q" + (h >>> 0);
   }
@@ -189,6 +189,24 @@
   }
 
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  // Return a copy of the question with its options shuffled and the answer
+  // index remapped, so the correct option isn't always in the same position.
+  function prepareQuestion(q) {
+    const type = q.type || "single";
+    if (type === "yesno") return q; // keep the Yes/No order
+    if (type === "sentence") {
+      const segments = q.segments.map(seg => {
+        if (typeof seg === "string") return seg;
+        const perm = shuffle(seg.options.map((_, i) => i));
+        return { options: perm.map(i => seg.options[i]), answer: perm.indexOf(seg.answer) };
+      });
+      return Object.assign({}, q, { segments });
+    }
+    const perm = shuffle(q.options.map((_, i) => i));
+    const options = perm.map(i => q.options[i]);
+    if (type === "multi") return Object.assign({}, q, { options, answers: q.answers.map(a => perm.indexOf(a)).sort((x, y) => x - y) });
+    return Object.assign({}, q, { options, answer: perm.indexOf(q.answer) });
+  }
   const topicsIn = k => Object.keys(topics).filter(t => topics[t].cat === k);
   const countTopic = t => AZ.QUESTIONS.filter(q => q.topic === t).length;
 
@@ -290,7 +308,7 @@
     opts = opts || {};
     if (!pool.length) { alert("No questions available for that selection yet."); return; }
     instantFeedback = el("feedbackToggle").checked;
-    questions = shuffle(pool);
+    questions = shuffle(pool).map(prepareQuestion);
     current = 0; answers = new Array(questions.length).fill(null); seconds = 0;
     el("setup").classList.add("hidden");
     el("results").classList.add("hidden");
