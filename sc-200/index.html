@@ -103,6 +103,25 @@
       </div>
     </section>
 
+    <!-- ============ HYBRID ENVIRONMENT MAP ============ -->
+    <section class="card mb">
+      <h3 style="margin-top:0">🗺️ The hybrid environment — where each tool fits</h3>
+      <p style="color:var(--muted);margin-top:0">Most SC-200 scenarios sit in a hybrid estate: on-premises Active Directory synced to the cloud, endpoints and servers on-prem, and Microsoft 365 + Azure in the cloud. Knowing which product defends which layer is half the exam.</p>
+      <div class="topic" style="margin:0">
+        <table>
+          <tr><th>Layer in the environment</th><th>Defends it</th></tr>
+          <tr><td>On-premises <b>domain controllers</b> (AD DS, Kerberos/NTLM, LDAP)</td><td><b>Defender for Identity</b> — sensors on the DCs detect recon, lateral movement, DCSync, Golden Ticket</td></tr>
+          <tr><td>On-prem identities synced to the cloud</td><td><b>Microsoft Entra Connect</b> syncs to <b>Entra ID</b>; <b>Entra ID Protection</b> covers risky cloud sign-ins/users</td></tr>
+          <tr><td>~1,000 domain-joined <b>Windows endpoints</b></td><td><b>Defender for Endpoint</b> (EDR) — onboard via Group Policy or Intune</td></tr>
+          <tr><td>On-prem <b>servers</b> (File, SQL, Exchange on Hyper-V) &amp; Azure VMs</td><td><b>Defender for Cloud → Defender for Servers</b> (non-Azure servers join via <b>Azure Arc</b> + AMA); <b>Defender for SQL</b></td></tr>
+          <tr><td><b>Microsoft 365</b> (Exchange Online, SharePoint, Teams, OneDrive)</td><td><b>Defender for Office 365</b> (email/collab) + <b>Defender for Cloud Apps</b> (SaaS/CASB)</td></tr>
+          <tr><td><b>Azure</b> IaaS/PaaS resources &amp; posture</td><td><b>Defender for Cloud</b> (CSPM + workload Defender plans)</td></tr>
+          <tr><td><b>Everything</b> — correlate, hunt, automate</td><td><b>Microsoft Sentinel</b> ingests all sources via data connectors (SIEM + SOAR)</td></tr>
+        </table>
+        <div class="key"><b>From your course notes:</b> the classic hybrid diagram (on-prem AD DS + DMZ + Hyper-V servers, Entra Connect, and the M365/Azure cloud) maps directly onto the tools above — expect scenario questions phrased around exactly this topology.</div>
+      </div>
+    </section>
+
     <!-- ============ DOMAIN 1 — DEFENDER XDR ============ -->
     <details class="domain" id="domain1" open>
       <summary>🛡️ Domain 1 — Microsoft Defender XDR <span class="weight">~35–40%</span></summary>
