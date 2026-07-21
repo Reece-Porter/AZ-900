@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SC-200 Study Hub — KQL Practice</title>
+<link rel="stylesheet" href="../css/style.css" />
+<style>
+  .kql-wrap { display: grid; grid-template-columns: 1fr 280px; gap: 18px; align-items: start; }
+  @media (max-width: 900px) { .kql-wrap { grid-template-columns: 1fr; } }
+  .editor {
+    width: 100%; min-height: 130px; resize: vertical; font-family: Consolas, "SF Mono", Menlo, monospace;
+    font-size: 14.5px; line-height: 1.5; background: #0b1226; color: #cfe0ff; border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 14px; tab-size: 2;
+  }
+  .editor:focus { outline: none; border-color: var(--primary); }
+  .kql-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 10px; }
+  .kbd { font-family: monospace; font-size: 11px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; color: var(--muted); }
+  .res-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; margin-top: 6px; }
+  table.kql { border-collapse: collapse; width: 100%; font-size: 13px; font-family: Consolas, monospace; }
+  table.kql th, table.kql td { border: 1px solid var(--border); padding: 6px 10px; text-align: left; white-space: nowrap; }
+  table.kql th { background: var(--panel-2); position: sticky; top: 0; }
+  table.kql tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+  .err { color: var(--red); background: rgba(248,113,113,.1); border-left: 3px solid var(--red); padding: 10px 14px; border-radius: 8px; font-family: monospace; font-size: 13.5px; }
+  .schema-tbl { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; background: var(--panel-2); }
+  .schema-tbl summary { cursor: pointer; padding: 9px 12px; font-weight: 700; font-size: 13.5px; font-family: monospace; }
+  .schema-tbl .cols { padding: 2px 12px 10px; }
+  .schema-tbl .col { font-family: monospace; font-size: 12.5px; color: var(--muted); padding: 2px 0; cursor: pointer; }
+  .schema-tbl .col:hover { color: var(--primary-2); }
+  .sc-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+  .sc-chip { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; font-weight: 700; font-size: 13px;
+    border: 1px solid var(--border); background: var(--panel-2); cursor: pointer; user-select: none; }
+  .sc-chip.done { background: rgba(54,211,153,.2); border-color: var(--green); color: var(--green); }
+  .sc-chip.current { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(58,141,255,.35); }
+  .sc-chip.locked { opacity: .45; cursor: not-allowed; }
+  .status { margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-weight: 600; display: none; }
+  .status.ok { display: block; background: rgba(54,211,153,.16); border: 1px solid var(--green); color: var(--green); }
+  .status.no { display: block; background: rgba(251,191,36,.12); border: 1px solid var(--amber); color: var(--amber); }
+  .hint { background: rgba(58,141,255,.1); border-left: 3px solid var(--primary); padding: 8px 12px; border-radius: 8px; margin-top: 8px; font-size: 14px; }
+  code.inline { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">SC</div>
+      <div><h1>SC-200 Study Hub</h1><span>Security Operations Analyst</span></div>
+    </div>
+    <nav class="nav">
+      <a href="../index.html" style="opacity:.85"><span class="ico">⇄</span> All courses</a>
+      <a href="index.html"><span class="ico">📖</span> Study Guide</a>
+      <a href="flashcards.html"><span class="ico">🃏</span> Flashcards</a>
+      <a href="mock-tests.html"><span class="ico">📝</span> Mock Tests</a>
+      <a href="games.html"><span class="ico">🎮</span> Memory Games</a>
+      <a href="kql.html" class="active"><span class="ico">🔎</span> KQL Practice</a>
+      <a href="progress.html"><span class="ico">📊</span> My Progress</a>
+      <a href="cheatsheet.html"><span class="ico">🧾</span> Cheat Sheet</a>
+    </nav>
+    <div class="sidebar-foot">A live KQL sandbox with a fictional SOC database. Solve each scenario to unlock the next.</div>
+  </aside>
+
+  <main class="content">
+    <header class="page-head">
+      <div class="eyebrow">Hands-on KQL</div>
+      <h2>KQL Practice</h2>
+      <p>Query a live, in-browser SOC database exactly as you would in Microsoft Sentinel or advanced hunting. Work the scenarios in order — each one unlocks the next — or explore freely by running any query against the tables.</p>
+    </header>
+
+    <!-- progress + scenario nav -->
+    <section class="card mb">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <h3 style="margin:0">Scenarios</h3>
+        <span id="progText" style="color:var(--muted);font-size:14px"></span>
+      </div>
+      <div class="progress mt mb"><span id="progBar"></span></div>
+      <div class="sc-chips" id="scChips"></div>
+    </section>
+
+    <!-- current scenario -->
+    <section class="card mb" id="scenarioCard">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+        <h3 style="margin:0" id="scTitle">Scenario</h3>
+        <span class="pill purple" id="scLevel">—</span>
+      </div>
+      <p id="scTask" style="margin:12px 0"></p>
+      <div class="btn-row">
+        <button class="btn ghost" id="hintBtn">💡 Show a hint</button>
+        <button class="btn ghost" id="solBtn">👁 Reveal solution</button>
+      </div>
+      <div id="hintBox"></div>
+      <div class="status" id="status"></div>
+    </section>
+
+    <div class="kql-wrap">
+      <!-- editor + results -->
+      <div>
+        <section class="card">
+          <h4 style="margin-top:0">Query</h4>
+          <textarea class="editor" id="editor" spellcheck="false"></textarea>
+          <div class="kql-toolbar">
+            <button class="btn primary" id="runBtn">▶ Run <span class="kbd">Ctrl/⌘ + Enter</span></button>
+            <button class="btn ghost" id="clearBtn">Clear</button>
+            <span id="runMeta" style="color:var(--muted);font-size:13px;margin-left:auto"></span>
+          </div>
+          <div id="output" class="mt"></div>
+        </section>
+      </div>
+
+      <!-- schema browser -->
+      <div>
+        <section class="card">
+          <h4 style="margin-top:0">Database schema</h4>
+          <p style="color:var(--muted);font-size:12.5px;margin:0 0 10px">Click a table or column to insert it. Current time: <code class="inline">2026-06-21 00:00Z</code></p>
+          <div id="schema"></div>
+          <button class="btn ghost mt" id="resetBtn" style="font-size:12.5px">↺ Reset KQL progress</button>
+        </section>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="js/kql-engine.js"></script>
+<script src="js/kql-data.js"></script>
+<script>
+(function () {
+  const el = id => document.getElementById(id);
+  const { TABLES, SCENARIOS, NOW } = window.KQLDATA;
+  const DONE_KEY = "sc200_kql_done";
+  let done = new Set();
+  try { done = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || "[]")); } catch (e) {}
+  let curIdx = firstIncomplete();
+  let hintsShown = 0;
+
+  function firstIncomplete() { for (let i = 0; i < SCENARIOS.length; i++) if (!done.has(SCENARIOS[i].id)) return i; return SCENARIOS.length - 1; }
+  function unlocked(i) { return i === 0 || done.has(SCENARIOS[i - 1].id); }
+  function save() { localStorage.setItem(DONE_KEY, JSON.stringify([...done])); }
+
+  /* ---------- schema browser ---------- */
+  function buildSchema() {
+    const wrap = el("schema"); wrap.innerHTML = "";
+    Object.keys(TABLES).forEach(name => {
+      const cols = TABLES[name].length ? Object.keys(TABLES[name][0]) : [];
+      const d = document.createElement("details");
+      d.className = "schema-tbl";
+      const sum = document.createElement("summary");
+      sum.textContent = `${name} (${TABLES[name].length})`;
+      sum.onclick = e => { /* allow toggle; also insert on double intent via button below */ };
+      const insertBtn = () => insertText(name);
+      sum.addEventListener("dblclick", insertBtn);
+      const colBox = document.createElement("div"); colBox.className = "cols";
+      const tip = document.createElement("div"); tip.className = "col"; tip.style.color = "var(--primary-2)"; tip.textContent = "＋ insert table name"; tip.onclick = () => insertText(name);
+      colBox.appendChild(tip);
+      cols.forEach(c => { const cd = document.createElement("div"); cd.className = "col"; cd.textContent = c; cd.onclick = () => insertText(c); colBox.appendChild(cd); });
+      d.appendChild(sum); d.appendChild(colBox); wrap.appendChild(d);
+    });
+  }
+  function insertText(t) {
+    const ta = el("editor"); const s = ta.selectionStart, e = ta.selectionEnd;
+    ta.value = ta.value.slice(0, s) + t + ta.value.slice(e);
+    ta.focus(); ta.selectionStart = ta.selectionEnd = s + t.length;
+  }
+
+  /* ---------- scenario UI ---------- */
+  function buildChips() {
+    const wrap = el("scChips"); wrap.innerHTML = "";
+    SCENARIOS.forEach((s, i) => {
+      const c = document.createElement("div");
+      const isDone = done.has(s.id), isLocked = !unlocked(i) && !isDone;
+      c.className = "sc-chip" + (isDone ? " done" : "") + (i === curIdx ? " current" : "") + (isLocked ? " locked" : "");
+      c.textContent = isDone ? "✓" : (isLocked ? "🔒" : (i + 1));
+      c.title = s.title + (isLocked ? " (locked)" : "");
+      if (!isLocked) c.onclick = () => selectScenario(i);
+      wrap.appendChild(c);
+    });
+    const n = done.size;
+    el("progText").textContent = `${n} / ${SCENARIOS.length} completed`;
+    el("progBar").style.width = (n / SCENARIOS.length * 100) + "%";
+  }
+  function selectScenario(i) {
+    curIdx = i; hintsShown = 0;
+    const s = SCENARIOS[i];
+    el("scTitle").textContent = `${i + 1}. ${s.title}`;
+    el("scLevel").textContent = s.level;
+    el("scTask").innerHTML = `<b>Task:</b> ${s.task} <span style="color:var(--muted)">&nbsp;·&nbsp; Table(s): <code class="inline">${s.table}</code></span>`;
+    el("hintBox").innerHTML = "";
+    el("status").className = "status";
+    el("status").textContent = "";
+    // starter query = first table name
+    const firstTable = s.table.split(/[^A-Za-z0-9_]/)[0];
+    el("editor").value = firstTable + "\n| ";
+    el("editor").focus();
+    buildChips();
+  }
+  el("hintBtn").onclick = () => {
+    const s = SCENARIOS[curIdx];
+    if (hintsShown >= s.hints.length) return;
+    const h = document.createElement("div"); h.className = "hint";
+    h.innerHTML = "💡 " + s.hints[hintsShown];
+    el("hintBox").appendChild(h);
+    hintsShown++;
+    if (hintsShown >= s.hints.length) el("hintBtn").textContent = "No more hints";
+  };
+  el("solBtn").onclick = () => {
+    const s = SCENARIOS[curIdx];
+    if (!confirm("Reveal the solution query for this scenario?")) return;
+    const h = document.createElement("div"); h.className = "hint";
+    h.innerHTML = `👁 <b>Solution:</b> <code class="inline">${escapeHtml(s.solution)}</code> <button class="btn ghost" id="loadSol" style="font-size:12px;padding:4px 10px;margin-left:8px">Load into editor</button>`;
+    el("hintBox").appendChild(h);
+    el("loadSol").onclick = () => { el("editor").value = s.solution; el("editor").focus(); };
+  };
+
+  /* ---------- run ---------- */
+  function run() {
+    const q = el("editor").value.trim();
+    el("status").className = "status"; el("status").textContent = "";
+    if (!q) { el("output").innerHTML = ""; el("runMeta").textContent = ""; return; }
+    let res;
+    try { res = window.KQL.runQuery(q, TABLES, { now: NOW }); }
+    catch (e) { el("output").innerHTML = `<div class="err">✗ ${escapeHtml(e.message)}</div>`; el("runMeta").textContent = ""; return; }
+    renderTable(res);
+    el("runMeta").textContent = `${res.rows.length} row${res.rows.length === 1 ? "" : "s"} · ${res.columns.length} column${res.columns.length === 1 ? "" : "s"}`;
+    checkScenario(res);
+  }
+  function renderTable(res) {
+    if (!res.rows.length) { el("output").innerHTML = `<div class="hint">Query ran successfully but returned no rows.</div>`; return; }
+    const cols = res.columns;
+    let html = '<div class="res-wrap"><table class="kql"><thead><tr>' + cols.map(c => `<th>${escapeHtml(c)}</th>`).join("") + "</tr></thead><tbody>";
+    res.rows.slice(0, 500).forEach(r => { html += "<tr>" + cols.map(c => `<td>${escapeHtml(res.format(r[c]))}</td>`).join("") + "</tr>"; });
+    html += "</tbody></table></div>";
+    if (res.rows.length > 500) html += `<p style="color:var(--muted);font-size:12px">Showing first 500 of ${res.rows.length} rows.</p>`;
+    el("output").innerHTML = html;
+  }
+  function checkScenario(res) {
+    const s = SCENARIOS[curIdx];
+    const st = el("status");
+    if (done.has(s.id)) { st.className = "status ok"; st.textContent = "✓ Already completed. Nice — explore more or pick another scenario."; return; }
+    let expected;
+    try { expected = window.KQL.runQuery(s.solution, TABLES, { now: NOW }); } catch (e) { return; }
+    if (window.KQL.resultsMatch(res, expected, s.ordered)) {
+      done.add(s.id); save(); buildChips();
+      const next = curIdx + 1 < SCENARIOS.length;
+      st.className = "status ok";
+      st.innerHTML = `✓ Correct! Scenario ${curIdx + 1} complete.` + (next ? ` <button class="btn primary" id="nextBtn" style="font-size:13px;padding:6px 14px;margin-left:8px">Next scenario →</button>` : " 🎉 You've finished every scenario!");
+      if (next) el("nextBtn").onclick = () => selectScenario(curIdx + 1);
+    } else {
+      st.className = "status no";
+      st.textContent = "Not quite — your result doesn't match the task yet. Check the expected columns and try again (use a hint if you're stuck).";
+    }
+  }
+
+  el("runBtn").onclick = run;
+  el("clearBtn").onclick = () => { el("editor").value = ""; el("output").innerHTML = ""; el("runMeta").textContent = ""; el("editor").focus(); };
+  el("resetBtn").onclick = () => { if (confirm("Reset all KQL scenario progress on this device?")) { done.clear(); save(); selectScenario(0); buildChips(); } };
+  el("editor").addEventListener("keydown", e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); run(); }
+    if (e.key === "Tab") { e.preventDefault(); insertText("  "); }
+  });
+  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+  buildSchema();
+  buildChips();
+  selectScenario(curIdx);
+})();
+</script>
+</body>
+</html>

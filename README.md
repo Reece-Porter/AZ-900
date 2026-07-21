@@ -22,6 +22,8 @@ The root `index.html` is a course selector with a button for each certification.
 | **My Progress** (`progress.html`) | Per-topic strengths & weaknesses dashboard, saved locally per course. |
 | **Cheat Sheet** (`cheatsheet.html`) | Dense high-yield one-pager with a Print / Save-as-PDF button. |
 
+**SC-200 also includes a KQL Practice page** (`sc-200/kql.html`) — a live, in-browser KQL engine over a fictional SOC database (SigninLogs, SecurityEvent, DeviceProcessEvents, etc.). Run any query and see real results, browse the schema, and work through gated scenarios that increase in difficulty (each unlocks the next). The engine is in `sc-200/js/kql-engine.js`; data and challenges in `sc-200/js/kql-data.js`.
+
 ## Structure & data
 
 ```
