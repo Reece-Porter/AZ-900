@@ -46,6 +46,9 @@
       <a href="#time">Time &amp; datetime</a>
       <a href="#basicq">Basic queries</a>
       <a href="#advq">Advanced queries</a>
+      <a href="#more">More techniques</a>
+      <a href="#soc">SOC hunting library</a>
+      <a href="#learn">Learn more</a>
       <a href="#answers">Practice answers</a>
     </nav>
   </aside>
@@ -236,6 +239,122 @@ SigninLogs
       <p class="lead" style="margin-bottom:0">Note: <code>has_any</code> and <code>render</code> are shown for real-world reference; the Practice sandbox supports a core subset (it accepts <code>render</code> and most patterns above run there).</p>
     </section>
 
+    <!-- MORE TECHNIQUES -->
+    <section class="card ref-card mb" id="more">
+      <h3 style="margin-top:0">More techniques worth knowing</h3>
+      <p class="lead">General-purpose KQL you'll use constantly. Some (marked) are beyond the Practice sandbox but standard in Sentinel / Azure Data Explorer.</p>
+      <div class="qblock"><code>// let: reusable variables and sub-queries
+let lookback = 7d;
+let vips = dynamic(["ceo@contoso.com","cfo@contoso.com"]);
+SigninLogs
+| where TimeGenerated > ago(lookback)
+| where UserPrincipalName in (vips)</code></div>
+      <div class="qblock"><code>// case / iff: conditional (calculated) columns
+SigninLogs
+| extend Outcome = iff(ResultType == "0", "Success", "Failure")
+| extend Bucket = case(ResultType == "0", "ok",
+                       ResultType == "50126", "bad-password",
+                       "other")</code></div>
+      <div class="qblock"><code>// extract fields from text with parse / extract
+SecurityEvent
+| parse Account with Domain "\\" User
+| project Account, Domain, User</code></div>
+      <div class="qblock"><code>// first-seen / last-seen per entity with arg_min / arg_max
+DeviceProcessEvents
+| summarize FirstSeen = arg_min(TimeGenerated, ProcessCommandLine),
+            LastSeen  = max(TimeGenerated)
+  by DeviceName, FileName</code></div>
+      <div class="qblock"><code>// mv-expand: one row per array element
+SigninLogs
+| summarize Ips = make_set(IPAddress) by UserPrincipalName
+| mv-expand Ips</code></div>
+      <div class="qblock"><code>// anti-join: things in A that are NOT in B (e.g. new hosts today)
+DeviceInfo
+| where TimeGenerated > ago(1d)
+| join kind=leftanti (DeviceInfo | where TimeGenerated between (ago(30d) .. ago(1d))) on DeviceName
+| distinct DeviceName    // hosts seen today but never in the prior 30 days</code></div>
+      <div class="qblock"><code>// time-series with make-series + render (Sentinel/ADX)
+SigninLogs
+| make-series Count = count() default = 0 on TimeGenerated from ago(1d) to now() step 1h by ResultType
+| render timechart</code></div>
+      <div class="qblock"><code>// percentiles & richer aggregates
+DeviceNetworkEvents
+| summarize Total = count(),
+            Uniq  = dcount(RemoteIP),
+            p95   = percentile(RemotePort, 95)
+  by DeviceName</code></div>
+    </section>
+
+    <!-- SOC HUNTING LIBRARY -->
+    <section class="card ref-card mb" id="soc">
+      <h3 style="margin-top:0">SOC hunting library</h3>
+      <p class="lead">Job-relevant hunts grouped by data source. Adapt table/column names to your workspace.</p>
+      <h4 style="color:#c4b5ff">Identity &amp; sign-ins</h4>
+      <div class="qblock"><code>// Impossible travel: same user, 2+ countries in a short window
+SigninLogs
+| where ResultType == "0"
+| summarize Countries = make_set(Location), Logins = count() by UserPrincipalName, bin(TimeGenerated, 1h)
+| where array_length(Countries) > 1</code></div>
+      <div class="qblock"><code>// Password spray: one IP, many distinct users failing
+SigninLogs
+| where ResultType != "0"
+| summarize Users = dcount(UserPrincipalName), Attempts = count() by IPAddress
+| where Users >= 5
+| sort by Users desc</code></div>
+      <div class="qblock"><code>// MFA fatigue: repeated MFA prompts for a user
+SigninLogs
+| where ResultType == "50074"          // MFA required
+| summarize Prompts = count() by UserPrincipalName, bin(TimeGenerated, 15m)
+| where Prompts >= 5</code></div>
+      <h4 style="color:#c4b5ff">Endpoint</h4>
+      <div class="qblock"><code>// LOLBins spawning from Office apps
+DeviceProcessEvents
+| where InitiatingProcessFileName in ("winword.exe","excel.exe","outlook.exe")
+| where FileName in ("powershell.exe","cmd.exe","wscript.exe","mshta.exe","rundll32.exe")
+| project TimeGenerated, DeviceName, InitiatingProcessFileName, FileName, ProcessCommandLine</code></div>
+      <div class="qblock"><code>// Beaconing: repeated connections to the same destination
+DeviceNetworkEvents
+| summarize Hits = count(), Ports = make_set(RemotePort) by DeviceName, RemoteIP
+| where Hits >= 3
+| sort by Hits desc</code></div>
+      <h4 style="color:#c4b5ff">Email</h4>
+      <div class="qblock"><code>// Delivered phishing that users then clicked
+EmailEvents
+| where ThreatTypes has "Phish" and DeliveryAction == "Delivered"
+| project NetworkMessageId, RecipientEmailAddress, Subject
+| join kind=inner (UrlClickEvents | where ActionType == "ClickAllowed") on NetworkMessageId
+| project RecipientEmailAddress, Subject, Url</code></div>
+      <h4 style="color:#c4b5ff">Cloud &amp; audit</h4>
+      <div class="qblock"><code>// Risky principals performing destructive operations
+AzureActivity
+| where OperationNameValue has_any ("delete","write")
+| summarize Ops = count(), Kinds = make_set(OperationNameValue) by Caller, CallerIpAddress
+| sort by Ops desc</code></div>
+      <div class="qblock"><code>// Privileged group changes
+AuditLogs
+| where OperationName has "member" and OperationName has "group"
+| where TargetResource has_any ("Domain Admins","Global Administrator")
+| project TimeGenerated, InitiatedBy, OperationName, TargetResource, Result</code></div>
+    </section>
+
+    <!-- LEARN MORE -->
+    <section class="card ref-card mb" id="learn">
+      <h3 style="margin-top:0">Level up your KQL (recommended)</h3>
+      <p class="lead">Beyond this lab, these free resources build real depth. Highly recommended for both the SC-200 exam and the job.</p>
+      <table class="reftable">
+        <tr><th>Resource</th><th>Why it's worth it</th></tr>
+        <tr><td><b>Kusto Detective Agency</b> (detective.kusto.io)</td><td>Free, gamified case-based KQL challenges — the single best way to get fluent. Start here.</td></tr>
+        <tr><td><b>"Must Learn KQL"</b> by Rod Trent (aka.ms/MustLearnKQL)</td><td>Free book + videos + GitHub, built specifically for security analysts and Sentinel.</td></tr>
+        <tr><td><b>Microsoft Learn — KQL modules</b></td><td>"Write your first query with KQL" and the Sentinel/Defender hunting learning paths (free, official).</td></tr>
+        <tr><td><b>KQL official documentation</b> (aka.ms/kqldocs)</td><td>The authoritative operator/function reference with runnable examples.</td></tr>
+        <tr><td><b>Azure Data Explorer — help cluster</b> (dataexplorer.azure.com/clusters/help)</td><td>A free public cluster (StormEvents etc.) to practise real KQL at scale in the browser.</td></tr>
+        <tr><td><b>Advanced hunting schema &amp; queries</b> (GitHub: microsoft/Microsoft-365-Defender-Hunting-Queries)</td><td>Hundreds of real Defender hunting queries and the full table/column schema.</td></tr>
+        <tr><td><b>KC7 Cyber Game</b> (kc7cyber.com)</td><td>Free story-driven investigations that teach KQL through realistic incident data.</td></tr>
+        <tr><td><b>SANS / Sentinel "KQL Cafe" community</b></td><td>Community talks and query walkthroughs for ongoing practice.</td></tr>
+      </table>
+      <p class="lead" style="margin-bottom:0"><b>Practice habit:</b> pick one hunt from the library above each day, run it against real data, then modify it — change the threshold, add a <code>bin()</code>, join another table. Muscle memory beats memorisation.</p>
+    </section>
+
     <!-- PRACTICE ANSWERS -->
     <section class="card ref-card mb" id="answers">
       <h3 style="margin-top:0">Practice scenario answers</h3>
@@ -254,15 +373,21 @@ SigninLogs
 (function () {
   const esc = s => String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 
-  // render practice answers from the shared data
+  // render practice answers from the shared data (scenarios -> levels)
   const box = document.getElementById("answersList");
-  (window.KQLDATA.SCENARIOS || []).forEach((s, i) => {
-    const d = document.createElement("div");
-    d.style.cssText = "border:1px solid var(--border);border-radius:10px;background:var(--panel-2);padding:12px 14px;margin-bottom:10px";
-    d.innerHTML = `<div style="font-weight:700">${i + 1}. ${esc(s.title)} <span class="pill purple" style="margin-left:6px">${esc(s.level)}</span></div>
-      <div style="color:var(--muted);font-size:13.5px;margin:6px 0 8px">${esc(s.task)}</div>
-      <div class="qblock"><code>${esc(s.solution)}</code></div>`;
-    box.appendChild(d);
+  (window.KQLDATA.SCENARIOS || []).forEach((s, si) => {
+    const h = document.createElement("h4");
+    h.style.cssText = "margin:18px 0 8px;color:#c4b5ff";
+    h.textContent = `Scenario ${si + 1} — ${s.title}`;
+    box.appendChild(h);
+    (s.levels || []).forEach((lv, li) => {
+      const d = document.createElement("div");
+      d.style.cssText = "border:1px solid var(--border);border-radius:10px;background:var(--panel-2);padding:12px 14px;margin-bottom:10px";
+      d.innerHTML = `<div style="font-weight:700">Level ${li + 1}: ${esc(lv.title)} <span class="pill purple" style="margin-left:6px">${esc(lv.level)}</span></div>
+        <div style="color:var(--muted);font-size:13.5px;margin:6px 0 8px">${esc(lv.task)}</div>
+        <div class="qblock"><code>${esc(lv.solution)}</code></div>`;
+      box.appendChild(d);
+    });
   });
 
   // add copy buttons to every code block

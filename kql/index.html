@@ -52,33 +52,36 @@
       <a href="index.html" class="active"><span class="ico">🧪</span> Practice</a>
       <a href="reference.html"><span class="ico">📚</span> Reference</a>
     </nav>
-    <div class="sidebar-foot">A live KQL sandbox with a fictional SOC database. Solve each scenario to unlock the next — or explore freely. Straight and “smart” quotes both work.</div>
+    <div class="nav-section">Scenarios</div>
+    <nav class="nav" id="scenarioNav"></nav>
+    <div class="sidebar-foot">Each scenario is its own database. Solve a scenario's levels in order — or explore freely. Straight and “smart” quotes both work.</div>
   </aside>
 
   <main class="content">
     <header class="page-head">
       <div class="eyebrow">Hands-on KQL</div>
       <h2>KQL Practice</h2>
-      <p>Query a live, in-browser SOC database exactly as you would in Microsoft Sentinel or advanced hunting. Work the scenarios in order — each one unlocks the next — or explore freely by running any query against the tables.</p>
+      <p>Query a live, in-browser SOC database exactly as you would in Microsoft Sentinel or advanced hunting. Each scenario is its own database with a series of levels that get harder — solve a level to unlock the next. Switch scenarios anytime from the sidebar, or explore freely by running any query.</p>
     </header>
 
-    <!-- progress + scenario nav -->
+    <!-- scenario header + level progress -->
     <section class="card mb">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-        <h3 style="margin:0">Scenarios</h3>
+        <h3 style="margin:0" id="scenTitle">Scenario</h3>
         <span id="progText" style="color:var(--muted);font-size:14px"></span>
       </div>
+      <p id="scenBlurb" style="color:var(--muted);margin:6px 0 0;font-size:14px"></p>
       <div class="progress mt mb"><span id="progBar"></span></div>
-      <div class="sc-chips" id="scChips"></div>
+      <div class="sc-chips" id="levelChips"></div>
     </section>
 
-    <!-- current scenario -->
-    <section class="card mb" id="scenarioCard">
+    <!-- current level -->
+    <section class="card mb" id="levelCard">
       <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <h3 style="margin:0" id="scTitle">Scenario</h3>
-        <span class="pill purple" id="scLevel">—</span>
+        <h3 style="margin:0" id="lvlTitle">Level</h3>
+        <span class="pill purple" id="lvlDiff">—</span>
       </div>
-      <p id="scTask" style="margin:12px 0"></p>
+      <p id="lvlTask" style="margin:12px 0"></p>
       <div class="btn-row">
         <button class="btn ghost" id="hintBtn">💡 Show a hint</button>
         <button class="btn ghost" id="solBtn">👁 Reveal solution</button>
@@ -120,29 +123,48 @@
 <script>
 (function () {
   const el = id => document.getElementById(id);
-  const { TABLES, SCENARIOS, NOW } = window.KQLDATA;
+  const { SCENARIOS, NOW } = window.KQLDATA;
   const DONE_KEY = "kql_done";
   let done = new Set();
   try { done = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || "[]")); } catch (e) {}
-  let curIdx = firstIncomplete();
-  let hintsShown = 0;
+  let scenIdx = 0, lvlIdx = 0, hintsShown = 0;
 
-  function firstIncomplete() { for (let i = 0; i < SCENARIOS.length; i++) if (!done.has(SCENARIOS[i].id)) return i; return SCENARIOS.length - 1; }
-  function unlocked(i) { return i === 0 || done.has(SCENARIOS[i - 1].id); }
-  function save() { localStorage.setItem(DONE_KEY, JSON.stringify([...done])); }
+  const key = (sc, lv) => sc + ":" + lv;
+  const save = () => localStorage.setItem(DONE_KEY, JSON.stringify([...done]));
+  const curScen = () => SCENARIOS[scenIdx];
+  const curTables = () => curScen().tables;
+  const curLevels = () => curScen().levels;
+  const curLevel = () => curLevels()[lvlIdx];
+  const levelDone = (s, i) => done.has(key(s.id, s.levels[i].id));
+  const levelUnlocked = (s, i) => i === 0 || levelDone(s, i - 1);
+  const scenDoneCount = s => s.levels.filter((_, i) => levelDone(s, i)).length;
+  function firstIncompleteLevel(s) { for (let i = 0; i < s.levels.length; i++) if (!levelDone(s, i)) return i; return 0; }
+  function firstIncompleteScenario() { for (let i = 0; i < SCENARIOS.length; i++) if (scenDoneCount(SCENARIOS[i]) < SCENARIOS[i].levels.length) return i; return 0; }
 
-  /* ---------- schema browser ---------- */
+  /* ---------- sidebar scenario list ---------- */
+  function buildScenarioNav() {
+    const wrap = el("scenarioNav"); wrap.innerHTML = "";
+    SCENARIOS.forEach((s, i) => {
+      const a = document.createElement("a");
+      a.href = "#"; a.className = (i === scenIdx ? "active" : "");
+      const total = s.levels.length, doneN = scenDoneCount(s);
+      const badge = doneN === total ? "✓" : `${doneN}/${total}`;
+      a.innerHTML = `<span class="ico">${i + 1}</span> <span style="flex:1">${s.title}</span> <span style="font-size:11px;color:var(--muted)">${badge}</span>`;
+      a.onclick = e => { e.preventDefault(); selectScenario(i); };
+      wrap.appendChild(a);
+    });
+  }
+
+  /* ---------- schema browser (per scenario) ---------- */
   function buildSchema() {
     const wrap = el("schema"); wrap.innerHTML = "";
-    Object.keys(TABLES).forEach(name => {
-      const cols = TABLES[name].length ? Object.keys(TABLES[name][0]) : [];
-      const d = document.createElement("details");
-      d.className = "schema-tbl";
+    const T = curTables();
+    Object.keys(T).forEach(name => {
+      const cols = T[name].length ? Object.keys(T[name][0]) : [];
+      const d = document.createElement("details"); d.className = "schema-tbl";
       const sum = document.createElement("summary");
-      sum.textContent = `${name} (${TABLES[name].length})`;
-      sum.onclick = e => { /* allow toggle; also insert on double intent via button below */ };
-      const insertBtn = () => insertText(name);
-      sum.addEventListener("dblclick", insertBtn);
+      sum.textContent = `${name} (${T[name].length})`;
+      sum.addEventListener("dblclick", () => insertText(name));
       const colBox = document.createElement("div"); colBox.className = "cols";
       const tip = document.createElement("div"); tip.className = "col"; tip.style.color = "var(--primary-2)"; tip.textContent = "＋ insert table name"; tip.onclick = () => insertText(name);
       colBox.appendChild(tip);
@@ -156,66 +178,75 @@
     ta.focus(); ta.selectionStart = ta.selectionEnd = s + t.length;
   }
 
-  /* ---------- scenario UI ---------- */
-  function buildChips() {
-    const wrap = el("scChips"); wrap.innerHTML = "";
-    SCENARIOS.forEach((s, i) => {
+  /* ---------- level chips ---------- */
+  function buildLevelChips() {
+    const s = curScen(), wrap = el("levelChips"); wrap.innerHTML = "";
+    s.levels.forEach((lv, i) => {
       const c = document.createElement("div");
-      const isDone = done.has(s.id), isLocked = !unlocked(i) && !isDone;
-      c.className = "sc-chip" + (isDone ? " done" : "") + (i === curIdx ? " current" : "") + (isLocked ? " locked" : "");
+      const isDone = levelDone(s, i), isLocked = !levelUnlocked(s, i) && !isDone;
+      c.className = "sc-chip" + (isDone ? " done" : "") + (i === lvlIdx ? " current" : "") + (isLocked ? " locked" : "");
       c.textContent = isDone ? "✓" : (isLocked ? "🔒" : (i + 1));
-      c.title = s.title + (isLocked ? " (locked)" : "");
-      if (!isLocked) c.onclick = () => selectScenario(i);
+      c.title = `Level ${i + 1}: ${lv.title}` + (isLocked ? " (locked — finish the previous level)" : "");
+      if (!isLocked) c.onclick = () => selectLevel(i);
       wrap.appendChild(c);
     });
-    const n = done.size;
-    el("progText").textContent = `${n} / ${SCENARIOS.length} completed`;
-    el("progBar").style.width = (n / SCENARIOS.length * 100) + "%";
+    const total = s.levels.length, doneN = scenDoneCount(s);
+    el("progText").textContent = `${doneN} / ${total} levels`;
+    el("progBar").style.width = (doneN / total * 100) + "%";
   }
+
+  /* ---------- selection ---------- */
   function selectScenario(i) {
-    curIdx = i; hintsShown = 0;
-    const s = SCENARIOS[i];
-    el("scTitle").textContent = `${i + 1}. ${s.title}`;
-    el("scLevel").textContent = s.level;
-    el("scTask").innerHTML = `<b>Task:</b> ${s.task} <span style="color:var(--muted)">&nbsp;·&nbsp; Table(s): <code class="inline">${s.table}</code></span>`;
+    scenIdx = i;
+    const s = curScen();
+    el("scenTitle").textContent = `Scenario ${i + 1} — ${s.title}`;
+    el("scenBlurb").textContent = s.blurb;
+    buildSchema();
+    buildScenarioNav();
+    selectLevel(firstIncompleteLevel(s));
+  }
+  function selectLevel(i) {
+    lvlIdx = i; hintsShown = 0;
+    const lv = curLevel();
+    el("lvlTitle").textContent = `Level ${i + 1} — ${lv.title}`;
+    el("lvlDiff").textContent = lv.level;
+    el("lvlTask").innerHTML = `<b>Task:</b> ${lv.task} <span style="color:var(--muted)">&nbsp;·&nbsp; Start table: <code class="inline">${lv.table}</code></span>`;
     el("hintBox").innerHTML = "";
-    el("status").className = "status";
-    el("status").textContent = "";
-    // starter query = first table name
-    const firstTable = s.table.split(/[^A-Za-z0-9_]/)[0];
+    el("status").className = "status"; el("status").textContent = "";
+    el("hintBtn").textContent = "💡 Show a hint";
+    const firstTable = lv.table.split(/[^A-Za-z0-9_]/)[0];
     el("editor").value = firstTable + "\n| ";
     el("editor").focus();
-    buildChips();
+    buildLevelChips();
   }
+
   el("hintBtn").onclick = () => {
-    const s = SCENARIOS[curIdx];
-    if (hintsShown >= s.hints.length) return;
-    const h = document.createElement("div"); h.className = "hint";
-    h.innerHTML = "💡 " + s.hints[hintsShown];
-    el("hintBox").appendChild(h);
-    hintsShown++;
-    if (hintsShown >= s.hints.length) el("hintBtn").textContent = "No more hints";
+    const lv = curLevel();
+    if (hintsShown >= lv.hints.length) return;
+    const h = document.createElement("div"); h.className = "hint"; h.innerHTML = "💡 " + lv.hints[hintsShown];
+    el("hintBox").appendChild(h); hintsShown++;
+    if (hintsShown >= lv.hints.length) el("hintBtn").textContent = "No more hints";
   };
   el("solBtn").onclick = () => {
-    const s = SCENARIOS[curIdx];
-    if (!confirm("Reveal the solution query for this scenario?")) return;
+    const lv = curLevel();
+    if (!confirm("Reveal the solution query for this level?")) return;
     const h = document.createElement("div"); h.className = "hint";
-    h.innerHTML = `👁 <b>Solution:</b> <code class="inline">${escapeHtml(s.solution)}</code> <button class="btn ghost" id="loadSol" style="font-size:12px;padding:4px 10px;margin-left:8px">Load into editor</button>`;
+    h.innerHTML = `👁 <b>Solution:</b> <code class="inline">${escapeHtml(lv.solution)}</code> <button class="btn ghost" id="loadSol" style="font-size:12px;padding:4px 10px;margin-left:8px">Load into editor</button>`;
     el("hintBox").appendChild(h);
-    el("loadSol").onclick = () => { el("editor").value = s.solution; el("editor").focus(); };
+    el("loadSol").onclick = () => { el("editor").value = lv.solution; el("editor").focus(); };
   };
 
-  /* ---------- run ---------- */
+  /* ---------- run + check ---------- */
   function run() {
     const q = el("editor").value.trim();
     el("status").className = "status"; el("status").textContent = "";
     if (!q) { el("output").innerHTML = ""; el("runMeta").textContent = ""; return; }
     let res;
-    try { res = window.KQL.runQuery(q, TABLES, { now: NOW }); }
+    try { res = window.KQL.runQuery(q, curTables(), { now: NOW }); }
     catch (e) { el("output").innerHTML = `<div class="err">✗ ${escapeHtml(e.message)}</div>`; el("runMeta").textContent = ""; return; }
     renderTable(res);
     el("runMeta").textContent = `${res.rows.length} row${res.rows.length === 1 ? "" : "s"} · ${res.columns.length} column${res.columns.length === 1 ? "" : "s"}`;
-    checkScenario(res);
+    checkLevel(res);
   }
   function renderTable(res) {
     if (!res.rows.length) { el("output").innerHTML = `<div class="hint">Query ran successfully but returned no rows.</div>`; return; }
@@ -226,18 +257,19 @@
     if (res.rows.length > 500) html += `<p style="color:var(--muted);font-size:12px">Showing first 500 of ${res.rows.length} rows.</p>`;
     el("output").innerHTML = html;
   }
-  function checkScenario(res) {
-    const s = SCENARIOS[curIdx];
-    const st = el("status");
-    if (done.has(s.id)) { st.className = "status ok"; st.textContent = "✓ Already completed. Nice — explore more or pick another scenario."; return; }
+  function checkLevel(res) {
+    const s = curScen(), lv = curLevel(), st = el("status");
+    if (levelDone(s, lvlIdx)) { st.className = "status ok"; st.textContent = "✓ Already completed. Explore more, or pick another level/scenario."; return; }
     let expected;
-    try { expected = window.KQL.runQuery(s.solution, TABLES, { now: NOW }); } catch (e) { return; }
-    if (window.KQL.resultsMatch(res, expected, s.ordered)) {
-      done.add(s.id); save(); buildChips();
-      const next = curIdx + 1 < SCENARIOS.length;
+    try { expected = window.KQL.runQuery(lv.solution, curTables(), { now: NOW }); } catch (e) { return; }
+    if (window.KQL.resultsMatch(res, expected, lv.ordered)) {
+      done.add(key(s.id, lv.id)); save(); buildLevelChips(); buildScenarioNav();
+      const moreLevels = lvlIdx + 1 < s.levels.length;
+      const moreScen = scenIdx + 1 < SCENARIOS.length;
       st.className = "status ok";
-      st.innerHTML = `✓ Correct! Scenario ${curIdx + 1} complete.` + (next ? ` <button class="btn primary" id="nextBtn" style="font-size:13px;padding:6px 14px;margin-left:8px">Next scenario →</button>` : " 🎉 You've finished every scenario!");
-      if (next) el("nextBtn").onclick = () => selectScenario(curIdx + 1);
+      if (moreLevels) { st.innerHTML = `✓ Correct! Level ${lvlIdx + 1} complete. <button class="btn primary" id="nextBtn" style="font-size:13px;padding:6px 14px;margin-left:8px">Next level →</button>`; el("nextBtn").onclick = () => selectLevel(lvlIdx + 1); }
+      else if (moreScen) { st.innerHTML = `🎉 Scenario complete! <button class="btn primary" id="nextBtn" style="font-size:13px;padding:6px 14px;margin-left:8px">Next scenario →</button>`; el("nextBtn").onclick = () => selectScenario(scenIdx + 1); }
+      else { st.textContent = "🏆 Outstanding — you've completed every level in every scenario!"; }
     } else {
       st.className = "status no";
       st.textContent = "Not quite — your result doesn't match the task yet. Check the expected columns and try again (use a hint if you're stuck).";
@@ -246,16 +278,14 @@
 
   el("runBtn").onclick = run;
   el("clearBtn").onclick = () => { el("editor").value = ""; el("output").innerHTML = ""; el("runMeta").textContent = ""; el("editor").focus(); };
-  el("resetBtn").onclick = () => { if (confirm("Reset all KQL scenario progress on this device?")) { done.clear(); save(); selectScenario(0); buildChips(); } };
+  el("resetBtn").onclick = () => { if (confirm("Reset ALL KQL progress (every scenario) on this device?")) { done.clear(); save(); scenIdx = 0; selectScenario(0); } };
   el("editor").addEventListener("keydown", e => {
     if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); run(); }
     if (e.key === "Tab") { e.preventDefault(); insertText("  "); }
   });
   function escapeHtml(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
-  buildSchema();
-  buildChips();
-  selectScenario(curIdx);
+  selectScenario(firstIncompleteScenario());
 })();
 </script>
 </body>

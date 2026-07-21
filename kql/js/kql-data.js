@@ -1,45 +1,40 @@
 /* =====================================================================
-   SC-200 Study Hub — KQL sandbox data + scenarios
-   Realistic (fictional) security tables and a set of gated challenges
-   that increase in difficulty. The sandbox's "current time" is fixed so
-   ago()/now() are deterministic.
+   KQL Practice Lab — data + scenarios
+   A "scenario" is a themed database plus a set of "levels" (challenges)
+   that increase in difficulty. Each scenario has its own tables.
+   The sandbox "current time" is fixed so ago()/now() are deterministic.
    ===================================================================== */
 (function () {
   const NOW = Date.parse("2026-06-21T00:00:00Z"); // sandbox "now"
 
-  const TABLES = {
-    /* ---------------- SigninLogs ---------------- */
+  /* ============================================================
+     SCENARIO 1 — SOC Fundamentals (sign-ins, Windows events, endpoints)
+     ============================================================ */
+  const S1_TABLES = {
     SigninLogs: [
       { TimeGenerated: "2026-06-20T08:12:00Z", UserPrincipalName: "jsmith@contoso.com",    IPAddress: "203.0.113.10", Location: "US-NY",     ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "Office 365 Exchange Online" },
       { TimeGenerated: "2026-06-20T08:45:00Z", UserPrincipalName: "jsmith@contoso.com",    IPAddress: "203.0.113.10", Location: "US-NY",     ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "Microsoft Teams" },
       { TimeGenerated: "2026-06-20T12:03:00Z", UserPrincipalName: "jsmith@contoso.com",    IPAddress: "203.0.113.10", Location: "US-NY",     ResultType: "50074", ResultDescription: "MFA required",         AppDisplayName: "Azure Portal" },
       { TimeGenerated: "2026-06-19T09:20:00Z", UserPrincipalName: "jsmith@contoso.com",    IPAddress: "203.0.113.10", Location: "US-NY",     ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "SharePoint Online" },
       { TimeGenerated: "2026-06-18T16:40:00Z", UserPrincipalName: "jsmith@contoso.com",    IPAddress: "198.51.100.7", Location: "US-CA",     ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "Office 365 Exchange Online" },
-
       { TimeGenerated: "2026-06-20T07:55:00Z", UserPrincipalName: "aparker@contoso.com",   IPAddress: "198.51.100.22",Location: "US-CA",     ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "Microsoft Teams" },
       { TimeGenerated: "2026-06-20T10:15:00Z", UserPrincipalName: "aparker@contoso.com",   IPAddress: "198.51.100.22",Location: "US-CA",     ResultType: "50074", ResultDescription: "MFA required",         AppDisplayName: "Azure Portal" },
       { TimeGenerated: "2026-06-19T11:00:00Z", UserPrincipalName: "aparker@contoso.com",   IPAddress: "198.51.100.22",Location: "US-CA",     ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "SharePoint Online" },
       { TimeGenerated: "2026-06-18T13:30:00Z", UserPrincipalName: "aparker@contoso.com",   IPAddress: "198.51.100.22",Location: "US-CA",     ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "OneDrive" },
-
       { TimeGenerated: "2026-06-20T02:01:00Z", UserPrincipalName: "bpatel@contoso.com",    IPAddress: "185.220.101.5",Location: "RU-Moscow", ResultType: "50126", ResultDescription: "Invalid credentials", AppDisplayName: "Azure Portal" },
       { TimeGenerated: "2026-06-20T02:01:20Z", UserPrincipalName: "bpatel@contoso.com",    IPAddress: "185.220.101.5",Location: "RU-Moscow", ResultType: "50126", ResultDescription: "Invalid credentials", AppDisplayName: "Azure Portal" },
       { TimeGenerated: "2026-06-20T02:01:45Z", UserPrincipalName: "bpatel@contoso.com",    IPAddress: "185.220.101.5",Location: "RU-Moscow", ResultType: "50126", ResultDescription: "Invalid credentials", AppDisplayName: "Azure Portal" },
       { TimeGenerated: "2026-06-20T02:02:10Z", UserPrincipalName: "bpatel@contoso.com",    IPAddress: "185.220.101.5",Location: "RU-Moscow", ResultType: "53003", ResultDescription: "Blocked by CA policy",AppDisplayName: "Azure Portal" },
       { TimeGenerated: "2026-06-20T02:02:30Z", UserPrincipalName: "bpatel@contoso.com",    IPAddress: "185.220.101.5",Location: "RU-Moscow", ResultType: "50126", ResultDescription: "Invalid credentials", AppDisplayName: "Azure Portal" },
       { TimeGenerated: "2026-06-19T18:22:00Z", UserPrincipalName: "bpatel@contoso.com",    IPAddress: "10.10.5.30",   Location: "UK-London", ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "Microsoft Teams" },
-
       { TimeGenerated: "2026-06-20T09:05:00Z", UserPrincipalName: "mchen@contoso.com",     IPAddress: "10.10.5.31",   Location: "UK-London", ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "SharePoint Online" },
       { TimeGenerated: "2026-06-20T14:40:00Z", UserPrincipalName: "mchen@contoso.com",     IPAddress: "10.10.5.31",   Location: "UK-London", ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "OneDrive" },
       { TimeGenerated: "2026-06-18T08:10:00Z", UserPrincipalName: "mchen@contoso.com",     IPAddress: "10.10.5.31",   Location: "UK-London", ResultType: "50126", ResultDescription: "Invalid credentials", AppDisplayName: "Azure Portal" },
-
       { TimeGenerated: "2026-06-20T11:11:00Z", UserPrincipalName: "twilliams@contoso.com", IPAddress: "192.0.2.44",   Location: "DE-Berlin", ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "Office 365 Exchange Online" },
       { TimeGenerated: "2026-06-19T15:05:00Z", UserPrincipalName: "twilliams@contoso.com", IPAddress: "192.0.2.44",   Location: "DE-Berlin", ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "Microsoft Teams" },
-
       { TimeGenerated: "2026-06-20T03:30:00Z", UserPrincipalName: "svc-backup@contoso.com",IPAddress: "10.10.9.9",    Location: "US-NY",     ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "Azure Portal" },
       { TimeGenerated: "2026-06-18T03:30:00Z", UserPrincipalName: "svc-backup@contoso.com",IPAddress: "10.10.9.9",    Location: "US-NY",     ResultType: "0",     ResultDescription: "Success",             AppDisplayName: "Azure Portal" },
     ],
-
-    /* ---------------- SecurityEvent ---------------- */
     SecurityEvent: [
       { TimeGenerated: "2026-06-20T08:12:05Z", Computer: "WKS-FIN01", Account: "CONTOSO\\jsmith",        EventID: 4624, Activity: "An account was successfully logged on", LogonType: 2,  IpAddress: "203.0.113.10" },
       { TimeGenerated: "2026-06-20T08:12:06Z", Computer: "SRV-FILE01",Account: "CONTOSO\\jsmith",        EventID: 4624, Activity: "An account was successfully logged on", LogonType: 3,  IpAddress: "203.0.113.10" },
@@ -58,8 +53,6 @@
       { TimeGenerated: "2026-06-18T08:10:03Z", Computer: "WKS-FIN02", Account: "CONTOSO\\mchen",         EventID: 4625, Activity: "An account failed to log on",          LogonType: 2,  IpAddress: "10.10.5.31" },
       { TimeGenerated: "2026-06-20T11:11:05Z", Computer: "WKS-ENG01", Account: "CONTOSO\\twilliams",     EventID: 4624, Activity: "An account was successfully logged on", LogonType: 2,  IpAddress: "192.0.2.44" },
     ],
-
-    /* ---------------- DeviceProcessEvents ---------------- */
     DeviceProcessEvents: [
       { TimeGenerated: "2026-06-20T02:05:00Z", DeviceName: "wks-fin01", AccountName: "jsmith",        FileName: "powershell.exe", ProcessCommandLine: "powershell.exe -NoProfile -EncodedCommand SQBFAFgA", InitiatingProcessFileName: "winword.exe" },
       { TimeGenerated: "2026-06-20T02:06:00Z", DeviceName: "srv-file01",AccountName: "administrator", FileName: "powershell.exe", ProcessCommandLine: "powershell -w hidden -EncodedCommand JABzAD0A", InitiatingProcessFileName: "cmd.exe" },
@@ -72,8 +65,6 @@
       { TimeGenerated: "2026-06-20T12:00:00Z", DeviceName: "wks-fin01", AccountName: "jsmith",        FileName: "excel.exe",      ProcessCommandLine: "excel.exe budget.xlsx",               InitiatingProcessFileName: "explorer.exe" },
       { TimeGenerated: "2026-06-20T21:15:00Z", DeviceName: "wks-fin01", AccountName: "jsmith",        FileName: "powershell.exe", ProcessCommandLine: "powershell.exe -enc dwBoAG8AYQBtAGkA", InitiatingProcessFileName: "outlook.exe" },
     ],
-
-    /* ---------------- DeviceLogonEvents ---------------- */
     DeviceLogonEvents: [
       { TimeGenerated: "2026-06-20T08:12:00Z", DeviceName: "wks-fin01", AccountName: "jsmith",        ActionType: "LogonSuccess", LogonType: "Interactive", RemoteIP: "" },
       { TimeGenerated: "2026-06-20T02:01:00Z", DeviceName: "srv-dc01",  AccountName: "bpatel",        ActionType: "LogonFailed",  LogonType: "Network",     RemoteIP: "185.220.101.5" },
@@ -84,8 +75,6 @@
       { TimeGenerated: "2026-06-20T11:11:00Z", DeviceName: "wks-eng01", AccountName: "twilliams",     ActionType: "LogonSuccess", LogonType: "Interactive", RemoteIP: "" },
       { TimeGenerated: "2026-06-18T08:10:00Z", DeviceName: "wks-fin02", AccountName: "mchen",         ActionType: "LogonFailed",  LogonType: "Interactive", RemoteIP: "" },
     ],
-
-    /* ---------------- SecurityAlert ---------------- */
     SecurityAlert: [
       { TimeGenerated: "2026-06-20T02:15:00Z", AlertName: "Multiple failed sign-ins (possible brute force)", Severity: "High",   CompromisedEntity: "bpatel@contoso.com",  ProviderName: "Microsoft Entra ID Protection" },
       { TimeGenerated: "2026-06-20T02:20:00Z", AlertName: "Suspicious PowerShell encoded command",           Severity: "High",   CompromisedEntity: "jsmith@contoso.com",  ProviderName: "Microsoft Defender for Endpoint" },
@@ -95,65 +84,255 @@
       { TimeGenerated: "2026-06-20T04:12:00Z", AlertName: "Special privileges assigned to new logon",        Severity: "Medium", CompromisedEntity: "administrator@contoso.com", ProviderName: "Microsoft Defender for Cloud" },
     ],
   };
-
-  const SCENARIOS = [
-    { id: "s1", title: "Filter with where", level: "Beginner", table: "SigninLogs", ordered: false,
+  const S1_LEVELS = [
+    { id: "l1", title: "Filter with where", level: "Beginner", table: "SigninLogs", ordered: false,
       task: "Return every sign-in performed by the user jsmith@contoso.com.",
       solution: 'SigninLogs | where UserPrincipalName == "jsmith@contoso.com"',
       hints: ["Start with the table name, then pipe into an operator: SigninLogs | ...", "Use where to filter rows and == to compare.", 'String values need double quotes: where UserPrincipalName == "jsmith@contoso.com"'] },
-
-    { id: "s2", title: "Count the rows", level: "Beginner", table: "SigninLogs", ordered: false,
+    { id: "l2", title: "Count the rows", level: "Beginner", table: "SigninLogs", ordered: false,
       task: "How many sign-in records are in SigninLogs in total? Return a single number.",
-      solution: "SigninLogs | count",
-      hints: ["The count operator returns the number of rows.", "SigninLogs | count"] },
-
-    { id: "s3", title: "Project specific columns", level: "Beginner", table: "SigninLogs", ordered: false,
+      solution: "SigninLogs | count", hints: ["The count operator returns the number of rows.", "SigninLogs | count"] },
+    { id: "l3", title: "Project specific columns", level: "Beginner", table: "SigninLogs", ordered: false,
       task: 'Return only the UserPrincipalName and IPAddress of every FAILED sign-in. (A successful sign-in has ResultType "0"; anything else is a failure.)',
       solution: 'SigninLogs | where ResultType != "0" | project UserPrincipalName, IPAddress',
       hints: ['Filter failures with where ResultType != "0".', "Choose columns with project.", "project UserPrincipalName, IPAddress"] },
-
-    { id: "s4", title: "Distinct values", level: "Beginner", table: "SigninLogs", ordered: false,
+    { id: "l4", title: "Distinct values", level: "Beginner", table: "SigninLogs", ordered: false,
       task: "List the distinct Locations that sign-ins originated from.",
-      solution: "SigninLogs | distinct Location",
-      hints: ["distinct returns unique rows for the column(s) you name.", "SigninLogs | distinct Location"] },
-
-    { id: "s5", title: "Aggregate with summarize", level: "Intermediate", table: "SigninLogs", ordered: false,
+      solution: "SigninLogs | distinct Location", hints: ["distinct returns unique rows for the column(s) you name.", "SigninLogs | distinct Location"] },
+    { id: "l5", title: "Aggregate with summarize", level: "Intermediate", table: "SigninLogs", ordered: false,
       task: "Count how many sign-ins occurred for each ResultType. Use the default count column name (count_).",
       solution: "SigninLogs | summarize count() by ResultType",
       hints: ["summarize count() by <column> groups rows and counts them.", "The default count column is named count_.", "SigninLogs | summarize count() by ResultType"] },
-
-    { id: "s6", title: "Top N by count", level: "Intermediate", table: "SigninLogs", ordered: true,
+    { id: "l6", title: "Top N by count", level: "Intermediate", table: "SigninLogs", ordered: true,
       task: "Which 3 users have the most sign-ins? Return UserPrincipalName and count_, highest first.",
       solution: "SigninLogs | summarize count() by UserPrincipalName | top 3 by count_ desc",
       hints: ["First summarize count() by UserPrincipalName.", "Then use top 3 by count_ desc.", "top keeps the highest values first."] },
-
-    { id: "s7", title: "Filter on time", level: "Intermediate", table: "SigninLogs", ordered: false,
+    { id: "l7", title: "Filter on time", level: "Intermediate", table: "SigninLogs", ordered: false,
       task: "Return all sign-ins from the last 24 hours. (The sandbox's current time is 2026-06-21 00:00Z.)",
       solution: "SigninLogs | where TimeGenerated > ago(1d)",
       hints: ["ago(1d) is the datetime 24 hours before now.", "Compare TimeGenerated > ago(1d).", "SigninLogs | where TimeGenerated > ago(1d)"] },
-
-    { id: "s8", title: "Failed logons per account", level: "Intermediate", table: "SecurityEvent", ordered: false,
+    { id: "l8", title: "Failed logons per account", level: "Intermediate", table: "SecurityEvent", ordered: false,
       task: "In SecurityEvent, find failed logons (EventID 4625) and count them per Account (default count column name).",
       solution: "SecurityEvent | where EventID == 4625 | summarize count() by Account",
       hints: ["EventID 4625 means a failed logon.", "Filter first, then summarize count() by Account.", "EventID is a number, so no quotes: EventID == 4625"] },
-
-    { id: "s9", title: "Threat hunt (contains + and)", level: "Advanced", table: "DeviceProcessEvents", ordered: false,
+    { id: "l9", title: "Threat hunt (contains + and)", level: "Advanced", table: "DeviceProcessEvents", ordered: false,
       task: 'Hunt for PowerShell running encoded commands. Return DeviceName and ProcessCommandLine where FileName is "powershell.exe" AND the command line contains "encodedcommand".',
       solution: 'DeviceProcessEvents | where FileName == "powershell.exe" and ProcessCommandLine contains "encodedcommand" | project DeviceName, ProcessCommandLine',
       hints: ["Combine two conditions with and.", "contains is a case-insensitive substring match.", 'Finish with project DeviceName, ProcessCommandLine'] },
-
-    { id: "s10", title: "Distinct count (dcount)", level: "Advanced", table: "SecurityEvent", ordered: false,
+    { id: "l10", title: "Distinct count (dcount)", level: "Advanced", table: "SecurityEvent", ordered: false,
       task: "For successful logons (EventID 4624), how many DISTINCT Computers did each Account log on to? Return Account and dcount_Computer.",
       solution: "SecurityEvent | where EventID == 4624 | summarize dcount(Computer) by Account",
       hints: ["dcount() counts distinct values.", "Its default column name is dcount_Computer.", "Filter EventID == 4624 first, then summarize dcount(Computer) by Account"] },
-
-    { id: "s11", title: "Join two tables", level: "Expert", table: "SecurityAlert + SigninLogs", ordered: false,
+    { id: "l11", title: "Join two tables", level: "Expert", table: "SecurityAlert", ordered: false,
       task: "Find users who have a HIGH severity alert AND also appear in SigninLogs. Return the distinct UserPrincipalName. (SecurityAlert.CompromisedEntity holds the user; match it to SigninLogs.UserPrincipalName.)",
       solution: 'SecurityAlert | where Severity == "High" | project UserPrincipalName = CompromisedEntity | join kind=inner (SigninLogs) on UserPrincipalName | distinct UserPrincipalName',
       hints: ['Filter High alerts, then rename the entity: project UserPrincipalName = CompromisedEntity', "Join to the other table: join kind=inner (SigninLogs) on UserPrincipalName", "Finish with distinct UserPrincipalName"] },
   ];
 
-  const API = { NOW, TABLES, SCENARIOS };
+  /* ============================================================
+     SCENARIO 2 — Email & Phishing Investigation (Defender for Office 365)
+     ============================================================ */
+  const S2_TABLES = {
+    EmailEvents: [
+      { TimeGenerated: "2026-06-20T07:10:00Z", NetworkMessageId: "msg-001", SenderFromAddress: "billing@invoices-online.ru",   RecipientEmailAddress: "jsmith@contoso.com",    Subject: "Overdue invoice #4471",     DeliveryAction: "Delivered", ThreatTypes: "Phish",   DetectionMethods: "URL reputation" },
+      { TimeGenerated: "2026-06-20T07:40:00Z", NetworkMessageId: "msg-002", SenderFromAddress: "hr@contoso.com",              RecipientEmailAddress: "aparker@contoso.com",   Subject: "Payroll update",            DeliveryAction: "Delivered", ThreatTypes: "",        DetectionMethods: "" },
+      { TimeGenerated: "2026-06-20T08:05:00Z", NetworkMessageId: "msg-003", SenderFromAddress: "security@micros0ft-support.com",RecipientEmailAddress:"aparker@contoso.com",  Subject: "Your account is locked",    DeliveryAction: "Delivered", ThreatTypes: "Phish",   DetectionMethods: "Impersonation" },
+      { TimeGenerated: "2026-06-20T08:30:00Z", NetworkMessageId: "msg-004", SenderFromAddress: "ceo@contoso.com",            RecipientEmailAddress: "bpatel@contoso.com",    Subject: "Urgent wire transfer",      DeliveryAction: "Junked",    ThreatTypes: "Phish",   DetectionMethods: "Spoof" },
+      { TimeGenerated: "2026-06-20T09:00:00Z", NetworkMessageId: "msg-005", SenderFromAddress: "newsletter@news.example",    RecipientEmailAddress: "mchen@contoso.com",     Subject: "Weekly digest",             DeliveryAction: "Delivered", ThreatTypes: "",        DetectionMethods: "" },
+      { TimeGenerated: "2026-06-20T09:20:00Z", NetworkMessageId: "msg-006", SenderFromAddress: "invoices@invoices-online.ru", RecipientEmailAddress: "twilliams@contoso.com", Subject: "invoice attached",          DeliveryAction: "Blocked",   ThreatTypes: "Malware", DetectionMethods: "Safe Attachments" },
+      { TimeGenerated: "2026-06-20T10:00:00Z", NetworkMessageId: "msg-007", SenderFromAddress: "no-reply@dropbox.example",   RecipientEmailAddress: "jsmith@contoso.com",    Subject: "A file was shared with you",DeliveryAction: "Delivered", ThreatTypes: "",        DetectionMethods: "" },
+      { TimeGenerated: "2026-06-20T10:30:00Z", NetworkMessageId: "msg-008", SenderFromAddress: "billing@invoices-online.ru",  RecipientEmailAddress: "mchen@contoso.com",     Subject: "Invoice reminder",          DeliveryAction: "Delivered", ThreatTypes: "Phish",   DetectionMethods: "URL reputation" },
+      { TimeGenerated: "2026-06-20T11:15:00Z", NetworkMessageId: "msg-009", SenderFromAddress: "it-help@contoso.com",        RecipientEmailAddress: "aparker@contoso.com",   Subject: "Password expiry notice",    DeliveryAction: "Delivered", ThreatTypes: "",        DetectionMethods: "" },
+      { TimeGenerated: "2026-06-20T12:00:00Z", NetworkMessageId: "msg-010", SenderFromAddress: "support@paypa1.example",     RecipientEmailAddress: "bpatel@contoso.com",    Subject: "Verify your payment",       DeliveryAction: "Delivered", ThreatTypes: "Phish",   DetectionMethods: "Impersonation" },
+      { TimeGenerated: "2026-06-20T13:00:00Z", NetworkMessageId: "msg-011", SenderFromAddress: "billing@invoices-online.ru",  RecipientEmailAddress: "twilliams@contoso.com", Subject: "Final invoice notice",      DeliveryAction: "Delivered", ThreatTypes: "Phish",   DetectionMethods: "URL reputation" },
+      { TimeGenerated: "2026-06-20T13:30:00Z", NetworkMessageId: "msg-012", SenderFromAddress: "hr@contoso.com",             RecipientEmailAddress: "jsmith@contoso.com",    Subject: "Benefits enrollment",       DeliveryAction: "Delivered", ThreatTypes: "",        DetectionMethods: "" },
+      { TimeGenerated: "2026-06-20T14:00:00Z", NetworkMessageId: "msg-013", SenderFromAddress: "billing@invoices-online.ru",  RecipientEmailAddress: "aparker@contoso.com",   Subject: "Invoice overdue - pay now",  DeliveryAction: "Delivered", ThreatTypes: "Phish",   DetectionMethods: "URL reputation" },
+    ],
+    EmailUrlInfo: [
+      { NetworkMessageId: "msg-001", Url: "http://invoices-online.ru/pay/4471", UrlDomain: "invoices-online.ru" },
+      { NetworkMessageId: "msg-003", Url: "http://micros0ft-support.com/unlock", UrlDomain: "micros0ft-support.com" },
+      { NetworkMessageId: "msg-004", Url: "http://secure-wire.example/transfer", UrlDomain: "secure-wire.example" },
+      { NetworkMessageId: "msg-008", Url: "http://invoices-online.ru/reminder", UrlDomain: "invoices-online.ru" },
+      { NetworkMessageId: "msg-010", Url: "http://paypa1.example/verify", UrlDomain: "paypa1.example" },
+      { NetworkMessageId: "msg-011", Url: "http://invoices-online.ru/final", UrlDomain: "invoices-online.ru" },
+      { NetworkMessageId: "msg-013", Url: "http://invoices-online.ru/pay", UrlDomain: "invoices-online.ru" },
+      { NetworkMessageId: "msg-007", Url: "http://dropbox.example/s/abc", UrlDomain: "dropbox.example" },
+    ],
+    UrlClickEvents: [
+      { TimeGenerated: "2026-06-20T07:12:00Z", NetworkMessageId: "msg-001", AccountUpn: "jsmith@contoso.com",  Url: "http://invoices-online.ru/pay/4471", ActionType: "ClickAllowed" },
+      { TimeGenerated: "2026-06-20T08:07:00Z", NetworkMessageId: "msg-003", AccountUpn: "aparker@contoso.com", Url: "http://micros0ft-support.com/unlock", ActionType: "ClickBlocked" },
+      { TimeGenerated: "2026-06-20T10:35:00Z", NetworkMessageId: "msg-008", AccountUpn: "mchen@contoso.com",   Url: "http://invoices-online.ru/reminder", ActionType: "ClickAllowed" },
+      { TimeGenerated: "2026-06-20T12:05:00Z", NetworkMessageId: "msg-010", AccountUpn: "bpatel@contoso.com",  Url: "http://paypa1.example/verify", ActionType: "ClickAllowed" },
+      { TimeGenerated: "2026-06-20T13:05:00Z", NetworkMessageId: "msg-011", AccountUpn: "twilliams@contoso.com",Url: "http://invoices-online.ru/final", ActionType: "ClickBlocked" },
+      { TimeGenerated: "2026-06-20T10:02:00Z", NetworkMessageId: "msg-007", AccountUpn: "jsmith@contoso.com",  Url: "http://dropbox.example/s/abc", ActionType: "ClickAllowed" },
+    ],
+    EmailAttachmentInfo: [
+      { NetworkMessageId: "msg-006", FileName: "invoice.zip",      FileType: "zip", SHA256: "a1b2c3d4", ThreatTypes: "Malware" },
+      { NetworkMessageId: "msg-001", FileName: "invoice_4471.pdf", FileType: "pdf", SHA256: "e5f6a7b8", ThreatTypes: "" },
+      { NetworkMessageId: "msg-004", FileName: "wire_details.doc", FileType: "doc", SHA256: "11aa22bb", ThreatTypes: "Malware" },
+      { NetworkMessageId: "msg-012", FileName: "benefits.pdf",     FileType: "pdf", SHA256: "33cc44dd", ThreatTypes: "" },
+    ],
+  };
+  const S2_LEVELS = [
+    { id: "l1", title: "Search email subjects", level: "Beginner", table: "EmailEvents", ordered: false,
+      task: 'Return all emails whose Subject contains the word "invoice".',
+      solution: 'EmailEvents | where Subject contains "invoice"',
+      hints: ["contains is a case-insensitive substring match.", 'EmailEvents | where Subject contains "invoice"'] },
+    { id: "l2", title: "Count phishing emails", level: "Beginner", table: "EmailEvents", ordered: false,
+      task: 'How many emails were classified as phishing (ThreatTypes is "Phish")? Return a single number.',
+      solution: 'EmailEvents | where ThreatTypes == "Phish" | count',
+      hints: ['Filter with where ThreatTypes == "Phish".', "Then pipe into count."] },
+    { id: "l3", title: "Delivered phishing", level: "Intermediate", table: "EmailEvents", ordered: false,
+      task: 'A phishing email that was actually DELIVERED is dangerous. Return the RecipientEmailAddress and Subject of every email where ThreatTypes is "Phish" AND DeliveryAction is "Delivered".',
+      solution: 'EmailEvents | where ThreatTypes == "Phish" and DeliveryAction == "Delivered" | project RecipientEmailAddress, Subject',
+      hints: ["Combine both conditions with and.", "project RecipientEmailAddress, Subject"] },
+    { id: "l4", title: "Noisy senders", level: "Intermediate", table: "EmailEvents", ordered: false,
+      task: "Which senders sent more than 2 emails? Return SenderFromAddress and count_ (default count column name).",
+      solution: "EmailEvents | summarize count() by SenderFromAddress | where count_ > 2",
+      hints: ["First summarize count() by SenderFromAddress.", "Then filter the aggregate: where count_ > 2"] },
+    { id: "l5", title: "Malicious domains", level: "Intermediate", table: "EmailUrlInfo", ordered: false,
+      task: "List the distinct UrlDomain values seen in email links.",
+      solution: "EmailUrlInfo | distinct UrlDomain",
+      hints: ["distinct returns unique values for a column.", "EmailUrlInfo | distinct UrlDomain"] },
+    { id: "l6", title: "Who clicked a phish?", level: "Expert", table: "EmailEvents", ordered: false,
+      task: 'Find users who CLICKED a link (ActionType "ClickAllowed") in a phishing email. Return the distinct AccountUpn. (Join EmailEvents to UrlClickEvents on NetworkMessageId.)',
+      solution: 'EmailEvents | where ThreatTypes == "Phish" | project NetworkMessageId | join kind=inner (UrlClickEvents) on NetworkMessageId | where ActionType == "ClickAllowed" | distinct AccountUpn',
+      hints: ['Start with phishing emails and keep the key: project NetworkMessageId', "Join to clicks: join kind=inner (UrlClickEvents) on NetworkMessageId", 'Then filter ActionType == "ClickAllowed" and finish with distinct AccountUpn'] },
+  ];
+
+  /* ============================================================
+     SCENARIO 3 — Endpoint Threat Hunting (Defender for Endpoint)
+     ============================================================ */
+  const S3_TABLES = {
+    DeviceProcessEvents: [
+      { TimeGenerated: "2026-06-20T02:05:00Z", DeviceName: "wks-fin01", AccountName: "jsmith",        FileName: "powershell.exe", ProcessCommandLine: "powershell -enc SQBFAFgA", InitiatingProcessFileName: "winword.exe", SHA256: "aa01" },
+      { TimeGenerated: "2026-06-20T02:07:00Z", DeviceName: "srv-file01",AccountName: "administrator", FileName: "mimikatz.exe",   ProcessCommandLine: "mimikatz sekurlsa::logonpasswords", InitiatingProcessFileName: "cmd.exe", SHA256: "bb02" },
+      { TimeGenerated: "2026-06-20T02:08:00Z", DeviceName: "srv-file01",AccountName: "administrator", FileName: "cmd.exe",        ProcessCommandLine: "cmd /c whoami /all", InitiatingProcessFileName: "powershell.exe", SHA256: "cc03" },
+      { TimeGenerated: "2026-06-20T09:30:00Z", DeviceName: "wks-fin02", AccountName: "mchen",         FileName: "cmd.exe",        ProcessCommandLine: "cmd /c dir", InitiatingProcessFileName: "explorer.exe", SHA256: "cc03" },
+      { TimeGenerated: "2026-06-20T02:10:00Z", DeviceName: "srv-dc01",  AccountName: "administrator", FileName: "reg.exe",        ProcessCommandLine: "reg save hklm\\sam sam.hive", InitiatingProcessFileName: "cmd.exe", SHA256: "dd04" },
+      { TimeGenerated: "2026-06-20T21:15:00Z", DeviceName: "wks-fin01", AccountName: "jsmith",        FileName: "powershell.exe", ProcessCommandLine: "powershell IEX (New-Object Net.WebClient)", InitiatingProcessFileName: "outlook.exe", SHA256: "aa05" },
+      { TimeGenerated: "2026-06-20T11:00:00Z", DeviceName: "wks-eng01", AccountName: "twilliams",     FileName: "code.exe",       ProcessCommandLine: "code .", InitiatingProcessFileName: "explorer.exe", SHA256: "ee06" },
+      { TimeGenerated: "2026-06-20T03:00:00Z", DeviceName: "srv-file01",AccountName: "administrator", FileName: "mimikatz.exe",   ProcessCommandLine: "mimikatz lsadump::sam", InitiatingProcessFileName: "cmd.exe", SHA256: "bb02" },
+    ],
+    DeviceNetworkEvents: [
+      { TimeGenerated: "2026-06-20T02:06:00Z", DeviceName: "wks-fin01", RemoteIP: "185.220.101.5", RemoteUrl: "c2-server.ru",   RemotePort: 4444, InitiatingProcessFileName: "powershell.exe", ActionType: "ConnectionSuccess" },
+      { TimeGenerated: "2026-06-20T02:11:00Z", DeviceName: "srv-file01",RemoteIP: "185.220.101.5", RemoteUrl: "c2-server.ru",   RemotePort: 4444, InitiatingProcessFileName: "mimikatz.exe",   ActionType: "ConnectionSuccess" },
+      { TimeGenerated: "2026-06-20T02:22:00Z", DeviceName: "srv-file01",RemoteIP: "185.220.101.5", RemoteUrl: "c2-server.ru",   RemotePort: 4444, InitiatingProcessFileName: "cmd.exe",        ActionType: "ConnectionSuccess" },
+      { TimeGenerated: "2026-06-20T09:31:00Z", DeviceName: "wks-fin02", RemoteIP: "13.107.42.14",  RemoteUrl: "microsoft.com",  RemotePort: 443,  InitiatingProcessFileName: "msedge.exe",     ActionType: "ConnectionSuccess" },
+      { TimeGenerated: "2026-06-20T21:16:00Z", DeviceName: "wks-fin01", RemoteIP: "45.33.32.10",   RemoteUrl: "pastebin.example",RemotePort: 443, InitiatingProcessFileName: "powershell.exe", ActionType: "ConnectionSuccess" },
+      { TimeGenerated: "2026-06-20T11:01:00Z", DeviceName: "wks-eng01", RemoteIP: "140.82.112.3",  RemoteUrl: "github.com",     RemotePort: 443,  InitiatingProcessFileName: "code.exe",       ActionType: "ConnectionSuccess" },
+      { TimeGenerated: "2026-06-20T02:30:00Z", DeviceName: "srv-file01",RemoteIP: "185.220.101.5", RemoteUrl: "c2-server.ru",   RemotePort: 8080, InitiatingProcessFileName: "cmd.exe",        ActionType: "ConnectionFailed" },
+    ],
+    DeviceFileEvents: [
+      { TimeGenerated: "2026-06-20T02:12:00Z", DeviceName: "srv-file01", FileName: "sam.hive",   FolderPath: "C:\\Windows\\Temp\\sam.hive",   ActionType: "FileCreated",  InitiatingProcessFileName: "reg.exe" },
+      { TimeGenerated: "2026-06-20T02:13:00Z", DeviceName: "srv-file01", FileName: "dump.txt",   FolderPath: "C:\\Windows\\Temp\\dump.txt",   ActionType: "FileCreated",  InitiatingProcessFileName: "mimikatz.exe" },
+      { TimeGenerated: "2026-06-20T21:17:00Z", DeviceName: "wks-fin01",  FileName: "payload.ps1",FolderPath: "C:\\Users\\jsmith\\AppData\\Local\\Temp\\payload.ps1", ActionType: "FileCreated", InitiatingProcessFileName: "powershell.exe" },
+      { TimeGenerated: "2026-06-20T12:00:00Z", DeviceName: "wks-fin01",  FileName: "budget.xlsx",FolderPath: "C:\\Users\\jsmith\\Documents\\budget.xlsx", ActionType: "FileModified", InitiatingProcessFileName: "excel.exe" },
+      { TimeGenerated: "2026-06-20T11:02:00Z", DeviceName: "wks-eng01",  FileName: "main.js",    FolderPath: "C:\\repo\\main.js",              ActionType: "FileModified", InitiatingProcessFileName: "code.exe" },
+      { TimeGenerated: "2026-06-20T02:40:00Z", DeviceName: "srv-file01", FileName: "sam.hive",   FolderPath: "C:\\Windows\\Temp\\sam.hive",   ActionType: "FileDeleted",  InitiatingProcessFileName: "cmd.exe" },
+    ],
+    DeviceLogonEvents: [
+      { TimeGenerated: "2026-06-20T02:00:00Z", DeviceName: "srv-dc01",  AccountName: "administrator", ActionType: "LogonFailed",  LogonType: "Network",     RemoteIP: "185.220.101.5" },
+      { TimeGenerated: "2026-06-20T02:00:20Z", DeviceName: "srv-dc01",  AccountName: "administrator", ActionType: "LogonFailed",  LogonType: "Network",     RemoteIP: "185.220.101.5" },
+      { TimeGenerated: "2026-06-20T02:04:00Z", DeviceName: "srv-file01",AccountName: "administrator", ActionType: "LogonSuccess", LogonType: "Network",     RemoteIP: "10.10.5.30" },
+      { TimeGenerated: "2026-06-20T09:29:00Z", DeviceName: "wks-fin02", AccountName: "mchen",         ActionType: "LogonSuccess", LogonType: "Interactive", RemoteIP: "" },
+      { TimeGenerated: "2026-06-20T02:03:00Z", DeviceName: "srv-file01",AccountName: "administrator", ActionType: "LogonFailed",  LogonType: "Network",     RemoteIP: "185.220.101.5" },
+    ],
+  };
+  const S3_LEVELS = [
+    { id: "l1", title: "Find a process", level: "Beginner", table: "DeviceProcessEvents", ordered: false,
+      task: 'Return every process event where FileName is "cmd.exe".',
+      solution: 'DeviceProcessEvents | where FileName == "cmd.exe"',
+      hints: ['Filter with where FileName == "cmd.exe".'] },
+    { id: "l2", title: "Processes per device", level: "Beginner", table: "DeviceProcessEvents", ordered: false,
+      task: "Count how many process events each device generated. Return DeviceName and count_.",
+      solution: "DeviceProcessEvents | summarize count() by DeviceName",
+      hints: ["summarize count() by DeviceName"] },
+    { id: "l3", title: "Suspicious ports", level: "Intermediate", table: "DeviceNetworkEvents", ordered: false,
+      task: "Port 4444 is a common C2 port. Return DeviceName, RemoteIP and InitiatingProcessFileName for every connection to RemotePort 4444.",
+      solution: "DeviceNetworkEvents | where RemotePort == 4444 | project DeviceName, RemoteIP, InitiatingProcessFileName",
+      hints: ["RemotePort is a number: where RemotePort == 4444", "project DeviceName, RemoteIP, InitiatingProcessFileName"] },
+    { id: "l4", title: "Files dropped in Temp", level: "Intermediate", table: "DeviceFileEvents", ordered: false,
+      task: 'Find files CREATED in a Temp folder. Return DeviceName, FileName and FolderPath where ActionType is "FileCreated" AND FolderPath contains "Temp".',
+      solution: 'DeviceFileEvents | where ActionType == "FileCreated" and FolderPath contains "Temp" | project DeviceName, FileName, FolderPath',
+      hints: ["Combine with and.", 'contains is case-insensitive, so "Temp" matches "temp" too.', "project DeviceName, FileName, FolderPath"] },
+    { id: "l5", title: "Failed logons per device", level: "Advanced", table: "DeviceLogonEvents", ordered: false,
+      task: 'Count failed logons (ActionType "LogonFailed") per device. Return DeviceName and count_.',
+      solution: 'DeviceLogonEvents | where ActionType == "LogonFailed" | summarize count() by DeviceName',
+      hints: ['Filter ActionType == "LogonFailed" first.', "Then summarize count() by DeviceName"] },
+    { id: "l6", title: "Correlate process + network", level: "Expert", table: "DeviceProcessEvents", ordered: false,
+      task: 'Which devices ran "mimikatz.exe" AND also made a network connection? Return the distinct DeviceName. (Join DeviceProcessEvents to DeviceNetworkEvents on DeviceName.)',
+      solution: 'DeviceProcessEvents | where FileName == "mimikatz.exe" | distinct DeviceName | join kind=inner (DeviceNetworkEvents) on DeviceName | distinct DeviceName',
+      hints: ['Get the mimikatz devices: where FileName == "mimikatz.exe" | distinct DeviceName', "Join to network events: join kind=inner (DeviceNetworkEvents) on DeviceName", "Finish with distinct DeviceName"] },
+  ];
+
+  /* ============================================================
+     SCENARIO 4 — Cloud & Identity (Azure activity, risky sign-ins, audit)
+     ============================================================ */
+  const S4_TABLES = {
+    AzureActivity: [
+      { TimeGenerated: "2026-06-20T09:00:00Z", Caller: "admin@contoso.com",   OperationNameValue: "Microsoft.Compute/virtualMachines/write",  ActivityStatusValue: "Success", ResourceGroup: "rg-prod",  CallerIpAddress: "10.10.5.30" },
+      { TimeGenerated: "2026-06-20T09:15:00Z", Caller: "admin@contoso.com",   OperationNameValue: "Microsoft.Storage/storageAccounts/delete", ActivityStatusValue: "Success", ResourceGroup: "rg-prod",  CallerIpAddress: "10.10.5.30" },
+      { TimeGenerated: "2026-06-20T09:20:00Z", Caller: "admin@contoso.com",   OperationNameValue: "Microsoft.Compute/virtualMachines/delete", ActivityStatusValue: "Success", ResourceGroup: "rg-prod",  CallerIpAddress: "10.10.5.30" },
+      { TimeGenerated: "2026-06-20T02:30:00Z", Caller: "bpatel@contoso.com",  OperationNameValue: "Microsoft.Authorization/roleAssignments/write", ActivityStatusValue: "Failure", ResourceGroup: "rg-prod", CallerIpAddress: "185.220.101.5" },
+      { TimeGenerated: "2026-06-20T02:31:00Z", Caller: "bpatel@contoso.com",  OperationNameValue: "Microsoft.KeyVault/vaults/secrets/read",   ActivityStatusValue: "Failure", ResourceGroup: "rg-sec",   CallerIpAddress: "185.220.101.5" },
+      { TimeGenerated: "2026-06-20T02:32:00Z", Caller: "bpatel@contoso.com",  OperationNameValue: "Microsoft.KeyVault/vaults/secrets/read",   ActivityStatusValue: "Failure", ResourceGroup: "rg-sec",   CallerIpAddress: "185.220.101.5" },
+      { TimeGenerated: "2026-06-20T11:00:00Z", Caller: "svc-deploy@contoso.com", OperationNameValue: "Microsoft.Resources/deployments/write", ActivityStatusValue: "Success", ResourceGroup: "rg-web", CallerIpAddress: "10.10.9.9" },
+      { TimeGenerated: "2026-06-20T12:00:00Z", Caller: "admin@contoso.com",   OperationNameValue: "Microsoft.Network/networkSecurityGroups/delete", ActivityStatusValue: "Success", ResourceGroup: "rg-net", CallerIpAddress: "10.10.5.30" },
+      { TimeGenerated: "2026-06-20T13:00:00Z", Caller: "mchen@contoso.com",   OperationNameValue: "Microsoft.Storage/storageAccounts/read",   ActivityStatusValue: "Success", ResourceGroup: "rg-data", CallerIpAddress: "10.10.5.31" },
+    ],
+    SigninLogs: [
+      { TimeGenerated: "2026-06-20T02:01:00Z", UserPrincipalName: "bpatel@contoso.com",  IPAddress: "185.220.101.5", RiskLevelDuringSignIn: "high",   ConditionalAccessStatus: "failure", ResultType: "50126" },
+      { TimeGenerated: "2026-06-20T02:05:00Z", UserPrincipalName: "bpatel@contoso.com",  IPAddress: "185.220.101.5", RiskLevelDuringSignIn: "high",   ConditionalAccessStatus: "failure", ResultType: "50126" },
+      { TimeGenerated: "2026-06-20T08:12:00Z", UserPrincipalName: "jsmith@contoso.com",  IPAddress: "203.0.113.10",  RiskLevelDuringSignIn: "none",   ConditionalAccessStatus: "success", ResultType: "0" },
+      { TimeGenerated: "2026-06-20T10:00:00Z", UserPrincipalName: "aparker@contoso.com", IPAddress: "88.77.66.55",   RiskLevelDuringSignIn: "medium", ConditionalAccessStatus: "success", ResultType: "0" },
+      { TimeGenerated: "2026-06-20T10:05:00Z", UserPrincipalName: "aparker@contoso.com", IPAddress: "198.51.100.22", RiskLevelDuringSignIn: "none",   ConditionalAccessStatus: "success", ResultType: "0" },
+      { TimeGenerated: "2026-06-20T14:00:00Z", UserPrincipalName: "mchen@contoso.com",   IPAddress: "10.10.5.31",    RiskLevelDuringSignIn: "none",   ConditionalAccessStatus: "success", ResultType: "0" },
+      { TimeGenerated: "2026-06-20T03:00:00Z", UserPrincipalName: "admin@contoso.com",   IPAddress: "10.10.5.30",    RiskLevelDuringSignIn: "low",    ConditionalAccessStatus: "success", ResultType: "0" },
+    ],
+    AuditLogs: [
+      { TimeGenerated: "2026-06-20T09:30:00Z", OperationName: "Add member to group",  Result: "success", InitiatedBy: "admin@contoso.com",  TargetResource: "Domain Admins" },
+      { TimeGenerated: "2026-06-20T02:35:00Z", OperationName: "Add member to group",  Result: "success", InitiatedBy: "bpatel@contoso.com", TargetResource: "Domain Admins" },
+      { TimeGenerated: "2026-06-20T11:00:00Z", OperationName: "Reset user password",  Result: "success", InitiatedBy: "admin@contoso.com",  TargetResource: "twilliams@contoso.com" },
+      { TimeGenerated: "2026-06-20T12:30:00Z", OperationName: "Update application",   Result: "success", InitiatedBy: "svc-deploy@contoso.com", TargetResource: "HR Portal" },
+      { TimeGenerated: "2026-06-20T13:15:00Z", OperationName: "Add member to group",  Result: "failure", InitiatedBy: "mchen@contoso.com",  TargetResource: "Finance" },
+    ],
+  };
+  const S4_LEVELS = [
+    { id: "l1", title: "Failed cloud operations", level: "Beginner", table: "AzureActivity", ordered: false,
+      task: 'Return every AzureActivity record where ActivityStatusValue is "Failure".',
+      solution: 'AzureActivity | where ActivityStatusValue == "Failure"',
+      hints: ['Filter with where ActivityStatusValue == "Failure".'] },
+    { id: "l2", title: "Busiest callers", level: "Beginner", table: "AzureActivity", ordered: false,
+      task: "Count operations per Caller. Return Caller and count_.",
+      solution: "AzureActivity | summarize count() by Caller",
+      hints: ["summarize count() by Caller"] },
+    { id: "l3", title: "Risky sign-ins", level: "Intermediate", table: "SigninLogs", ordered: false,
+      task: 'Return UserPrincipalName, RiskLevelDuringSignIn and IPAddress for every sign-in whose RiskLevelDuringSignIn is NOT "none".',
+      solution: 'SigninLogs | where RiskLevelDuringSignIn != "none" | project UserPrincipalName, RiskLevelDuringSignIn, IPAddress',
+      hints: ['Filter with where RiskLevelDuringSignIn != "none".', "project the three columns."] },
+    { id: "l4", title: "Sensitive deletes", level: "Intermediate", table: "AzureActivity", ordered: false,
+      task: 'Which callers performed DELETE operations? Return Caller and count_ where the OperationNameValue contains "delete".',
+      solution: 'AzureActivity | where OperationNameValue contains "delete" | summarize count() by Caller',
+      hints: ['Filter with where OperationNameValue contains "delete".', "Then summarize count() by Caller."] },
+    { id: "l5", title: "Distinct IPs per user", level: "Advanced", table: "SigninLogs", ordered: false,
+      task: "How many DISTINCT IP addresses did each user sign in from? Return UserPrincipalName and dcount_IPAddress.",
+      solution: "SigninLogs | summarize dcount(IPAddress) by UserPrincipalName",
+      hints: ["dcount() counts distinct values.", "Default name is dcount_IPAddress.", "summarize dcount(IPAddress) by UserPrincipalName"] },
+    { id: "l6", title: "Privilege escalation audit", level: "Expert", table: "AuditLogs", ordered: false,
+      task: 'Someone added an account to a privileged group. Return InitiatedBy and TargetResource for successful "Add member to group" operations targeting "Domain Admins".',
+      solution: 'AuditLogs | where OperationName == "Add member to group" and Result == "success" and TargetResource == "Domain Admins" | project InitiatedBy, TargetResource',
+      hints: ["Chain three conditions with and.", "project InitiatedBy, TargetResource"] },
+  ];
+
+  const SCENARIOS = [
+    { id: "sc1", title: "SOC Fundamentals", blurb: "Sign-in logs, Windows security events and endpoint process data — the everyday tables. Learn the core operators.", tables: S1_TABLES, levels: S1_LEVELS },
+    { id: "sc2", title: "Email & Phishing", blurb: "Defender for Office 365 email telemetry. Hunt phishing, trace who clicked, and pivot across message tables.", tables: S2_TABLES, levels: S2_LEVELS },
+    { id: "sc3", title: "Endpoint Threat Hunting", blurb: "Defender for Endpoint process, network and file events. Follow an intrusion from execution to C2 to file drop.", tables: S3_TABLES, levels: S3_LEVELS },
+    { id: "sc4", title: "Cloud & Identity", blurb: "Azure activity, risky sign-ins and directory audit logs. Spot risky operations and privilege escalation.", tables: S4_TABLES, levels: S4_LEVELS },
+  ];
+
+  const API = { NOW, SCENARIOS };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   if (typeof window !== "undefined") window.KQLDATA = API;
 })();
