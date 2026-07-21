@@ -8,7 +8,7 @@
    mv-expand, render (ignored). Scalar funcs: ago, now, datetime, bin,
    tolower/toupper, strlen, strcat, tostring, toint, isempty/isnotempty,
    coalesce, iff/iif, substring, indexof, split, array_length.
-   String ops: ==, !=, <,>,<=,>=, contains, has, startswith, endswith,
+   String ops: ==, !=, =~, !~, <,>,<=,>=, contains, has, startswith, endswith,
    in, !in, between; and/or/not; +,-,*,/,%.
 
    Not a full KQL implementation — enough for realistic SOC practice.
@@ -124,7 +124,7 @@
       }
       if (isIdStart(c)) { let j = i; while (j < n && isId(input[j])) j++; toks.push({ t: "id", v: input.slice(i, j) }); i = j; continue; }
       const two = input.substr(i, 2);
-      if (["==", "!=", "<=", ">=", "..", "&&", "||"].indexOf(two) >= 0) { toks.push({ t: "op", v: two }); i += 2; continue; }
+      if (["==", "!=", "=~", "!~", "<=", ">=", "..", "&&", "||"].indexOf(two) >= 0) { toks.push({ t: "op", v: two }); i += 2; continue; }
       if ("=<>!+-*/%(),.".indexOf(c) >= 0) { toks.push({ t: "op", v: c }); i++; continue; }
       throw new Error("Unexpected character '" + c + "'");
     }
@@ -143,7 +143,7 @@
     function parseOr() { let l = parseAnd(); while (isId("or") || isOp("||")) { next(); l = { type: "bin", op: "or", l, r: parseAnd() }; } return l; }
     function parseAnd() { let l = parseNot(); while (isId("and") || isOp("&&")) { next(); l = { type: "bin", op: "and", l, r: parseNot() }; } return l; }
     function parseNot() { if (isId("not") || isOp("!")) { next(); return { type: "unary", op: "not", e: parseNot() }; } return parseComparison(); }
-    const CMP = ["==", "!=", "<", ">", "<=", ">="];
+    const CMP = ["==", "!=", "=~", "!~", "<", ">", "<=", ">="];
     const WORDOPS = ["contains", "has", "startswith", "endswith", "in", "hasprefix", "hassuffix", "matches"];
     function parseComparison() {
       const l = parseAdditive();
@@ -229,6 +229,8 @@
         switch (op) {
           case "==": return eqCS(a, b);
           case "!=": return !eqCS(a, b);
+          case "=~": return ci(a) === ci(b);
+          case "!~": return ci(a) !== ci(b);
           case "<": return cmp(a, b) < 0;
           case ">": return cmp(a, b) > 0;
           case "<=": return cmp(a, b) <= 0;

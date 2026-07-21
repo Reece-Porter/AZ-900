@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KQL Practice Lab — Cheat Sheet</title>
+<link rel="stylesheet" href="../css/style.css" />
+<style>
+  .sheet { columns: 2; column-gap: 22px; }
+  @media (max-width: 900px) { .sheet { columns: 1; } }
+  .cs { break-inside: avoid; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; margin: 0 0 14px; background: var(--panel); }
+  .cs h4 { margin: 0 0 8px; font-size: 14.5px; color: var(--primary-2); }
+  .cs ul { margin: 0; padding-left: 18px; }
+  .cs li { margin: 4px 0; font-size: 13px; line-height: 1.5; }
+  .cs b { color: var(--text); }
+  .cs code { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 12px; background: rgba(127,127,127,.14); padding: 1px 5px; border-radius: 5px; color: var(--text); white-space: nowrap; }
+  .cs .hi { color: var(--amber); font-weight: 700; }
+  @media print {
+    @page { margin: 12mm; }
+    body { background: #fff !important; color: #000 !important; }
+    .sidebar, .no-print { display: none !important; }
+    .content { max-width: none; padding: 0; }
+    .page-head .eyebrow, .page-head p { color: #333 !important; }
+    .sheet { columns: 2; column-gap: 14px; }
+    .cs { border: 1px solid #bbb; background: #fff !important; box-shadow: none; page-break-inside: avoid; }
+    .cs h4 { color: #1558b0 !important; }
+    .cs b, .cs li { color: #000 !important; }
+    .cs code { background: #eee !important; color: #000 !important; }
+    .cs .hi { color: #000 !important; text-decoration: underline; }
+    h2, h3 { color: #000 !important; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar no-print">
+    <div class="brand">
+      <div class="logo" style="font-size:13px">KQL</div>
+      <div><h1>KQL Practice Lab</h1><span>Kusto Query Language</span></div>
+    </div>
+    <nav class="nav">
+      <a href="../index.html" style="opacity:.85"><span class="ico">⇄</span> All courses</a>
+      <a href="index.html"><span class="ico">🧪</span> Practice</a>
+      <a href="reference.html"><span class="ico">📚</span> Reference</a>
+      <a href="cheatsheet.html" class="active"><span class="ico">🧾</span> Cheat Sheet</a>
+    </nav>
+    <div class="sidebar-foot">One-page KQL reference for study and day-to-day SOC work. Use the Print button for a paper copy.</div>
+  </aside>
+
+  <main class="content">
+    <header class="page-head">
+      <div class="eyebrow">One-page reference</div>
+      <h2>KQL Cheat Sheet</h2>
+      <p>The operators, functions, and patterns you reach for most — on a single page. <button class="btn primary no-print" onclick="window.print()" style="margin-left:10px">🖨️ Print / Save as PDF</button></p>
+    </header>
+
+    <div class="sheet">
+
+      <div class="cs">
+        <h4>Query shape (order matters)</h4>
+        <ul>
+          <li>A query is a <b>table</b> then a pipeline of <code>|</code> operators, evaluated top to bottom.</li>
+          <li>Golden rule: <span class="hi">filter early</span> — put <code>where</code> before <code>summarize</code>/<code>join</code> to cut data first.</li>
+          <li>Typical flow: <code>Table | where … | summarize … | sort by … | take …</code></li>
+          <li><code>//</code> starts a comment.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Filter rows — <code>where</code></h4>
+        <ul>
+          <li><code>== != &lt; &gt; &lt;= &gt;=</code> compare; <code>and</code> / <code>or</code> combine.</li>
+          <li><code>=~</code> / <code>!~</code> — case-insensitive string equals / not-equals.</li>
+          <li><code>has</code> — matches a whole <b>indexed term</b> (fast). Prefer over <code>contains</code>.</li>
+          <li><code>contains</code> — substring scan (slower; <code>"badminton"</code> matches <code>"admin"</code>).</li>
+          <li><code>startswith</code> / <code>endswith</code> — prefix / suffix.</li>
+          <li><code>in (a, b)</code> / <code>!in (…)</code> — value in a set.</li>
+          <li><code>matches regex "…"</code> — regular expression.</li>
+          <li>Add <code>_cs</code> for case-sensitive (<code>has_cs</code>, <code>contains_cs</code>).</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Shape columns</h4>
+        <ul>
+          <li><code>project</code> — keep / rename / reorder columns.</li>
+          <li><code>project-away</code> — drop columns; <code>project-rename</code> — rename.</li>
+          <li><code>extend</code> — add a <b>computed</b> column, keep the rest.</li>
+          <li><code>distinct Col1, Col2</code> — unique combinations.</li>
+          <li><code>sort by Col desc</code> (a.k.a. <code>order by</code>).</li>
+          <li><code>top 10 by Col desc</code> — sorted first N.</li>
+          <li><code>take 10</code> / <code>limit 10</code> — any N rows (<b>no order</b>).</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Aggregate — <code>summarize</code></h4>
+        <ul>
+          <li><code>count()</code> — rows; <code>countif(pred)</code> — rows matching.</li>
+          <li><code>dcount(Col)</code> — distinct count.</li>
+          <li><code>sum() avg() min() max()</code> — numeric.</li>
+          <li><code>arg_max(TimeGenerated, *)</code> — <span class="hi">whole latest row</span> per group (<code>*</code> = all cols). <code>arg_min</code> for earliest.</li>
+          <li><code>make_set(Col)</code> — distinct values as array; <code>make_list(Col)</code> — all values.</li>
+          <li>Group with <code>by Col</code>; time-bucket with <code>by bin(TimeGenerated, 1h)</code>.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Combine tables</h4>
+        <ul>
+          <li><code>union T1, T2</code> — stack all rows from both.</li>
+          <li><code>join kind=inner (…) on Key</code> — keep only matches.</li>
+          <li><code>kind=leftouter</code> — all left rows + matches.</li>
+          <li><span class="hi"><code>kind=leftanti</code></span> — left rows with <b>no</b> match (find X missing Y).</li>
+          <li><code>kind=leftsemi</code> — left rows that <b>do</b> match (left cols only).</li>
+          <li><code>lookup</code> — enrich from a dimension table.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Time</h4>
+        <ul>
+          <li><code>ago(1d)</code> = now − 1 day; units <code>m h d</code> (e.g. <code>5m</code>, <code>1h</code>, <code>30d</code>).</li>
+          <li>Last 24h: <code>where TimeGenerated &gt; ago(1d)</code>.</li>
+          <li><code>now()</code> — current time; <code>bin(T, 1h)</code> — round into buckets.</li>
+          <li><code>todatetime("2026-06-21")</code> — cast string to datetime.</li>
+          <li><code>between (ago(7d) .. now())</code> — inclusive range.</li>
+          <li>Set the range in the time picker <b>or</b> in the query — the query wins if stricter.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Handy functions</h4>
+        <ul>
+          <li><code>let x = …;</code> — name a value, list, or subquery for reuse.</li>
+          <li><code>iff(cond, a, b)</code> — inline if; <code>case(c1,v1, c2,v2, default)</code>.</li>
+          <li><code>tostring() toint() toreal() todatetime()</code> — casts.</li>
+          <li><code>strcat(a, b)</code> — join strings; <code>split(s, ",")</code> — to array.</li>
+          <li><code>parse Col with … </code> — extract fields from text.</li>
+          <li><code>mv-expand Col</code> — one row per array element.</li>
+          <li><code>isnotempty(Col)</code> / <code>isnull(Col)</code>.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Visualize</h4>
+        <ul>
+          <li><code>render timechart</code> — time series (after a <code>summarize … by bin()</code>).</li>
+          <li><code>render columnchart</code> / <code>barchart</code> / <code>piechart</code>.</li>
+          <li><code>make-series C=count() on TimeGenerated step 1h</code> — gap-filled series.</li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>SOC one-liners</h4>
+        <ul>
+          <li>Failed sign-ins by user:<br><code>SigninLogs | where ResultType != 0 | summarize c=count() by UserPrincipalName | top 10 by c</code></li>
+          <li>Brute force (Windows 4625) per hour:<br><code>SecurityEvent | where EventID==4625 | summarize c=count() by bin(TimeGenerated,1h), Account | where c&gt;10</code></li>
+          <li>PowerShell child processes:<br><code>DeviceProcessEvents | where InitiatingProcessFileName =~ "powershell.exe"</code></li>
+          <li>Rare outbound domains:<br><code>DeviceNetworkEvents | summarize c=count() by RemoteUrl | where c&lt;5</code></li>
+        </ul>
+      </div>
+
+      <div class="cs">
+        <h4>Sentinel / exam tips</h4>
+        <ul>
+          <li>A <b>scheduled analytics rule</b> = a KQL query + schedule + threshold (<code>results &gt; 0</code>) + <b>entity mapping</b>.</li>
+          <li>Entity mapping (Account, Host, IP → entities) powers the investigation graph.</li>
+          <li>In advanced hunting, turn a query into alerts via <b>Create detection rule</b>.</li>
+          <li>Watch the trap: <code>max(T)</code> returns only the value — use <code>arg_max(T, *)</code> for the whole row.</li>
+          <li><code>has</code> ≠ <code>contains</code>; <code>take</code> is unordered; <code>project</code> replaces the column list, <code>extend</code> adds to it.</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <p class="no-print" style="color:var(--muted);font-size:13px;margin-top:8px">Want to run these? Open the <a href="index.html">Practice</a> lab, or browse the full <a href="reference.html">Reference</a> library.</p>
+  </main>
+</div>
+</body>
+</html>
