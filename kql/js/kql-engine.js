@@ -408,11 +408,31 @@
   }
 
   function doJoin(arg, rows, ctx, tables) {
-    const m = /^(?:kind\s*=\s*(\w+)\s*)?\(\s*([A-Za-z_][A-Za-z0-9_]*)\s*\)\s+on\s+([\s\S]+)$/i.exec(arg.trim());
-    if (!m) throw new Error("Usage: join kind=inner (RightTable) on Key");
-    const kind = (m[1] || "innerunique").toLowerCase();
-    const rname = m[2]; const rightRows = tables[rname]; if (!rightRows) throw new Error("Unknown table '" + rname + "'");
-    const keys = splitTop(m[3], ",").map(s => s.trim());
+    let s = arg.trim();
+    // optional "kind=xxx"
+    let kind = "innerunique";
+    const km = /^kind\s*=\s*(\w+)\s*/i.exec(s);
+    if (km) { kind = km[1].toLowerCase(); s = s.slice(km[0].length); }
+    // the right side must be a parenthesized (sub)query; scan for its match
+    if (s[0] !== "(") throw new Error("Usage: join kind=inner (RightTable) on Key");
+    let depth = 0, end = -1, qc = null;
+    for (let i = 0; i < s.length; i++) {
+      const c = s[i];
+      if (qc) { if (c === qc) qc = null; continue; }
+      if (c === '"' || c === "'") { qc = c; continue; }
+      if (c === "(") depth++;
+      else if (c === ")") { depth--; if (depth === 0) { end = i; break; } }
+    }
+    if (end < 0) throw new Error("Unbalanced parentheses in join");
+    const inner = s.slice(1, end).trim();
+    const onPart = s.slice(end + 1).trim();
+    const onm = /^on\s+([\s\S]+)$/i.exec(onPart);
+    if (!onm) throw new Error("Usage: join kind=inner (RightTable) on Key");
+    // right side: a bare table name, or a full subquery pipeline to evaluate
+    const rightRows = /^[A-Za-z_][A-Za-z0-9_]*$/.test(inner)
+      ? (tables[inner] ? tables[inner].map(r => Object.assign({}, r)) : (() => { throw new Error("Unknown table '" + inner + "'"); })())
+      : runPipeline(inner, tables, ctx);
+    const keys = splitTop(onm[1], ",").map(s => s.trim());
     const keyFn = row => keys.map(k => String(row[k])).join("");
     const index = new Map();
     rightRows.forEach(r => { const k = keyFn(r); if (!index.has(k)) index.set(k, []); index.get(k).push(r); });
@@ -468,11 +488,18 @@
       .replace(/[\u00A0\u2007\u202F\u200B]/g, " ");
     // preprocess bare datetime(...) -> datetime("...")
     q = q.replace(/datetime\(\s*([^)'"]+?)\s*\)/gi, 'datetime("$1")');
+    const rows = runPipeline(q, tables, ctx);
+    return { columns: inferColumns(rows), rows: rows, format: formatCell, canonRow: canonRow };
+  }
+
+  // Run a (already-normalized) query string through the pipeline and return
+  // its rows. Reused for subqueries, e.g. the right side of a join.
+  function runPipeline(q, tables, ctx) {
     const segs = splitPipes(q);
     if (!segs.length) throw new Error("Empty query");
     let rows = evalSource(segs[0], tables);
     for (let i = 1; i < segs.length; i++) rows = applyOp(segs[i], rows, ctx, tables);
-    return { columns: inferColumns(rows), rows: rows, format: formatCell, canonRow: canonRow };
+    return rows;
   }
 
   // compare two result sets for scenario checking
