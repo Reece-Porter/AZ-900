@@ -18,7 +18,7 @@ The root `index.html` is a course selector with a button for each certification.
 |------|--------------|
 | **Study Guide** (`index.html`) | Complete, exam-aligned notes across all domains, plus an exam-readiness meter, an exam-date countdown, and a tickable 7-day study plan. |
 | **Flashcards** (`flashcards.html`) | Active-recall cards with domain filtering, shuffle, and mastery tracking. |
-| **Mock Tests** (`mock-tests.html`) | Scenario questions in single-answer, multiple-response, yes/no, and complete-the-sentence formats. Full timed exam, relaxed practice, and a focused **By Topic** mode. Instant-feedback toggle, Back button, flag questions, review mistakes, and retry incorrect. |
+| **Mock Tests** (`mock-tests.html`) | Scenario questions in single-answer, multiple-response, yes/no, and complete-the-sentence formats — including **read-the-KQL / complete-the-query** items and **incident-response workflow** scenarios. Full timed exam, relaxed practice, and a focused **By Topic** mode. Instant-feedback toggle, Back button, flag questions, review mistakes, retry incorrect, and a **Drill my weak spots** mode that auto-builds a set from your lowest-scoring topics (read from My Progress). |
 | **Memory Games** (`games.html`) | Match Up, Memory Flip, and Beat the Clock on key term/definition pairs. |
 | **My Progress** (`progress.html`) | Per-topic strengths & weaknesses dashboard, saved locally per course. |
 | **Cheat Sheet** (`cheatsheet.html`) | Dense high-yield one-pager with a Print / Save-as-PDF button. |

@@ -83,9 +83,11 @@
         <h4 style="margin-top:0">⚡ Quick drills</h4>
         <p style="color:var(--muted);margin:0 0 12px;font-size:13.5px">Jump straight into the questions you most need to revisit.</p>
         <div class="btn-row">
+          <button class="btn" id="weakSpotsBtn" style="display:none"></button>
           <button class="btn" id="reviewMistakesBtn" style="display:none"></button>
           <button class="btn" id="flaggedBtn" style="display:none"></button>
         </div>
+        <p id="weakSpotsHint" style="color:var(--muted);margin:12px 0 0;font-size:12.5px;display:none"></p>
       </div>
     </section>
 
@@ -144,6 +146,7 @@
 <script src="js/questions.js"></script>
 <script src="js/questions-formats.js"></script>
 <script src="js/questions-extra.js"></script>
+<script src="js/questions-kql-ir.js"></script>
 <script src="js/data.js"></script>
 <script src="js/progress.js"></script>
 <script>
@@ -166,6 +169,19 @@
     let h = 0; for (let i = 0; i < str.length; i++) h = (h * 31 + str.charCodeAt(i)) | 0;
     return "q" + (h >>> 0);
   }
+  // ---- weak-topics detection (reads the same progress store as My Progress) ----
+  // A topic is "weak" once you've answered enough of it (>=4) and are scoring
+  // below 70% (the pass mark). Topics you've barely touched are surfaced too,
+  // so the final-week revision auto-targets your lowest-scoring areas.
+  const WEAK_MIN_ANSWERED = 4, WEAK_PCT = 70;
+  function weakTopics() {
+    if (!window.AZProgress) return [];
+    const data = AZProgress.load();
+    return Object.keys(topics)
+      .map(t => { const d = data[t]; const total = d ? d.total : 0; const pct = total ? Math.round((d.correct / total) * 100) : null; return { t, total, pct }; })
+      .filter(x => x.total >= WEAK_MIN_ANSWERED && x.pct < WEAK_PCT)
+      .sort((a, b) => a.pct - b.pct);
+  }
   function refreshDrills() {
     const missCount = AZ.QUESTIONS.filter(q => missed.has(qid(q))).length;
     const flagCount = AZ.QUESTIONS.filter(q => flagged.has(qid(q))).length;
@@ -174,8 +190,26 @@
     mb.textContent = `🔁 Review my mistakes (${missCount})`;
     fb.style.display = flagCount ? "inline-flex" : "none";
     fb.textContent = `⭐ Flagged questions (${flagCount})`;
-    el("drillCard").style.display = (missCount || flagCount) ? "block" : "none";
+
+    const weak = weakTopics();
+    const wb = el("weakSpotsBtn"), wh = el("weakSpotsHint");
+    const weakQ = weak.length ? AZ.QUESTIONS.filter(q => weak.some(w => w.t === q.topic)) : [];
+    wb.style.display = weakQ.length ? "inline-flex" : "none";
+    wb.textContent = `🎯 Drill my weak spots (${weakQ.length})`;
+    if (weakQ.length) {
+      const names = weak.slice(0, 3).map(w => `${topics[w.t].name} (${w.pct}%)`).join(", ");
+      wh.textContent = `Built from your Progress data — weakest first: ${names}${weak.length > 3 ? ", …" : ""}.`;
+      wh.style.display = "block";
+    } else { wh.style.display = "none"; }
+
+    el("drillCard").style.display = (missCount || flagCount || weakQ.length) ? "block" : "none";
   }
+  el("weakSpotsBtn").onclick = () => {
+    const weak = weakTopics();
+    const pool = AZ.QUESTIONS.filter(q => weak.some(w => w.t === q.topic));
+    if (!pool.length) return;
+    mode = "review"; startPool(pool, { timed: false });
+  };
   el("reviewMistakesBtn").onclick = () => { mode = "review"; startPool(AZ.QUESTIONS.filter(q => missed.has(qid(q))), { timed: false }); };
   el("flaggedBtn").onclick = () => { mode = "review"; startPool(AZ.QUESTIONS.filter(q => flagged.has(qid(q))), { timed: false }); };
   el("flagBtn").onclick = () => {

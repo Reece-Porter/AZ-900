@@ -175,7 +175,7 @@ a:hover { text-decoration: underline; }
 
 /* ===== Quiz ===== */
 .q-card { margin: 18px 0; }
-.q-text { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+.q-text { font-size: 18px; font-weight: 700; margin-bottom: 16px; white-space: pre-wrap; }
 .options { display: flex; flex-direction: column; gap: 10px; }
 .opt {
   display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-radius: 10px;
