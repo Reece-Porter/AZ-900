@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>KQL — Reference</title>
+<link rel="stylesheet" href="../css/style.css" />
+<style>
+  .ref-toc { position: sticky; top: 16px; }
+  .ref-toc a { display: block; padding: 3px 0; font-size: 13.5px; color: var(--muted); }
+  .ref-toc a:hover { color: var(--text); }
+  .qblock { position: relative; background: #0b1226; border: 1px solid var(--border); border-radius: 10px; padding: 12px 40px 12px 14px; margin: 8px 0; overflow-x: auto; }
+  .qblock code { font-family: Consolas, "SF Mono", monospace; font-size: 13.5px; line-height: 1.55; color: #cfe0ff; white-space: pre; display: block; }
+  .copybtn { position: absolute; top: 8px; right: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--muted);
+    border-radius: 6px; font-size: 11px; padding: 2px 8px; cursor: pointer; }
+  .copybtn:hover { color: var(--text); border-color: var(--primary); }
+  .copybtn.done { color: var(--green); border-color: var(--green); }
+  .reftable { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 8px 0; }
+  .reftable th, .reftable td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; vertical-align: top; }
+  .reftable th { background: var(--panel-2); }
+  .reftable code, .prose code { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-family: Consolas, monospace; font-size: 12.5px; }
+  .ref-card h3 { scroll-margin-top: 16px; }
+  .lead { color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo" style="font-size:13px">KQL</div>
+      <div><h1>KQL Practice Lab</h1><span>Kusto Query Language</span></div>
+    </div>
+    <nav class="nav">
+      <a href="../index.html" style="opacity:.85"><span class="ico">⇄</span> All courses</a>
+      <a href="index.html"><span class="ico">🧪</span> Practice</a>
+      <a href="reference.html" class="active"><span class="ico">📚</span> Reference</a>
+    </nav>
+    <div class="nav-section">On this page</div>
+    <nav class="ref-toc">
+      <a href="#basics">Query basics</a>
+      <a href="#filter">Filter &amp; shape</a>
+      <a href="#aggregate">Aggregate (summarize)</a>
+      <a href="#tables">Multiple tables</a>
+      <a href="#strings">Operators &amp; strings</a>
+      <a href="#functions">Scalar functions</a>
+      <a href="#time">Time &amp; datetime</a>
+      <a href="#basicq">Basic queries</a>
+      <a href="#advq">Advanced queries</a>
+      <a href="#answers">Practice answers</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    <header class="page-head">
+      <div class="eyebrow">Query Library</div>
+      <h2>KQL Reference</h2>
+      <p class="lead">A quick-reference of KQL operators, functions, and ready-to-use query patterns for study and day-to-day SOC work. Click <b>Copy</b> on any block and paste it into the <a href="index.html">Practice</a> tab (or your real Sentinel / advanced-hunting workspace).</p>
+    </header>
+
+    <!-- BASICS -->
+    <section class="card ref-card mb" id="basics">
+      <h3 style="margin-top:0">Query basics</h3>
+      <p class="prose">A KQL query starts with a <b>table</b> and pipes (<code>|</code>) data through a sequence of operators. Each operator transforms the rows. Comments use <code>//</code>.</p>
+      <div class="qblock"><code>TableName
+| where SomeColumn == "value"   // filter rows
+| project ColumnA, ColumnB      // choose columns
+| sort by TimeGenerated desc    // order
+| take 10                       // first 10 rows</code></div>
+    </section>
+
+    <!-- FILTER -->
+    <section class="card ref-card mb" id="filter">
+      <h3 style="margin-top:0">Filter &amp; shape rows</h3>
+      <table class="reftable">
+        <tr><th>Operator</th><th>What it does</th></tr>
+        <tr><td><code>where</code></td><td>Keep rows matching a condition</td></tr>
+        <tr><td><code>project</code></td><td>Choose / rename columns (drops the rest)</td></tr>
+        <tr><td><code>project-away</code></td><td>Remove specific columns</td></tr>
+        <tr><td><code>extend</code></td><td>Add a new calculated column</td></tr>
+        <tr><td><code>distinct</code></td><td>Unique rows for the named columns</td></tr>
+        <tr><td><code>take</code> / <code>limit</code></td><td>Return N arbitrary rows</td></tr>
+        <tr><td><code>sort by</code> / <code>order by</code></td><td>Order rows (default <code>desc</code>)</td></tr>
+        <tr><td><code>top N by C</code></td><td>Highest N rows by a value</td></tr>
+        <tr><td><code>count</code></td><td>Number of rows (column <code>Count</code>)</td></tr>
+      </table>
+      <div class="qblock"><code>SigninLogs
+| where ResultType != "0"
+| extend Failed = true
+| project TimeGenerated, UserPrincipalName, IPAddress, Failed
+| sort by TimeGenerated desc</code></div>
+    </section>
+
+    <!-- AGGREGATE -->
+    <section class="card ref-card mb" id="aggregate">
+      <h3 style="margin-top:0">Aggregate with <code>summarize</code></h3>
+      <p class="prose"><code>summarize</code> groups rows and computes aggregates. Group with <code>by</code>. Bucket time with <code>bin()</code>.</p>
+      <table class="reftable">
+        <tr><th>Aggregation</th><th>Result</th></tr>
+        <tr><td><code>count()</code></td><td>Row count (default column <code>count_</code>)</td></tr>
+        <tr><td><code>countif(pred)</code></td><td>Count rows where a condition is true</td></tr>
+        <tr><td><code>dcount(Col)</code></td><td>Distinct count of a column</td></tr>
+        <tr><td><code>sum / avg / min / max (Col)</code></td><td>Numeric/temporal aggregates</td></tr>
+        <tr><td><code>make_set(Col)</code> / <code>make_list(Col)</code></td><td>Collect values into an array (unique / all)</td></tr>
+      </table>
+      <div class="qblock"><code>SigninLogs
+| summarize
+    Total = count(),
+    Failures = countif(ResultType != "0"),
+    Countries = make_set(Location)
+  by UserPrincipalName
+| sort by Failures desc</code></div>
+    </section>
+
+    <!-- TABLES -->
+    <section class="card ref-card mb" id="tables">
+      <h3 style="margin-top:0">Combine tables</h3>
+      <p class="prose"><code>union</code> stacks rows from multiple tables; <code>join</code> merges rows on a matching key. Join kinds: <code>inner</code>, <code>innerunique</code>, <code>leftouter</code>, <code>leftanti</code>.</p>
+      <div class="qblock"><code>// union: rows from both tables together
+union SigninLogs, AuditLogs
+| where TimeGenerated > ago(1d)
+
+// join: correlate on a shared key
+SecurityAlert
+| where Severity == "High"
+| project UserPrincipalName = CompromisedEntity
+| join kind=inner (SigninLogs) on UserPrincipalName
+| distinct UserPrincipalName</code></div>
+    </section>
+
+    <!-- STRINGS -->
+    <section class="card ref-card mb" id="strings">
+      <h3 style="margin-top:0">Operators &amp; string matching</h3>
+      <table class="reftable">
+        <tr><th>Operator</th><th>Meaning</th></tr>
+        <tr><td><code>==</code> / <code>!=</code></td><td>Equals / not-equals (<code>==</code> is case-sensitive)</td></tr>
+        <tr><td><code>&lt; &gt; &lt;= &gt;=</code></td><td>Comparisons (numbers &amp; datetimes)</td></tr>
+        <tr><td><code>contains</code></td><td>Case-insensitive substring</td></tr>
+        <tr><td><code>has</code></td><td>Case-insensitive whole-term (indexed, fast)</td></tr>
+        <tr><td><code>startswith</code> / <code>endswith</code></td><td>Prefix / suffix match</td></tr>
+        <tr><td><code>in (a, b, c)</code></td><td>Value is one of a list</td></tr>
+        <tr><td><code>between (x .. y)</code></td><td>Inclusive range</td></tr>
+        <tr><td><code>and</code> / <code>or</code> / <code>not</code></td><td>Boolean logic</td></tr>
+      </table>
+      <div class="qblock"><code>DeviceProcessEvents
+| where FileName has "powershell"
+    and ProcessCommandLine contains "encodedcommand"
+    and AccountName !in ("svc-backup", "system")</code></div>
+    </section>
+
+    <!-- FUNCTIONS -->
+    <section class="card ref-card mb" id="functions">
+      <h3 style="margin-top:0">Scalar functions</h3>
+      <table class="reftable">
+        <tr><th>Function</th><th>Use</th></tr>
+        <tr><td><code>ago(1d)</code> · <code>now()</code></td><td>Relative time · current time</td></tr>
+        <tr><td><code>bin(TimeGenerated, 1h)</code></td><td>Round a time into buckets (time-series)</td></tr>
+        <tr><td><code>datetime("2026-06-20")</code></td><td>A specific datetime literal</td></tr>
+        <tr><td><code>tolower / toupper(s)</code></td><td>Change case</td></tr>
+        <tr><td><code>strlen(s)</code> · <code>strcat(a,b)</code></td><td>Length · concatenate</td></tr>
+        <tr><td><code>substring(s, i, n)</code> · <code>split(s, ",")</code></td><td>Slice · split into array</td></tr>
+        <tr><td><code>iff(cond, a, b)</code></td><td>If/else expression</td></tr>
+        <tr><td><code>isempty(x)</code> · <code>isnotempty(x)</code></td><td>Null/empty checks</td></tr>
+        <tr><td><code>coalesce(a, b, ...)</code></td><td>First non-empty value</td></tr>
+      </table>
+    </section>
+
+    <!-- TIME -->
+    <section class="card ref-card mb" id="time">
+      <h3 style="margin-top:0">Working with time</h3>
+      <div class="qblock"><code>// last 24 hours
+SigninLogs | where TimeGenerated > ago(1d)
+
+// a specific window
+SigninLogs | where TimeGenerated between (datetime(2026-06-20) .. datetime(2026-06-21))
+
+// events per hour (for a timechart)
+SigninLogs
+| summarize count() by bin(TimeGenerated, 1h)
+| sort by TimeGenerated asc
+| render timechart</code></div>
+      <p class="prose">Timespans: <code>s</code> seconds, <code>m</code> minutes, <code>h</code> hours, <code>d</code> days — e.g. <code>ago(30m)</code>, <code>bin(TimeGenerated, 15m)</code>.</p>
+    </section>
+
+    <!-- BASIC QUERIES -->
+    <section class="card ref-card mb" id="basicq">
+      <h3 style="margin-top:0">Basic queries you'll reuse</h3>
+      <p class="lead">These run against the Practice database (and mirror real Sentinel tables).</p>
+      <div class="qblock"><code>// 1) Recent activity
+SigninLogs | where TimeGenerated > ago(24h)</code></div>
+      <div class="qblock"><code>// 2) Failed sign-ins only
+SigninLogs | where ResultType != "0"</code></div>
+      <div class="qblock"><code>// 3) Count events by a field
+SigninLogs | summarize count() by ResultType</code></div>
+      <div class="qblock"><code>// 4) Top talkers
+SigninLogs | summarize Count = count() by UserPrincipalName | top 5 by Count desc</code></div>
+      <div class="qblock"><code>// 5) Distinct values
+SigninLogs | distinct Location</code></div>
+      <div class="qblock"><code>// 6) Failed Windows logons (Event 4625)
+SecurityEvent | where EventID == 4625 | summarize count() by Account, Computer</code></div>
+    </section>
+
+    <!-- ADVANCED QUERIES -->
+    <section class="card ref-card mb" id="advq">
+      <h3 style="margin-top:0">Advanced hunting patterns</h3>
+      <div class="qblock"><code>// Brute-force: many failures from one user/IP
+SigninLogs
+| where ResultType != "0"
+| summarize Failures = count() by UserPrincipalName, IPAddress
+| where Failures >= 5
+| sort by Failures desc</code></div>
+      <div class="qblock"><code>// How many distinct hosts did each account touch?
+SecurityEvent
+| where EventID == 4624
+| summarize Hosts = dcount(Computer), HostList = make_set(Computer) by Account
+| sort by Hosts desc</code></div>
+      <div class="qblock"><code>// Suspicious PowerShell (encoded commands)
+DeviceProcessEvents
+| where FileName == "powershell.exe"
+    and ProcessCommandLine has_any ("-enc", "-EncodedCommand")
+| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine</code></div>
+      <div class="qblock"><code>// Rare processes across the fleet (potential LOLBins)
+DeviceProcessEvents
+| summarize Count = count(), Devices = dcount(DeviceName) by FileName
+| sort by Count asc</code></div>
+      <div class="qblock"><code>// Correlate: users with a High alert who also signed in
+SecurityAlert
+| where Severity == "High"
+| project UserPrincipalName = CompromisedEntity
+| join kind=inner (SigninLogs) on UserPrincipalName
+| distinct UserPrincipalName</code></div>
+      <div class="qblock"><code>// Activity timeline for a single user
+SigninLogs
+| where UserPrincipalName == "bpatel@contoso.com"
+| summarize Attempts = count() by bin(TimeGenerated, 1h), ResultType
+| sort by TimeGenerated asc</code></div>
+      <p class="lead" style="margin-bottom:0">Note: <code>has_any</code> and <code>render</code> are shown for real-world reference; the Practice sandbox supports a core subset (it accepts <code>render</code> and most patterns above run there).</p>
+    </section>
+
+    <!-- PRACTICE ANSWERS -->
+    <section class="card ref-card mb" id="answers">
+      <h3 style="margin-top:0">Practice scenario answers</h3>
+      <p class="lead">Every Practice challenge and one correct solution — for review. (Any query that returns the same result also passes.)</p>
+      <div id="answersList"></div>
+    </section>
+
+    <footer class="page-foot">
+      KQL Reference · Query patterns are general-purpose; the Practice sandbox implements a core subset of KQL. Confirm exact behaviour against the official KQL documentation for production use.
+    </footer>
+  </main>
+</div>
+
+<script src="js/kql-data.js"></script>
+<script>
+(function () {
+  const esc = s => String(s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+
+  // render practice answers from the shared data
+  const box = document.getElementById("answersList");
+  (window.KQLDATA.SCENARIOS || []).forEach((s, i) => {
+    const d = document.createElement("div");
+    d.style.cssText = "border:1px solid var(--border);border-radius:10px;background:var(--panel-2);padding:12px 14px;margin-bottom:10px";
+    d.innerHTML = `<div style="font-weight:700">${i + 1}. ${esc(s.title)} <span class="pill purple" style="margin-left:6px">${esc(s.level)}</span></div>
+      <div style="color:var(--muted);font-size:13.5px;margin:6px 0 8px">${esc(s.task)}</div>
+      <div class="qblock"><code>${esc(s.solution)}</code></div>`;
+    box.appendChild(d);
+  });
+
+  // add copy buttons to every code block
+  document.querySelectorAll(".qblock").forEach(block => {
+    const btn = document.createElement("button");
+    btn.className = "copybtn"; btn.textContent = "Copy";
+    btn.onclick = () => {
+      const text = block.querySelector("code").textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = "Copied ✓"; btn.classList.add("done");
+        setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("done"); }, 1400);
+      }).catch(() => { btn.textContent = "Copy failed"; });
+    };
+    block.appendChild(btn);
+  });
+})();
+</script>
+</body>
+</html>

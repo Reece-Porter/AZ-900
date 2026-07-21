@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SC-200 Study Hub — KQL Practice</title>
+<title>KQL — Practice Lab</title>
 <link rel="stylesheet" href="../css/style.css" />
 <style>
   .kql-wrap { display: grid; grid-template-columns: 1fr 280px; gap: 18px; align-items: start; }
@@ -44,20 +44,15 @@
 <div class="app">
   <aside class="sidebar">
     <div class="brand">
-      <div class="logo">SC</div>
-      <div><h1>SC-200 Study Hub</h1><span>Security Operations Analyst</span></div>
+      <div class="logo" style="font-size:13px">KQL</div>
+      <div><h1>KQL Practice Lab</h1><span>Kusto Query Language</span></div>
     </div>
     <nav class="nav">
       <a href="../index.html" style="opacity:.85"><span class="ico">⇄</span> All courses</a>
-      <a href="index.html"><span class="ico">📖</span> Study Guide</a>
-      <a href="flashcards.html"><span class="ico">🃏</span> Flashcards</a>
-      <a href="mock-tests.html"><span class="ico">📝</span> Mock Tests</a>
-      <a href="games.html"><span class="ico">🎮</span> Memory Games</a>
-      <a href="kql.html" class="active"><span class="ico">🔎</span> KQL Practice</a>
-      <a href="progress.html"><span class="ico">📊</span> My Progress</a>
-      <a href="cheatsheet.html"><span class="ico">🧾</span> Cheat Sheet</a>
+      <a href="index.html" class="active"><span class="ico">🧪</span> Practice</a>
+      <a href="reference.html"><span class="ico">📚</span> Reference</a>
     </nav>
-    <div class="sidebar-foot">A live KQL sandbox with a fictional SOC database. Solve each scenario to unlock the next.</div>
+    <div class="sidebar-foot">A live KQL sandbox with a fictional SOC database. Solve each scenario to unlock the next — or explore freely. Straight and “smart” quotes both work.</div>
   </aside>
 
   <main class="content">
@@ -126,7 +121,7 @@
 (function () {
   const el = id => document.getElementById(id);
   const { TABLES, SCENARIOS, NOW } = window.KQLDATA;
-  const DONE_KEY = "sc200_kql_done";
+  const DONE_KEY = "kql_done";
   let done = new Set();
   try { done = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || "[]")); } catch (e) {}
   let curIdx = firstIncomplete();

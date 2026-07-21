@@ -8,6 +8,7 @@ A self-contained, zero-dependency study site for Microsoft certifications. Open 
 |--------|------|--------|
 | **AZ-900** — Azure Fundamentals | `az-900/` | Cloud concepts, Azure architecture & services, management & governance |
 | **SC-200** — Security Operations Analyst | `sc-200/` | Microsoft Defender XDR, Microsoft Defender for Cloud, Microsoft Sentinel |
+| **KQL** — Kusto Query Language | `kql/` | A live query sandbox with gated scenarios + a full basic/advanced query reference |
 
 The root `index.html` is a course selector with a button for each certification.
 
@@ -22,7 +23,7 @@ The root `index.html` is a course selector with a button for each certification.
 | **My Progress** (`progress.html`) | Per-topic strengths & weaknesses dashboard, saved locally per course. |
 | **Cheat Sheet** (`cheatsheet.html`) | Dense high-yield one-pager with a Print / Save-as-PDF button. |
 
-**SC-200 also includes a KQL Practice page** (`sc-200/kql.html`) — a live, in-browser KQL engine over a fictional SOC database (SigninLogs, SecurityEvent, DeviceProcessEvents, etc.). Run any query and see real results, browse the schema, and work through gated scenarios that increase in difficulty (each unlocks the next). The engine is in `sc-200/js/kql-engine.js`; data and challenges in `sc-200/js/kql-data.js`.
+**The KQL course** (`kql/`) is a dedicated lab: a live, in-browser KQL engine over a fictional SOC database (SigninLogs, SecurityEvent, DeviceProcessEvents, etc.). Its **Practice** page (`kql/index.html`) lets you run any query, browse the schema, and work gated scenarios (Beginner→Expert, each unlocks the next); its **Reference** page (`kql/reference.html`) is a copy-paste library of operators, functions, and basic/advanced query patterns. Engine: `kql/js/kql-engine.js`; data + challenges: `kql/js/kql-data.js`. SC-200's sidebar links across to it since KQL underpins Sentinel and advanced hunting.
 
 ## Structure & data
 

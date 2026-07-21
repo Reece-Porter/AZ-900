@@ -458,8 +458,14 @@
   function runQuery(query, tables, options) {
     const now = options && options.now != null ? options.now : Date.now();
     const ctx = { now, tables };
+    // normalize "smart"/curly quotes and non-breaking spaces that autocorrect
+    // often inserts, so typed queries don't fail with "Unexpected character".
+    let q = String(query)
+      .replace(/[\u201C\u201D\u201E\u201F\u2033]/g, '"')
+      .replace(/[\u2018\u2019\u201A\u201B\u2032]/g, "'")
+      .replace(/[\u00A0\u2007\u202F\u200B]/g, " ");
     // preprocess bare datetime(...) -> datetime("...")
-    let q = String(query).replace(/datetime\(\s*([^)'"]+?)\s*\)/gi, 'datetime("$1")');
+    q = q.replace(/datetime\(\s*([^)'"]+?)\s*\)/gi, 'datetime("$1")');
     const segs = splitPipes(q);
     if (!segs.length) throw new Error("Empty query");
     let rows = evalSource(segs[0], tables);
