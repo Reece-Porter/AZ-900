@@ -375,7 +375,21 @@
     groups.forEach(g => {
       const o = {};
       keys.forEach((k, i) => o[k.name] = g.kv[i]);
-      aggs.forEach(a => o[a.name] = computeAgg(a, g.rows, ctx));
+      aggs.forEach(a => {
+        if (a.isArg) {
+          let best = null, bestVal = null;
+          g.rows.forEach(r => {
+            const v = evalExpr(a.orderAst, r, ctx);
+            if (best === null || (a.fn === "arg_max" ? cmp(v, bestVal) > 0 : cmp(v, bestVal) < 0)) { best = r; bestVal = v; }
+          });
+          if (best) a.returns.forEach(ret => {
+            if (ret.star) Object.keys(best).forEach(c => { if (!(c in o)) o[c] = best[c]; });
+            else o[ret.name] = evalExpr(ret.ast, best, ctx);
+          });
+        } else {
+          o[a.name] = computeAgg(a, g.rows, ctx);
+        }
+      });
       out.push(o);
     });
     return out;
@@ -387,6 +401,17 @@
     const m = /^([A-Za-z_]+)\s*\(([\s\S]*)\)$/.exec(expr);
     if (!m) throw new Error("Invalid aggregation '" + expr + "'");
     const fn = m[1].toLowerCase(); const inner = m[2].trim();
+    // arg_max/arg_min take (orderExpr, returnExpr | *, ...) and yield columns
+    // from the winning row rather than a single scalar.
+    if (fn === "arg_max" || fn === "arg_min") {
+      const parts = splitTop(inner, ",").map(s => s.trim()).filter(Boolean);
+      if (!parts.length) throw new Error(fn + "() needs an expression to order by");
+      const orderAst = parseExpr(parts[0]);
+      let returns = parts.slice(1).map(p => p === "*" ? { star: true } : parseItem(p));
+      if (!returns.length) returns = [{ star: true }];
+      if (name && returns.length === 1 && !returns[0].star) returns[0].name = name;
+      return { fn, isArg: true, orderAst, returns };
+    }
     if (!name) name = fn === "count" ? "count_" : fn + "_" + (inner || "");
     return { name, fn, ast: inner ? parseExpr(inner) : null, inner };
   }

@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>KQL — Practice Lab</title>
+<title>KQL — Sandbox</title>
 <link rel="stylesheet" href="../css/style.css" />
 <style>
   .kql-wrap { display: grid; grid-template-columns: 1fr 280px; gap: 18px; align-items: start; }
   @media (max-width: 900px) { .kql-wrap { grid-template-columns: 1fr; } }
   .editor {
-    width: 100%; min-height: 130px; resize: vertical; font-family: Consolas, "SF Mono", Menlo, monospace;
+    width: 100%; min-height: 150px; resize: vertical; font-family: Consolas, "SF Mono", Menlo, monospace;
     font-size: 14.5px; line-height: 1.5; background: #0b1226; color: #cfe0ff; border: 1px solid var(--border);
     border-radius: 10px; padding: 12px 14px; tab-size: 2;
   }
@@ -22,7 +22,6 @@
   .ac-item { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; cursor: pointer; color: #cfe0ff; }
   .ac-item.sel, .ac-item:hover { background: rgba(90,130,255,.22); }
   .ac-label { flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .ac-label b { color: #fff; }
   .ac-tag { font-size: 10px; letter-spacing: .3px; text-transform: uppercase; padding: 1px 6px; border-radius: 999px; opacity: .9; flex-shrink: 0; }
   .ac-tag.op { background: rgba(124,92,255,.25); color: #c9bcff; }
   .ac-tag.fn { background: rgba(54,211,153,.22); color: #9ff0cf; }
@@ -43,17 +42,11 @@
   .schema-tbl .cols { padding: 2px 12px 10px; }
   .schema-tbl .col { font-family: monospace; font-size: 12.5px; color: var(--muted); padding: 2px 0; cursor: pointer; }
   .schema-tbl .col:hover { color: var(--primary-2); }
-  .sc-chips { display: flex; gap: 8px; flex-wrap: wrap; }
-  .sc-chip { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; font-weight: 700; font-size: 13px;
-    border: 1px solid var(--border); background: var(--panel-2); cursor: pointer; user-select: none; }
-  .sc-chip.done { background: rgba(54,211,153,.2); border-color: var(--green); color: var(--green); }
-  .sc-chip.current { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(58,141,255,.35); }
-  .sc-chip.locked { opacity: .45; cursor: not-allowed; }
-  .status { margin-top: 12px; padding: 12px 14px; border-radius: 10px; font-weight: 600; display: none; }
-  .status.ok { display: block; background: rgba(54,211,153,.16); border: 1px solid var(--green); color: var(--green); }
-  .status.no { display: block; background: rgba(251,191,36,.12); border: 1px solid var(--amber); color: var(--amber); }
+  .schema-tbl .srcnote { font-size: 11px; color: var(--amber); font-weight: 400; margin-left: 6px; }
   .hint { background: rgba(58,141,255,.1); border-left: 3px solid var(--primary); padding: 8px 12px; border-radius: 8px; margin-top: 8px; font-size: 14px; }
   code.inline { background: var(--panel-2); border: 1px solid var(--border); border-radius: 5px; padding: 1px 6px; font-size: 13px; }
+  .samples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+  .samples button { font-family: Consolas, monospace; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -65,55 +58,27 @@
     </div>
     <nav class="nav">
       <a href="../index.html" style="opacity:.85"><span class="ico">⇄</span> All courses</a>
-      <a href="index.html" class="active"><span class="ico">🧪</span> Practice</a>
-      <a href="sandbox.html"><span class="ico">🧰</span> Sandbox</a>
+      <a href="index.html"><span class="ico">🧪</span> Practice</a>
+      <a href="sandbox.html" class="active"><span class="ico">🧰</span> Sandbox</a>
       <a href="reference.html"><span class="ico">📚</span> Reference</a>
       <a href="cheatsheet.html"><span class="ico">🧾</span> Cheat Sheet</a>
     </nav>
-    <div class="nav-section">Scenarios</div>
-    <nav class="nav" id="scenarioNav"></nav>
-    <div class="sidebar-foot">Each scenario is its own database. Solve a scenario's levels in order — or explore freely. Straight and “smart” quotes both work.</div>
+    <div class="sidebar-foot">A free-form workspace with <b>every</b> table from every scenario loaded at once. No levels, no gating — just query. Current sandbox time: 2026-06-21 00:00Z.</div>
   </aside>
 
   <main class="content">
     <header class="page-head">
-      <div class="eyebrow">Hands-on KQL</div>
-      <h2>KQL Practice</h2>
-      <p>Query a live, in-browser SOC database exactly as you would in Microsoft Sentinel or advanced hunting. Each scenario is its own database with a series of levels that get harder — solve a level to unlock the next. Switch scenarios anytime from the sidebar, or explore freely by running any query.</p>
+      <div class="eyebrow">Free-form workspace</div>
+      <h2>KQL Sandbox</h2>
+      <p>Every database from all four scenarios — sign-in logs, endpoint events, email/phishing, cloud &amp; identity — is loaded together here. Run anything you like, join across domains, and experiment without solving levels. Autocomplete and the schema browser cover the whole combined database.</p>
     </header>
-
-    <!-- scenario header + level progress -->
-    <section class="card mb">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-        <h3 style="margin:0" id="scenTitle">Scenario</h3>
-        <span id="progText" style="color:var(--muted);font-size:14px"></span>
-      </div>
-      <p id="scenBlurb" style="color:var(--muted);margin:6px 0 0;font-size:14px"></p>
-      <div class="progress mt mb"><span id="progBar"></span></div>
-      <div class="sc-chips" id="levelChips"></div>
-    </section>
-
-    <!-- current level -->
-    <section class="card mb" id="levelCard">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
-        <h3 style="margin:0" id="lvlTitle">Level</h3>
-        <span class="pill purple" id="lvlDiff">—</span>
-      </div>
-      <p id="lvlTask" style="margin:12px 0"></p>
-      <div class="btn-row">
-        <button class="btn ghost" id="hintBtn">💡 Show a hint</button>
-        <button class="btn ghost" id="solBtn">👁 Reveal solution</button>
-      </div>
-      <div id="hintBox"></div>
-      <div class="status" id="status"></div>
-    </section>
 
     <div class="kql-wrap">
       <!-- editor + results -->
       <div>
         <section class="card">
           <h4 style="margin-top:0">Query <span style="font-weight:400;font-size:12px;color:var(--muted)">— suggestions pop up as you type (<span class="kbd">Ctrl/⌘ + Space</span> to force them; <span class="kbd">↑↓</span> then <span class="kbd">⏎</span> to insert)</span></h4>
-          <textarea class="editor" id="editor" spellcheck="false"></textarea>
+          <textarea class="editor" id="editor" spellcheck="false" placeholder="e.g.  SigninLogs | where ResultType != 0 | summarize count() by UserPrincipalName | top 5 by count_"></textarea>
           <div class="kql-toolbar">
             <button class="btn primary" id="runBtn">▶ Run <span class="kbd">Ctrl/⌘ + Enter</span></button>
             <button class="btn ghost" id="clearBtn">Clear</button>
@@ -121,15 +86,20 @@
           </div>
           <div id="output" class="mt"></div>
         </section>
+
+        <section class="card mt">
+          <h4 style="margin-top:0">Try one of these</h4>
+          <p style="color:var(--muted);font-size:12.5px;margin:0 0 8px">Click to load an example into the editor, then Run.</p>
+          <div class="samples" id="samples"></div>
+        </section>
       </div>
 
       <!-- schema browser -->
       <div>
         <section class="card">
-          <h4 style="margin-top:0">Database schema</h4>
-          <p style="color:var(--muted);font-size:12.5px;margin:0 0 10px">Click a table or column to insert it. Current time: <code class="inline">2026-06-21 00:00Z</code></p>
+          <h4 style="margin-top:0">Full database schema</h4>
+          <p style="color:var(--muted);font-size:12.5px;margin:0 0 10px">Every scenario table, combined. Click a table or column to insert it.</p>
           <div id="schema"></div>
-          <button class="btn ghost mt" id="resetBtn" style="font-size:12.5px">↺ Reset KQL progress</button>
         </section>
       </div>
     </div>
@@ -140,48 +110,29 @@
 <script src="js/kql-data.js"></script>
 <script>
 (function () {
-  const el = id => document.getElementById(id);
   const { SCENARIOS, NOW } = window.KQLDATA;
-  const DONE_KEY = "kql_done";
-  let done = new Set();
-  try { done = new Set(JSON.parse(localStorage.getItem(DONE_KEY) || "[]")); } catch (e) {}
-  let scenIdx = 0, lvlIdx = 0, hintsShown = 0;
+  const el = id => document.getElementById(id);
 
-  const key = (sc, lv) => sc + ":" + lv;
-  const save = () => localStorage.setItem(DONE_KEY, JSON.stringify([...done]));
-  const curScen = () => SCENARIOS[scenIdx];
-  const curTables = () => curScen().tables;
-  const curLevels = () => curScen().levels;
-  const curLevel = () => curLevels()[lvlIdx];
-  const levelDone = (s, i) => done.has(key(s.id, s.levels[i].id));
-  const levelUnlocked = (s, i) => i === 0 || levelDone(s, i - 1);
-  const scenDoneCount = s => s.levels.filter((_, i) => levelDone(s, i)).length;
-  function firstIncompleteLevel(s) { for (let i = 0; i < s.levels.length; i++) if (!levelDone(s, i)) return i; return 0; }
-  function firstIncompleteScenario() { for (let i = 0; i < SCENARIOS.length; i++) if (scenDoneCount(SCENARIOS[i]) < SCENARIOS[i].levels.length) return i; return 0; }
-
-  /* ---------- sidebar scenario list ---------- */
-  function buildScenarioNav() {
-    const wrap = el("scenarioNav"); wrap.innerHTML = "";
-    SCENARIOS.forEach((s, i) => {
-      const a = document.createElement("a");
-      a.href = "#"; a.className = (i === scenIdx ? "active" : "");
-      const total = s.levels.length, doneN = scenDoneCount(s);
-      const badge = doneN === total ? "✓" : `${doneN}/${total}`;
-      a.innerHTML = `<span class="ico">${i + 1}</span> <span style="flex:1">${s.title}</span> <span style="font-size:11px;color:var(--muted)">${badge}</span>`;
-      a.onclick = e => { e.preventDefault(); selectScenario(i); };
-      wrap.appendChild(a);
+  /* ---------- merged database: every table from every scenario ---------- */
+  const TABLES = {}, SOURCES = {};
+  SCENARIOS.forEach(s => {
+    Object.keys(s.tables).forEach(name => {
+      if (!TABLES[name]) { TABLES[name] = []; SOURCES[name] = []; }
+      TABLES[name] = TABLES[name].concat(s.tables[name].map(r => Object.assign({}, r)));
+      SOURCES[name].push(s.title);
     });
-  }
+  });
+  const curTables = () => TABLES;
+  const tableColumns = rows => { const set = new Set(); rows.forEach(r => Object.keys(r).forEach(c => set.add(c))); return [...set]; };
 
-  /* ---------- schema browser (per scenario) ---------- */
+  /* ---------- schema browser ---------- */
   function buildSchema() {
     const wrap = el("schema"); wrap.innerHTML = "";
-    const T = curTables();
-    Object.keys(T).forEach(name => {
-      const cols = T[name].length ? Object.keys(T[name][0]) : [];
+    Object.keys(TABLES).sort().forEach(name => {
+      const cols = tableColumns(TABLES[name]);
       const d = document.createElement("details"); d.className = "schema-tbl";
       const sum = document.createElement("summary");
-      sum.textContent = `${name} (${T[name].length})`;
+      sum.innerHTML = `${name} (${TABLES[name].length})` + (SOURCES[name].length > 1 ? `<span class="srcnote">combines ${SOURCES[name].length} scenarios</span>` : "");
       sum.addEventListener("dblclick", () => insertText(name));
       const colBox = document.createElement("div"); colBox.className = "cols";
       const tip = document.createElement("div"); tip.className = "col"; tip.style.color = "var(--primary-2)"; tip.textContent = "＋ insert table name"; tip.onclick = () => insertText(name);
@@ -196,75 +147,33 @@
     ta.focus(); ta.selectionStart = ta.selectionEnd = s + t.length;
   }
 
-  /* ---------- level chips ---------- */
-  function buildLevelChips() {
-    const s = curScen(), wrap = el("levelChips"); wrap.innerHTML = "";
-    s.levels.forEach((lv, i) => {
-      const c = document.createElement("div");
-      const isDone = levelDone(s, i), isLocked = !levelUnlocked(s, i) && !isDone;
-      c.className = "sc-chip" + (isDone ? " done" : "") + (i === lvlIdx ? " current" : "") + (isLocked ? " locked" : "");
-      c.textContent = isDone ? "✓" : (isLocked ? "🔒" : (i + 1));
-      c.title = `Level ${i + 1}: ${lv.title}` + (isLocked ? " (locked — finish the previous level)" : "");
-      if (!isLocked) c.onclick = () => selectLevel(i);
-      wrap.appendChild(c);
+  /* ---------- sample queries ---------- */
+  const SAMPLES = [
+    { label: "Top failed sign-ins", q: `SigninLogs\n| where ResultType != 0\n| summarize Failures = count() by UserPrincipalName\n| top 5 by Failures desc` },
+    { label: "Phishing links clicked", q: `EmailEvents\n| where ThreatTypes has "Phish"\n| project NetworkMessageId\n| join kind=inner (UrlClickEvents | where ActionType == "ClickAllowed") on NetworkMessageId\n| distinct AccountUpn` },
+    { label: "PowerShell child processes", q: `DeviceProcessEvents\n| where InitiatingProcessFileName =~ "powershell.exe"\n| project DeviceName, FileName, ProcessCommandLine` },
+    { label: "Latest sign-in per user", q: `SigninLogs\n| summarize arg_max(TimeGenerated, *) by UserPrincipalName\n| project UserPrincipalName, TimeGenerated, IPAddress` },
+    { label: "Risky cloud operations", q: `AzureActivity\n| summarize Actions = count() by OperationName, Caller\n| top 10 by Actions desc` },
+    { label: "Sign-ins in the last day", q: `SigninLogs\n| where TimeGenerated > ago(1d)\n| summarize count() by bin(TimeGenerated, 1h)` },
+  ];
+  function buildSamples() {
+    const wrap = el("samples"); wrap.innerHTML = "";
+    SAMPLES.forEach(s => {
+      const b = document.createElement("button"); b.className = "btn ghost"; b.textContent = s.label;
+      b.onclick = () => { el("editor").value = s.q; el("editor").focus(); run(); };
+      wrap.appendChild(b);
     });
-    const total = s.levels.length, doneN = scenDoneCount(s);
-    el("progText").textContent = `${doneN} / ${total} levels`;
-    el("progBar").style.width = (doneN / total * 100) + "%";
   }
 
-  /* ---------- selection ---------- */
-  function selectScenario(i) {
-    scenIdx = i;
-    const s = curScen();
-    el("scenTitle").textContent = `Scenario ${i + 1} — ${s.title}`;
-    el("scenBlurb").textContent = s.blurb;
-    buildSchema();
-    buildScenarioNav();
-    selectLevel(firstIncompleteLevel(s));
-  }
-  function selectLevel(i) {
-    lvlIdx = i; hintsShown = 0;
-    const lv = curLevel();
-    el("lvlTitle").textContent = `Level ${i + 1} — ${lv.title}`;
-    el("lvlDiff").textContent = lv.level;
-    el("lvlTask").innerHTML = `<b>Task:</b> ${lv.task} <span style="color:var(--muted)">&nbsp;·&nbsp; Start table: <code class="inline">${lv.table}</code></span>`;
-    el("hintBox").innerHTML = "";
-    el("status").className = "status"; el("status").textContent = "";
-    el("hintBtn").textContent = "💡 Show a hint";
-    const firstTable = lv.table.split(/[^A-Za-z0-9_]/)[0];
-    el("editor").value = firstTable + "\n| ";
-    el("editor").focus();
-    buildLevelChips();
-  }
-
-  el("hintBtn").onclick = () => {
-    const lv = curLevel();
-    if (hintsShown >= lv.hints.length) return;
-    const h = document.createElement("div"); h.className = "hint"; h.innerHTML = "💡 " + lv.hints[hintsShown];
-    el("hintBox").appendChild(h); hintsShown++;
-    if (hintsShown >= lv.hints.length) el("hintBtn").textContent = "No more hints";
-  };
-  el("solBtn").onclick = () => {
-    const lv = curLevel();
-    if (!confirm("Reveal the solution query for this level?")) return;
-    const h = document.createElement("div"); h.className = "hint";
-    h.innerHTML = `👁 <b>Solution:</b> <code class="inline">${escapeHtml(lv.solution)}</code> <button class="btn ghost" id="loadSol" style="font-size:12px;padding:4px 10px;margin-left:8px">Load into editor</button>`;
-    el("hintBox").appendChild(h);
-    el("loadSol").onclick = () => { el("editor").value = lv.solution; el("editor").focus(); };
-  };
-
-  /* ---------- run + check ---------- */
+  /* ---------- run ---------- */
   function run() {
     const q = el("editor").value.trim();
-    el("status").className = "status"; el("status").textContent = "";
     if (!q) { el("output").innerHTML = ""; el("runMeta").textContent = ""; return; }
     let res;
     try { res = window.KQL.runQuery(q, curTables(), { now: NOW }); }
     catch (e) { el("output").innerHTML = `<div class="err">✗ ${escapeHtml(e.message)}</div>`; el("runMeta").textContent = ""; return; }
     renderTable(res);
     el("runMeta").textContent = `${res.rows.length} row${res.rows.length === 1 ? "" : "s"} · ${res.columns.length} column${res.columns.length === 1 ? "" : "s"}`;
-    checkLevel(res);
   }
   function renderTable(res) {
     if (!res.rows.length) { el("output").innerHTML = `<div class="hint">Query ran successfully but returned no rows.</div>`; return; }
@@ -275,30 +184,11 @@
     if (res.rows.length > 500) html += `<p style="color:var(--muted);font-size:12px">Showing first 500 of ${res.rows.length} rows.</p>`;
     el("output").innerHTML = html;
   }
-  function checkLevel(res) {
-    const s = curScen(), lv = curLevel(), st = el("status");
-    if (levelDone(s, lvlIdx)) { st.className = "status ok"; st.textContent = "✓ Already completed. Explore more, or pick another level/scenario."; return; }
-    let expected;
-    try { expected = window.KQL.runQuery(lv.solution, curTables(), { now: NOW }); } catch (e) { return; }
-    if (window.KQL.resultsMatch(res, expected, lv.ordered)) {
-      done.add(key(s.id, lv.id)); save(); buildLevelChips(); buildScenarioNav();
-      const moreLevels = lvlIdx + 1 < s.levels.length;
-      const moreScen = scenIdx + 1 < SCENARIOS.length;
-      st.className = "status ok";
-      if (moreLevels) { st.innerHTML = `✓ Correct! Level ${lvlIdx + 1} complete. <button class="btn primary" id="nextBtn" style="font-size:13px;padding:6px 14px;margin-left:8px">Next level →</button>`; el("nextBtn").onclick = () => selectLevel(lvlIdx + 1); }
-      else if (moreScen) { st.innerHTML = `🎉 Scenario complete! <button class="btn primary" id="nextBtn" style="font-size:13px;padding:6px 14px;margin-left:8px">Next scenario →</button>`; el("nextBtn").onclick = () => selectScenario(scenIdx + 1); }
-      else { st.textContent = "🏆 Outstanding — you've completed every level in every scenario!"; }
-    } else {
-      st.className = "status no";
-      st.textContent = "Not quite — your result doesn't match the task yet. Check the expected columns and try again (use a hint if you're stuck).";
-    }
-  }
-
   el("runBtn").onclick = run;
   el("clearBtn").onclick = () => { el("editor").value = ""; el("output").innerHTML = ""; el("runMeta").textContent = ""; el("editor").focus(); };
-  el("resetBtn").onclick = () => { if (confirm("Reset ALL KQL progress (every scenario) on this device?")) { done.clear(); save(); scenIdx = 0; selectScenario(0); } };
-  /* ---------- autocomplete ---------- */
-  // Pixel position of the caret inside the textarea, via a hidden mirror div.
+  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+
+  /* ---------- autocomplete (same engine as Practice, over the merged DB) ---------- */
   function caretCoords(ta, pos) {
     const style = getComputedStyle(ta);
     const div = document.createElement("div");
@@ -322,7 +212,6 @@
   }
 
   const AC = (function () {
-    // Only suggest what the engine actually supports, so accepting never errors.
     const OPERATORS = ["where","project","project-away","project-rename","extend","summarize",
       "distinct","count","sort by","order by","top","take","limit",
       "join kind=inner","join kind=leftouter","join kind=leftanti","union","mv-expand","render"];
@@ -338,22 +227,21 @@
     document.body.appendChild(pop);
     let items = [], sel = 0, open = false, fragStart = 0, ta = null;
 
-    const columns = () => { const T = curTables(), s = new Set(); Object.keys(T).forEach(n => { if (T[n][0]) Object.keys(T[n][0]).forEach(c => s.add(c)); }); return [...s]; };
-    const tableNames = () => Object.keys(curTables());
+    const allColumns = () => { const s = new Set(); Object.keys(TABLES).forEach(n => tableColumns(TABLES[n]).forEach(c => s.add(c))); return [...s]; };
+    const tableNames = () => Object.keys(TABLES);
 
     function candidates(frag, ctx) {
       const mk = (arr, type) => arr.map(v => ({ v, type, fn: type === "fn" }));
       let pool;
       if (ctx === "source") pool = [...mk(tableNames(), "tbl"), ...mk(OPERATORS, "op")];
       else if (ctx === "operator") pool = [...mk(OPERATORS, "op"), ...mk(tableNames(), "tbl")];
-      else pool = [...mk(columns(), "col"), ...mk(FUNCS, "fn"), ...mk(KEYWORDS, "kw"), ...mk(OPERATORS, "op")];
+      else pool = [...mk(allColumns(), "col"), ...mk(FUNCS, "fn"), ...mk(KEYWORDS, "kw"), ...mk(OPERATORS, "op")];
       const f = frag.toLowerCase(), pref = [], sub = [];
       pool.forEach(it => { const lv = it.v.toLowerCase(); if (!f) { pref.push(it); return; } const i = lv.indexOf(f); if (i === 0) pref.push(it); else if (i > 0) sub.push(it); });
       const seen = new Set(), out = [];
       [...pref, ...sub].forEach(it => { if (!seen.has(it.v)) { seen.add(it.v); out.push(it); } });
       return out.slice(0, 9);
     }
-
     function analyze(value, caret) {
       const before = value.slice(0, caret);
       const fm = /([A-Za-z_][\w-]*)$/.exec(before);
@@ -376,7 +264,6 @@
       else ctx = "expr";
       return { frag, fStart, ctx };
     }
-
     function render() {
       pop.innerHTML = items.map((it, i) =>
         `<div class="ac-item${i === sel ? " sel" : ""}" data-i="${i}">` +
@@ -400,7 +287,7 @@
       const caret = ta.selectionStart;
       if (caret !== ta.selectionEnd) return hide();
       const a = analyze(ta.value, caret);
-      if (!a.frag && a.ctx === "expr") return hide();        // don't nag mid-expression
+      if (!a.frag && a.ctx === "expr") return hide();
       const cands = candidates(a.frag, a.ctx);
       if (!cands.length) return hide();
       items = cands; sel = 0; fragStart = a.fStart; open = true;
@@ -426,7 +313,7 @@
       if (e.key === "Escape") { hide(); return true; }
       return false;
     }
-    return { refresh, hide, onKey, isOpen: () => open };
+    return { refresh, hide, onKey };
   })();
 
   el("editor").addEventListener("keydown", e => {
@@ -438,9 +325,9 @@
   el("editor").addEventListener("input", () => AC.refresh());
   el("editor").addEventListener("blur", () => setTimeout(() => AC.hide(), 120));
   el("editor").addEventListener("scroll", () => AC.hide());
-  function escapeHtml(s) { return String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
 
-  selectScenario(firstIncompleteScenario());
+  buildSchema();
+  buildSamples();
 })();
 </script>
 </body>
